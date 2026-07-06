@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Escape Room - Puzzle 3</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family: Georgia, serif;
+    background-image:url("segunda-habitacion.jpg");
+    background-size:75%;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-color:black;
+}
+
+/* OVERLAY */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* MODAL */
+
+.modal{
+    position:relative;
+    width:420px;
+    max-width:90%;
+    padding:20px;
+    border-radius:18px;
+
+    background:linear-gradient(145deg,#3a3a3a,#1b1b1b);
+    border:2px solid #666;
+
+    color:#d6c7a1;
+    text-align:center;
+}
+
+/* CERRAR */
+
+.close{
+    position:absolute;
+    right:15px;
+    top:10px;
+    cursor:pointer;
+    font-size:24px;
+}
+
+.close:hover{
+    color:red;
+}
+
+/* GRID */
+
+.puzzle-buttons{
+    display:grid;
+    grid-template-columns:repeat(4,70px);
+    justify-content:center;
+    gap:15px;
+    margin:20px 0;
+}
+
+/* BOTÓN */
+
+.candle{
+    position:relative;
+    width:70px;
+    height:90px;
+    cursor:pointer;
+
+    border:none;
+    border-radius:10px;
+
+    background:#222;
+
+    transition:.2s;
+}
+
+.candle:hover{
+    transform:scale(1.05);
+}
+
+/* CUERPO DE LA VELA */
+
+.bodyCandle{
+    position:absolute;
+    width:22px;
+    height:40px;
+    background:#efe8c8;
+    left:50%;
+    bottom:15px;
+    transform:translateX(-50%);
+    border-radius:3px;
+}
+
+/* MECHA */
+
+.wick{
+    position:absolute;
+    width:2px;
+    height:8px;
+    background:black;
+    left:50%;
+    top:24px;
+    transform:translateX(-50%);
+}
+
+/* LLAMA */
+
+.flame{
+    position:absolute;
+    width:16px;
+    height:22px;
+
+    left:50%;
+    top:2px;
+
+    transform:translateX(-50%) rotate(45deg);
+
+    background:orange;
+
+    border-radius:50% 50% 50% 0;
+
+    opacity:0;
+
+    transition:.2s;
+}
+
+/* ENCENDIDA */
+
+.candle.on .flame{
+
+    opacity:1;
+
+    background:linear-gradient(yellow,orange,red);
+
+    box-shadow:
+        0 0 8px yellow,
+        0 0 18px orange,
+        0 0 28px red;
+}
+
+.dev-btn{
+
+    margin-top:15px;
+    padding:10px 15px;
+
+    cursor:pointer;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#333;
+
+    color:#7cffb2;
+
+    font-family:monospace;
+}
+
+.codeBox{
+
+    font-size:24px;
+
+    color:#7cffb2;
+
+    margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="overlay" id="overlay">
+
+<div class="modal">
+
+<div class="close" onclick="closeModal()">✖</div>
+
+<h2>Enciende las velas</h2>
+
+<div class="puzzle-buttons">
+
+<button class="candle" onclick="toggleCandle(this,1)">
+<div class="flame"></div>
+<div class="wick"></div>
+<div class="bodyCandle"></div>
+</button>
+
+<button class="candle" onclick="toggleCandle(this,2)">
+<div class="flame"></div>
+<div class="wick"></div>
+<div class="bodyCandle"></div>
+</button>
+
+<button class="candle" onclick="toggleCandle(this,3)">
+<div class="flame"></div>
+<div class="wick"></div>
+<div class="bodyCandle"></div>
+</button>
+
+<button class="candle" onclick="toggleCandle(this,4)">
+<div class="flame"></div>
+<div class="wick"></div>
+<div class="bodyCandle"></div>
+</button>
+
+</div>
+
+<p id="r2"></p>
+
+<button class="dev-btn" onclick="check()">⚙️ console.log</button>
+
+<div id="code2" class="codeBox"></div>
+
+</div>
+
+</div>
+
+<script>
+
+let a=[];
+
+function toggleCandle(el,n){
+
+    el.classList.toggle("on");
+
+    if(el.classList.contains("on")){
+        a.push(n);
+    }else{
+        a=a.filter(x=>x!==n);
+    }
+
+    document.getElementById("r2").innerText=a.join("-");
+}
+
+function check(){
+
+    if(JSON.stringify(a)==JSON.stringify([1,2,3,4])){
+
+        document.getElementById("code2").innerText="3";
+
+    }else{
+
+        a=[];
+
+        document.getElementById("r2").innerText="";
+
+        document.querySelectorAll(".candle").forEach(c=>c.classList.remove("on"));
+    }
+
+}
+
+function closeModal(){
+
+    document.getElementById("overlay").style.display="none";
+
+}
+
+</script>
+
+</body>
+</html>
