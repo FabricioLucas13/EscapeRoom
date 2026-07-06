@@ -1,0 +1,5 @@
+#game-screen{
+    display: flex;
+    margin: auto;
+    background-color: black;
+}
