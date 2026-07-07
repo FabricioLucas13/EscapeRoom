@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Escape Room - Popup</title>
+
+<style>
+body{
+    margin: 670px;
+    font-family: 'Georgia', serif;
+
+    background-image: url(primera-habitacion.jpg);
+    background-size: 75%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: black;
+}
+
+/* OVERLAY */
+.overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(10,10,10,0.8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* MODAL */
+.modal{
+    position:relative;
+    width:90%;
+    max-width:450px;
+    padding:22px;
+    border-radius:18px;
+
+    background: linear-gradient(145deg, #3a3a3a, #1b1b1b);
+    border: 2px solid #6b6b6b;
+
+    color:#d6c7a1;
+    text-align:center;
+
+    box-shadow:
+        inset 0 0 20px rgba(0,0,0,0.7),
+        0 0 25px rgba(0,0,0,0.9);
+}
+
+/* CERRAR */
+.close{
+    position:absolute;
+    top:10px;
+    right:12px;
+    font-size:22px;
+    color:#c9b98a;
+    cursor:pointer;
+    font-weight:bold;
+    text-shadow: 0 0 5px black;
+}
+
+.close:hover{
+    color:#ff5a5a;
+}
+
+/* CONTENEDOR BOTONES PUZZLE */
+.puzzle-buttons{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-bottom:15px;
+}
+
+/* BOTONES PUZZLE */
+.puzzle-btn{
+    width:70px;
+    height:70px;
+    font-size:35px;
+    border:none;
+    border-radius:10px;
+    background:#222;
+    cursor:pointer;
+    transition:.2s;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.puzzle-btn:hover{
+    transform:scale(1.08);
+    background:#333;
+}
+/* BOTÓN EJECUTAR */
+.dev-btn{
+    margin-top: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #333;
+    color: #7cffb2;
+    font-family: monospace;
+
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.dev-btn:active{
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #111;
+}
+
+/* código */
+.codeBox{
+    font-size:22px;
+    margin-top:10px;
+    color:#7CFFB2;
+}
+
+/* shake */
+.shake{
+    animation:shake 0.4s;
+}
+
+@keyframes shake{
+    0%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    50%{transform:translateX(6px);}
+    75%{transform:translateX(-6px);}
+    100%{transform:translateX(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay" id="overlay">
+
+<div class="modal" id="p1">
+
+<div class="close" onclick="closeModal()">✕</div>
+
+<div class="puzzle-buttons">
+    <button class="puzzle-btn" onclick="add1(1)">☀️</button>
+    <button class="puzzle-btn" onclick="add1(2)">🔺</button>
+    <button class="puzzle-btn" onclick="add1(3)">✦</button>
+    <button class="puzzle-btn" onclick="add1(4)">🌙</button>
+</div>
+
+<p id="r1"></p>
+
+<button class="dev-btn" onclick="check1()">⚙️ Ejecutar</button>
+
+<div id="code1" class="codeBox"></div>
+
+</div>
+</div>
+
+<script>
+let a1 = [];
+
+function add1(n){
+    a1.push(n);
+    document.getElementById("r1").innerText = a1.join("-");
+}
+
+function check1(){
+    if(JSON.stringify(a1) === JSON.stringify([4,1,2,3])){
+        document.getElementById("code1").innerText = "7";
+    } else {
+        a1 = [];
+        document.getElementById("r1").innerText = "";
+
+        document.getElementById("p1").classList.add("shake");
+        setTimeout(()=>{
+            document.getElementById("p1").classList.remove("shake");
+        },400);
+    }
+}
+
+function closeModal(){
+    document.getElementById("overlay").style.display = "none";
+}
+</script>
+
+</body>
+</html>
