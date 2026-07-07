@@ -1,215 +1,223 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<title>Puzzle 3 Popup - Colores</title>
+    <meta charset="UTF-8">
+    <title>Puzzle 3 Popup - Colores</title>
 
-<style>
+    <style>
+        /* FONDO */
 
-/* FONDO */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-html, body{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-}
+        body {
+            font-family: Georgia, serif;
 
-body{
-    font-family:Georgia, serif;
+            background-image: url("tercera-habitacion.jpg");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: contain;
 
-    background-image:url("tercera-habitacion.jpg");
-    background-repeat:no-repeat;
-    background-position:center center;
-    background-size:contain;
+            background-color: black;
+        }
 
-    background-color:black;
-}
+        /* OVERLAY */
 
-/* OVERLAY */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 10, .8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-.overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(10,10,10,.8);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
+        /* MODAL */
 
-/* MODAL */
+        .modal {
+            position: relative;
+            width: 420px;
+            max-width: 90%;
+            padding: 20px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #3a3a3a, #1b1b1b);
+            border: 2px solid #666;
+            color: #d6c7a1;
+            text-align: center;
+        }
 
-.modal{
-    position:relative;
-    width:90%;
-    max-width:380px;
-    padding:22px;
-    border-radius:18px;
+        /* CERRAR */
 
-    background:linear-gradient(145deg,#3a3a3a,#1b1b1b);
-    border:2px solid #6b6b6b;
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #c9b98a;
+            text-shadow: 0 0 5px black;
+        }
 
-    color:#d6c7a1;
-    text-align:center;
+        .close:hover {
+            color: #ff5a5a;
+        }
 
-    box-shadow:
-        inset 0 0 18px rgba(0,0,0,.8),
-        0 0 25px rgba(0,0,0,.9);
-}
+        /* BOTONES */
 
-/* CERRAR */
+        .puzzle-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 260px;
+            margin: 21px 50px;
+        }
 
-.close{
-    position:absolute;
-    top:10px;
-    right:12px;
-    font-size:22px;
-    font-weight:bold;
-    cursor:pointer;
-    color:#c9b98a;
-    text-shadow:0 0 5px black;
-}
+        .puzzle-buttons button {
+            font-size: 35px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #222;
+            cursor: pointer;
+            transition: .2s;
+        }
 
-.close:hover{
-    color:#ff5a5a;
-}
+        .puzzle-buttons button:hover {
+            transform: scale(1.08);
+            background: #333;
+        }
 
-/* BOTONES */
+        /* 🔥 BOTÓN ESTILO ESCAPE ROOM PREMIUM */
 
-.puzzle-buttons{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-    max-width:260px;
-    margin:20px auto;
-}
+        .dev-btn {
+            margin-top: 15px;
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #333;
+            color: #7cffb2;
+            font-family: monospace;
 
-.puzzle-buttons button{
-    font-size:35px;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:#222;
-    cursor:pointer;
-    transition:.2s;
-}
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
 
-.puzzle-buttons button:hover{
-    transform:scale(1.08);
-    background:#333;
-}
+        .dev-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #111;
+        }
 
-/* 🔥 BOTÓN ESTILO ESCAPE ROOM PREMIUM */
-
-    .dev-btn {
-    margin-top: 15px;
-    padding: 10px 15px;
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    background: #333;
-    color: #7cffb2;
-    font-family: monospace;
-
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.dev-btn:active {
-    transform: translateY(3px);
-    box-shadow: 0 2px 0 #111;
-}
         .codeBox {
             font-size: 24px;
             color: #7cffb2;
             margin-top: 10px;
         }
 
-/* SHAKE */
+        /* SHAKE */
 
-.shake{
-    animation:shake .4s;
-}
+        .shake {
+            animation: shake .4s;
+        }
 
-@keyframes shake{
-    0%{transform:translateX(0);}
-    25%{transform:translateX(-6px);}
-    50%{transform:translateX(6px);}
-    75%{transform:translateX(-6px);}
-    100%{transform:translateX(0);}
-}
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
 
-</style>
+            25% {
+                transform: translateX(-6px);
+            }
+
+            50% {
+                transform: translateX(6px);
+            }
+
+            75% {
+                transform: translateX(-6px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="overlay" id="overlay">
+    <div class="overlay" id="overlay">
 
-<div class="modal" id="p3">
+        <div class="modal" id="p3">
 
-<div class="close" onclick="closeModal()">✖</div>
+            <div class="close" onclick="closeModal()">✖</div>
 
-<h2>Elige el orden correcto</h2>
+            <h2>Elige el orden correcto</h2>
+            <div class="puzzle-buttons">
 
-<div class="puzzle-buttons">
+                <button onclick="add('amarillo')">🟡</button>
+                <button onclick="add('azul')">🔵</button>
+                <button onclick="add('verde')">🟢</button>
+                <button onclick="add('morado')">🟣</button>
 
-<button onclick="add('rojo')">🔴</button>
-<button onclick="add('amarillo')">🟡</button>
-<button onclick="add('azul')">🔵</button>
+            </div>
 
-</div>
+            <p id="r3"></p>
 
-<p id="r3"></p>
+            <button class="dev-btn" onclick="check()">⚙️ Ejecutar</button>
 
-<button class="dev-btn" onclick="check()">⚙️ Ejecutar</button>
+            <div id="code3" class="codeBox"></div>
 
-<div id="code3" class="codeBox"></div>
+        </div>
 
-</div>
+    </div>
 
-</div>
+    <script>
 
-<script>
+        let a = [];
 
-let a=[];
+        function add(c) {
 
-function add(c){
+            a.push(c);
 
-    a.push(c);
+            document.getElementById("r3").innerText = a.join(" - ");
+        }
 
-    document.getElementById("r3").innerText=a.join(" - ");
-}
+        function check() {
+            if (JSON.stringify(a) == JSON.stringify(["amarillo", "azul", "verde", "morado"])) {
+                document.getElementById("code3").innerText = "9";
 
-function check(){
+            } else {
 
-    if(JSON.stringify(a)==JSON.stringify(["rojo","amarillo","azul","rojo","amarillo","azul"])){ // AQUI SE CAMBIA EL PUZZLE
+                a = [];
 
-        document.getElementById("code3").innerText="9";
+                document.getElementById("r3").innerText = "";
 
-    }else{
+                document.getElementById("p3").classList.add("shake");
 
-        a=[];
+                setTimeout(() => {
 
-        document.getElementById("r3").innerText="";
+                    document.getElementById("p3").classList.remove("shake");
 
-        document.getElementById("p3").classList.add("shake");
+                }, 400);
+            }
 
-        setTimeout(()=>{
+        }
 
-            document.getElementById("p3").classList.remove("shake");
+        function closeModal() {
 
-        },400);
-    }
+            document.getElementById("overlay").style.display = "none";
 
-}
+        }
 
-function closeModal(){
-
-    document.getElementById("overlay").style.display="none";
-
-}
-
-</script>
+    </script>
 
 </body>
+
 </html>
