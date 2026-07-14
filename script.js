@@ -182,14 +182,18 @@ function drawStandardRoomBackground(roomImage, fallbackColor) {
 // 5. CONTROL DE INPUTS Y EVENTOS
 canvas.addEventListener("mousemove", (event) => {
 	const rect = canvas.getBoundingClientRect()
-	mouseX = Math.floor(event.clientX - rect.left)
-	mouseY = Math.floor(event.clientY - rect.top)
+	const scaleX = canvas.width / rect.width
+	const scaleY = canvas.height / rect.height
+	mouseX = Math.floor((event.clientX - rect.left) * scaleX)
+	mouseY = Math.floor((event.clientY - rect.top) * scaleY)
 })
 
 canvas.addEventListener("click", (event) => {
 	const rect = canvas.getBoundingClientRect()
-	const clickX = event.clientX - rect.left
-	const clickY = event.clientY - rect.top
+	const scaleX = canvas.width / rect.width
+	const scaleY = canvas.height / rect.height
+	const clickX = (event.clientX - rect.left) * scaleX
+	const clickY = (event.clientY - rect.top) * scaleY
 
 	if (currentRoom === ROOM.START && isOptionsOpen) {
 		const modalInteractions = getModalInteractions()
