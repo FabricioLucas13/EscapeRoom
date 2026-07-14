@@ -15,8 +15,6 @@ gameMusic.loop = true
 const ROOM = {
 	START: 0,
 	ONE: 1,
-	TWO: 2,
-	THREE: 3,
 	FOUR: 4
 }
 
@@ -78,6 +76,7 @@ const roomInteractions = {
 			height: 44,
 			action: () => {
 				changeRoom(ROOM.ONE)
+				// Arranca la música si no está muteada al pulsar JUGAR
 				if (!isMusicMuted) {
 					gameMusic.play().catch((e) =>
 						console.log("Esperando interacción del usuario para reproducir audio.")
@@ -94,17 +93,11 @@ const roomInteractions = {
 		}
 	},
 	[ROOM.ONE]: [
-		{ x: 0, y: canvas.height / 2 - 35, width: 40, height: 70, action: () => changeRoom(ROOM.TWO) },
-		{ x: canvas.width - 40, y: canvas.height / 2 - 35, width: 40, height: 70, action: () => changeRoom(ROOM.THREE) },
+		// Flecha de avance directo hacia la Sala Cuatro
 		{ x: canvas.width / 2 - 35, y: 0, width: 70, height: 40, action: () => changeRoom(ROOM.FOUR) }
 	],
-	[ROOM.TWO]: [
-		{ x: canvas.width - 40, y: canvas.height / 2 - 35, width: 40, height: 70, action: () => changeRoom(ROOM.ONE) }
-	],
-	[ROOM.THREE]: [
-		{ x: 0, y: canvas.height / 2 - 35, width: 40, height: 70, action: () => changeRoom(ROOM.ONE) }
-	],
 	[ROOM.FOUR]: [
+		// Flecha hacia abajo para regresar a la Sala Uno
 		{ x: canvas.width / 2 - 35, y: canvas.height - 40, width: 70, height: 40, action: () => changeRoom(ROOM.ONE) },
 		{ x: 490, y: 235, width: 140, height: 185, action: () => openExitKeypad() }
 	]
@@ -116,12 +109,6 @@ roomStart.src = "assets/roomStart.png"
 
 const roomOne = new Image()
 roomOne.src = "assets/roomOne.jpg"
-
-const roomTwo = new Image()
-roomTwo.src = "assets/roomTwo.jpg"
-
-const roomThree = new Image()
-roomThree.src = "assets/roomThree.jpg"
 
 const roomFour = new Image()
 roomFour.src = "assets/roomFour.jpg"
@@ -169,7 +156,6 @@ function drawProportionalBackground(imageAsset) {
 	drawInGame.drawImage(imageAsset, x, y, newWidth, newHeight)
 }
 
-// 🟢 NUEVA FUNCIÓN REUTILIZABLE: Dibuja fondos estándar o color de respaldo si falla la carga
 function drawStandardRoomBackground(roomImage, fallbackColor) {
 	if (roomImage.complete) {
 		drawInGame.drawImage(roomImage, 0, 0, canvas.width, canvas.height)
@@ -289,17 +275,8 @@ function draw() {
 			}
 			break
 
-		// 🟢 OPTIMIZACIÓN APLICADA: Llamadas simplificadas mediante la función helper
 		case ROOM.ONE:
 			drawStandardRoomBackground(roomOne, "#2d2d2d")
-			break
-
-		case ROOM.TWO:
-			drawStandardRoomBackground(roomTwo, "#1e3a5f")
-			break
-
-		case ROOM.THREE:
-			drawStandardRoomBackground(roomThree, "#4b2e1e")
 			break
 
 		case ROOM.FOUR:
@@ -311,23 +288,7 @@ function draw() {
 	drawInGame.fillStyle = "white"
 
 	if (currentRoom === ROOM.ONE) {
-		// Flecha Izquierda (ROOM.ONE)
-		drawInGame.beginPath()
-		drawInGame.moveTo(5, canvas.height / 2)
-		drawInGame.lineTo(35, canvas.height / 2 - 30)
-		drawInGame.lineTo(35, canvas.height / 2 + 30)
-		drawInGame.closePath()
-		drawInGame.fill()
-
-		// Flecha Derecha (ROOM.ONE)
-		drawInGame.beginPath()
-		drawInGame.moveTo(canvas.width - 5, canvas.height / 2)
-		drawInGame.lineTo(canvas.width - 35, canvas.height / 2 - 30)
-		drawInGame.lineTo(canvas.width - 35, canvas.height / 2 + 30)
-		drawInGame.closePath()
-		drawInGame.fill()
-
-		// Flecha Arriba (ROOM.ONE)
+		// Únicamente la flecha de avance (Hacia arriba) hacia ROOM.FOUR
 		drawInGame.beginPath()
 		drawInGame.moveTo(canvas.width / 2, 5)
 		drawInGame.lineTo(canvas.width / 2 - 30, 35)
@@ -336,28 +297,8 @@ function draw() {
 		drawInGame.fill()
 	}
 
-	if (currentRoom === ROOM.TWO) {
-		// Flecha Derecha (ROOM.TWO)
-		drawInGame.beginPath()
-		drawInGame.moveTo(canvas.width - 5, canvas.height / 2)
-		drawInGame.lineTo(canvas.width - 35, canvas.height / 2 - 30)
-		drawInGame.lineTo(canvas.width - 35, canvas.height / 2 + 30)
-		drawInGame.closePath()
-		drawInGame.fill()
-	}
-
-	if (currentRoom === ROOM.THREE) {
-		// Flecha Izquierda (ROOM.THREE)
-		drawInGame.beginPath()
-		drawInGame.moveTo(5, canvas.height / 2)
-		drawInGame.lineTo(35, canvas.height / 2 - 30)
-		drawInGame.lineTo(35, canvas.height / 2 + 30)
-		drawInGame.closePath()
-		drawInGame.fill()
-	}
-
 	if (currentRoom === ROOM.FOUR) {
-		// Flecha Abajo (ROOM.FOUR)
+		// Únicamente la flecha de retorno (Hacia abajo) hacia ROOM.ONE
 		drawInGame.beginPath()
 		drawInGame.moveTo(canvas.width / 2, canvas.height - 5)
 		drawInGame.lineTo(canvas.width / 2 - 30, canvas.height - 35)
