@@ -45,6 +45,32 @@ function toggleMusic() {
 	}
 }
 
+// Función que define las cajas de clic del modal (Paso 4)
+function getModalInteractions() {
+    const modalWidth = 300
+    const modalHeight = 220
+    const modalY = canvas.height / 2 - modalHeight / 2
+    const audBtnW = 160
+    const audBtnX = canvas.width / 2 - audBtnW / 2
+
+    return [
+        { 
+            x: audBtnX, 
+            y: modalY + 70, 
+            width: audBtnW, 
+            height: 38, 
+            action: () => toggleMusic() 
+        },
+        { 
+            x: audBtnX, 
+            y: modalY + 140, 
+            width: audBtnW, 
+            height: 38, 
+            action: () => isOptionsOpen = false 
+        }
+    ]
+}
+
 
 
 // 2. Estructura de Datos: Mapa de Interacciones
