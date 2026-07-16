@@ -52,23 +52,7 @@
             text-align: center;
         }
 
-        /* CERRAR */
-
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 12px;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #c9b98a;
-            text-shadow: 0 0 5px black;
-        }
-
-        .close:hover {
-            color: #ff5a5a;
-        }
-
+      
         /* BOTONES */
 
         .puzzle-buttons {
@@ -152,27 +136,49 @@
 
 <body>
 
-    <div class="overlay" id="overlay">
+    <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+    <audio id="successSound" src="acierto.mp3" preload="auto"></audio>
+    <audio id="fireSound" src="encendido.mp3" preload="auto"></audio>
 
-        <div class="modal" id="p3">
+    <div class="overlay" id="overlay" onclick="closeModal(event)">
 
-            <div class="close" onclick="closeModal()">✖</div>
+        <div class="modal" onclick="event.stopPropagation()">
 
-            <h2>Elige el orden correcto</h2>
+            <h2>Enciende las velas</h2>
+
             <div class="puzzle-buttons">
 
-                <button onclick="add('amarillo')">🟡</button>
-                <button onclick="add('azul')">🔵</button>
-                <button onclick="add('verde')">🟢</button>
-                <button onclick="add('morado')">🟣</button>
+                <button class="candle" onclick="toggleCandle(this,1)">
+                    <div class="flame"></div>
+                    <div class="wick"></div>
+                    <div class="bodyCandle"></div>
+                </button>
+
+                <button class="candle" onclick="toggleCandle(this,2)">
+                    <div class="flame"></div>
+                    <div class="wick"></div>
+                    <div class="bodyCandle"></div>
+                </button>
+
+                <button class="candle" onclick="toggleCandle(this,3)">
+                    <div class="flame"></div>
+                    <div class="wick"></div>
+                    <div class="bodyCandle"></div>
+                </button>
+
+                <button class="candle" onclick="toggleCandle(this,4)">
+                    <div class="flame"></div>
+                    <div class="wick"></div>
+                    <div class="bodyCandle"></div>
+                </button>
 
             </div>
 
-            <p id="r3"></p>
+            <p id="r2"></p>
 
             <button class="dev-btn" onclick="check()">⚙️ Ejecutar</button>
 
-            <div id="code3" class="codeBox"></div>
+            <div id="code2" class="codeBox"></div>
 
         </div>
 
@@ -182,39 +188,88 @@
 
         let a = [];
 
-        function add(c) {
+function play(id) {
 
-            a.push(c);
+    const sonido = document.getElementById(id);
 
-            document.getElementById("r3").innerText = a.join(" - ");
-        }
+    sonido.currentTime = 0;
 
-        function check() {
-            if (JSON.stringify(a) == JSON.stringify(["amarillo", "azul", "verde", "morado"])) {
-                document.getElementById("code3").innerText = "9";
+    sonido.play().catch(err => console.log(err));
 
-            } else {
+}
 
-                a = [];
+function toggleCandle(el, n) {
 
-                document.getElementById("r3").innerText = "";
+    play("fireSound");
 
-                document.getElementById("p3").classList.add("shake");
+    el.classList.toggle("on");
 
-                setTimeout(() => {
+    if (el.classList.contains("on")) {
+        a.push(n);
+    } else {
+        a = a.filter(x => x !== n);
+    }
 
-                    document.getElementById("p3").classList.remove("shake");
+    document.getElementById("r2").innerText = a.join("-");
+}
 
-                }, 400);
-            }
+function shakeModal() {
 
-        }
+    const modal = document.querySelector(".modal");
 
-        function closeModal() {
+    modal.classList.add("shake");
 
-            document.getElementById("overlay").style.display = "none";
+    modal.addEventListener("animationend", function () {
 
-        }
+        modal.classList.remove("shake");
+
+    }, { once: true });
+
+}
+
+function resetCandles() {
+
+    a = [];
+
+    document.getElementById("r2").innerText = "";
+
+    document.querySelectorAll(".candle").forEach(c => {
+
+        c.classList.remove("on");
+
+    });
+
+}
+
+function check() {
+
+    if (JSON.stringify(a) === JSON.stringify([1,2,3,4])) {
+
+        play("successSound");
+
+        document.getElementById("code2").innerHTML =
+            "✅ Código: <span style='color:#7CFFB2;'>3</span>";
+
+        return;
+    }
+
+    play("errorSound");
+
+    shakeModal();
+
+    resetCandles();
+
+}
+
+function closeModal(e) {
+
+    if (e.target.id === "overlay") {
+
+        document.getElementById("overlay").style.display = "none";
+
+    }
+
+}
 
     </script>
 

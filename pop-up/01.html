@@ -48,19 +48,6 @@
             text-align: center;
         }
 
-        /* CERRAR */
-
-        .close {
-            position: absolute;
-            right: 15px;
-            top: 10px;
-            cursor: pointer;
-            font-size: 24px;
-        }
-
-        .close:hover {
-            color: red;
-        }
 
         /* GRID */
 
@@ -327,11 +314,14 @@
 
 <body>
 
-    <div class="overlay" id="overlay">
+  <body>
 
-        <div class="modal">
+    <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+    <audio id="successSound" src="acierto.mp3" preload="auto"></audio>
 
-            <div class="close" onclick="closeModal()">✖</div>
+    <div class="overlay" id="overlay" onclick="closeModal(event)">
+
+        <div class="modal" onclick="event.stopPropagation()">
 
             <h2>Enciende las velas</h2>
 
@@ -373,68 +363,79 @@
 
     </div>
 
+
+
     <script>
+let a = [];
 
-        let a = [];
+function play(id) {
+    const sonido = document.getElementById(id);
 
-        function toggleCandle(el, n) {
+    sonido.currentTime = 0;
+    sonido.play().catch(err => console.log(err));
+}
 
-            el.classList.toggle("on");
+function toggleCandle(el, n) {
 
-            if (el.classList.contains("on")) {
-                a.push(n);
-            } else {
-                a = a.filter(x => x !== n);
-            }
+    el.classList.toggle("on");
 
-            document.getElementById("r2").innerText = a.join("-");
-        }
+    if (el.classList.contains("on")) {
+        a.push(n);
+    } else {
+        a = a.filter(x => x !== n);
+    }
 
-        function shakeModal() {
+    document.getElementById("r2").innerText = a.join("-");
+}
 
-            const modal = document.querySelector(".modal");
+function shakeModal() {
 
-            modal.classList.add("shake");
+    const modal = document.querySelector(".modal");
 
-            modal.addEventListener("animationend", function () {
-                modal.classList.remove("shake");
-            }, { once: true });
-        }
+    modal.classList.add("shake");
 
-        function resetCandles() {
+    modal.addEventListener("animationend", function () {
+        modal.classList.remove("shake");
+    }, { once: true });
+}
 
-            a = [];
+function resetCandles() {
 
-            document.getElementById("r2").innerText = "";
+    a = [];
 
-            document.querySelectorAll(".candle").forEach(c => {
-                c.classList.remove("on");
-            });
-        }
+    document.getElementById("r2").innerText = "";
 
-        function check() {
+    document.querySelectorAll(".candle").forEach(c => {
+        c.classList.remove("on");
+    });
+}
 
-            // Combinación correcta
-            if (JSON.stringify(a) === JSON.stringify([1, 2, 3, 4])) {// AQUI SE CAMBIA EL PUZZLE
+function check() {
 
-                document.getElementById("code2").innerText = "3";
-                return;
-            }
+    // Combinación correcta
+    if (JSON.stringify(a) === JSON.stringify([1, 2, 3, 4])) {
 
-            // Vibra siempre que falle
-            shakeModal();
+        play("successSound");
 
-            // Si había alguna vela encendida, las apaga
-            if (a.length > 0) {
-                resetCandles();
-            }
-        }
+        document.getElementById("code2").innerHTML =
+            "✅ Código: <span style='color:#7CFFB2;'>3</span>";
 
-        function closeModal() {
+        return;
+    }
 
-            document.getElementById("overlay").style.display = "none";
+    play("errorSound");
 
-        }
+    shakeModal();
+
+    resetCandles();
+}
+
+function closeModal(e) {
+
+    if (e.target.id === "overlay") {
+        document.getElementById("overlay").style.display = "none";
+    }
+}
 
     </script>
 
