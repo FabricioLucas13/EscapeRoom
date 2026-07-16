@@ -16,7 +16,6 @@ import { INTERFACE_DIMENSIONS, ROOM } from "./config.js"
 // =========================================================================
 
 // 🔗 ENLACES HACIA EL ARCHIVO PRINCIPAL (main.js)
-// Esta lista guarda las funciones de "main.js" para que podamos usarlas desde este archivo.
 const gameEngineBridge = {
 	changeRoomRef: null,          // Guarda la función para cambiar de habitación
 	openExitKeypadRef: null,      // Guarda la función para abrir el teclado numérico
@@ -24,11 +23,16 @@ const gameEngineBridge = {
 	toggleMusicCallback: null,    // Función para silenciar o activar la música
 	closeOptionsModal: null,      // Función para cerrar el cuadro de opciones
 	openOptionsModal: null,       // Función para abrir el cuadro de opciones
-	getGameMusic: null            // Accede al reproductor de música del juego
+	getGameMusic: null,            // Accede al reproductor de música del juego
+	
+	// Enlaces nuevos para el teclado numérico:
+	closeExitKeypadRef: null,     // Función para cerrar el teclado numérico
+	keypadPressRef: null,         // Función para registrar un número pulsado
+	keypadResetRef: null,         // Función para borrar (botón flecha)
+	keypadCheckRef: null          // Función para comprobar la contraseña (botón check)
 }
 
 // 🟢 CONECTAR LOS ARCHIVOS (Se ejecuta una sola vez al arrancar el juego)
-// Toma las funciones reales de "main.js" y las mete en nuestra lista de enlaces de arriba.
 export function initializeInteractions(engineActions) {
 	gameEngineBridge.changeRoomRef = engineActions.changeRoom
 	gameEngineBridge.openExitKeypadRef = engineActions.openExitKeypad
@@ -37,16 +41,20 @@ export function initializeInteractions(engineActions) {
 	gameEngineBridge.closeOptionsModal = engineActions.closeOptionsModal
 	gameEngineBridge.openOptionsModal = engineActions.openOptionsModal
 	gameEngineBridge.getGameMusic = engineActions.getGameMusic
+	
+	// Conexión de las nuevas funciones del teclado:
+	gameEngineBridge.closeExitKeypadRef = engineActions.closeExitKeypad
+	gameEngineBridge.keypadPressRef = engineActions.keypadPress
+	gameEngineBridge.keypadResetRef = engineActions.keypadReset
+	gameEngineBridge.keypadCheckRef = engineActions.keypadCheck
 }
 
 // 🎵 SILENCIAR O ACTIVAR LA MÚSICA
-// Llama a la función de sonido que está guardada en nuestro enlace.
 export function toggleMusic() {
 	gameEngineBridge.toggleMusicCallback()
 }
 
 // 🔳 ZONAS DE CLIC PARA EL MENÚ DE OPCIONES (El cuadro de sonido)
-// Devuelve las posiciones X e Y de los botones de dentro del menú de sonido (MÚSICA y VOLVER).
 export function getModalInteractions(canvasElement) {
 	const modalTopY = canvasElement.height / 2 - INTERFACE_DIMENSIONS.OPTIONS_MODAL_HEIGHT / 2
 	const modalButtonLeftX = canvasElement.width / 2 - INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH / 2
@@ -69,12 +77,70 @@ export function getModalInteractions(canvasElement) {
 	]
 }
 
+// 🔢 ZONAS DE CLIC DINÁMICAS PARA EL TECLADO NUMÉRICO (Grid 3x4 + Cruz de cerrar)
+export function getKeypadInteractions(canvasElement) {
+	const padWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
+	const padHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
+	const btnSize = INTERFACE_DIMENSIONS.KEYPAD_BTN_SIZE || 50
+	const gap = INTERFACE_DIMENSIONS.KEYPAD_GAP || 10
+
+	const panelX = canvasElement.width / 2 - padWidth / 2
+	const panelY = canvasElement.height / 2 - padHeight / 2
+	
+	// El teclado empieza a calcular sus botones abajo del título y la pantalla (Y: +130)
+	const startGridX = panelX + (padWidth - (btnSize * 3 + gap * 2)) / 2
+	const startGridY = panelY + 130
+
+	// Orden exacto de los botones tal y como lo diseñó el equipo en el HTML
+	const layout = [
+		{ label: "1", action: () => gameEngineBridge.keypadPressRef("1") },
+		{ label: "2", action: () => gameEngineBridge.keypadPressRef("2") },
+		{ label: "3", action: () => gameEngineBridge.keypadPressRef("3") },
+		{ label: "4", action: () => gameEngineBridge.keypadPressRef("4") },
+		{ label: "5", action: () => gameEngineBridge.keypadPressRef("5") },
+		{ label: "6", action: () => gameEngineBridge.keypadPressRef("6") },
+		{ label: "7", action: () => gameEngineBridge.keypadPressRef("7") },
+		{ label: "8", action: () => gameEngineBridge.keypadPressRef("8") },
+		{ label: "9", action: () => gameEngineBridge.keypadPressRef("9") },
+		{ label: "←", action: () => gameEngineBridge.keypadResetRef() },
+		{ label: "0", action: () => gameEngineBridge.keypadPressRef("0") },
+		{ label: "✓", action: () => gameEngineBridge.keypadCheckRef() }
+	]
+
+	const zones = []
+
+	// Generamos matemáticamente las cajas de colisión para los 12 botones
+	layout.forEach((btn, index) => {
+		const col = index % 3
+		const row = Math.floor(index / 3)
+
+		zones.push({
+			x: startGridX + col * (btnSize + gap),
+			y: startGridY + row * (btnSize + gap),
+			width: btnSize,
+			height: btnSize,
+			action: btn.action,
+			label: btn.label // Pasamos la etiqueta para que main.js la dibuje
+		})
+	})
+
+	// Añadimos la cruz (✕) para poder cerrar el pop-up arriba a la derecha
+	zones.push({
+		x: panelX + padWidth - 30,
+		y: panelY + 10,
+		width: 20,
+		height: 20,
+		action: () => gameEngineBridge.closeExitKeypadRef(),
+		label: "✕"
+	})
+
+	return zones
+}
+
 // 🗺️ MAPA DE CLICS DE TODO EL JUEGO (Zonas interactivas)
-// Aquí guardamos los rectángulos invisibles de cada sala y lo que pasa cuando haces clic en ellos.
 export function getRoomInteractions(canvasElement) {
 	return {
 		[ROOM.START]: [
-			// Botón de la posición: Iniciar la partida (JUGAR)
 			{
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH / 2,
 				y: canvasElement.height / 2 - 35,
@@ -87,7 +153,6 @@ export function getRoomInteractions(canvasElement) {
 					}
 				}
 			},
-			// Botón de la posición: Abrir configuración (OPCIONES)
 			{
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH / 2,
 				y: canvasElement.height / 2 + 25,
@@ -97,7 +162,6 @@ export function getRoomInteractions(canvasElement) {
 			}
 		],
 		[ROOM.ONE]: [
-			// Botón de la posición: Flecha blanca para ir a la Habitación Cuatro
 			{ 
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, 
 				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE, 
@@ -107,7 +171,6 @@ export function getRoomInteractions(canvasElement) {
 			}
 		],
 		[ROOM.FOUR]: [
-			// Botón de la posición: Flecha blanca para volver a la Habitación Uno
 			{ 
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, 
 				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10, 
@@ -115,7 +178,6 @@ export function getRoomInteractions(canvasElement) {
 				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10, 
 				action: () => gameEngineBridge.changeRoomRef(ROOM.ONE) 
 			},
-			// Botón de la posición: El teclado numérico de la pared para escapar
 			{ 
 				x: 490, 
 				y: 235, 
