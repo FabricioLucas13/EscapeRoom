@@ -14,19 +14,27 @@ export const gameState = {
 
 	// 🚪 Abrir el panel de forma segura
 	openCandles(isOptionsOpen) {
-		if (!this.isCandleOpen && !isOptionsOpen && !this.isColorPuzzleOpen) {
+		if (!this.isCandleOpen && !isOptionsOpen && !this.isColorPuzzleOpen && !this.isScrollOpen) {
 			this.isCandleOpen = true
 		}
 	},
 
-	// ❌ Cerrar el panel y apagar todo
+	// ❌ Cerrar el panel de forma inteligente
 	closeCandles() {
 		this.isCandleOpen = false
-		this.resetCandles()
+		// Solo borramos los datos si el jugador no ha adivinado la secuencia todavía
+		if (this.candleResultText !== "3") {
+			this.resetCandles()
+		}
 	},
 
 	// 🕯️ Alternar estado (encendido/apagado) de una vela
 	toggleCandleState(candleId) {
+		// Bloqueo de seguridad: Si ya se resolvió, no dejamos que pulsen nada más
+		if (this.candleResultText === "3") {
+			return
+		}
+
 		this.candleResultText = ""
 
 		if (this.candlesOn.includes(candleId)) {
@@ -44,6 +52,10 @@ export const gameState = {
 
 	// ⚙️ Validar el orden secuencial de encendido desde config.js
 	checkCandles() {
+		if (this.candleResultText === "3") {
+			return
+		}
+
 		const correctOrderMatch = JSON.stringify(this.candlesOn) === JSON.stringify(GAME_PUZZLES.CANDLE_SECRET_ORDER)
 
 		if (correctOrderMatch) {
@@ -105,35 +117,46 @@ export const gameState = {
 	},
 
 	// =========================================================================
-	// 🎨 🚀 PUZZLE DE COLORES INTERCONECTADO (Habitación 1)
+	// 🎨 PUZZLE DE COLORES PERSISTENTE (Habitación 1)
 	// =========================================================================
 	isColorPuzzleOpen: false,        // Estado de apertura del puzle de colores
-	colorSelectedSequence: [],       // Secuencia de colores pulsada por el usuario (Antiguo let a)
+	colorSelectedSequence: [],       // Secuencia de colores pulsada por el usuario
 	colorsResultText: "",            // Mensaje en pantalla de éxito ("9") o error
 
 	// 🚪 Abrir el panel de forma segura controlando que no haya otros puzles abiertos
 	openColorPuzzle(isOptionsOpen) {
-		if (!this.isColorPuzzleOpen && !isOptionsOpen && !this.isCandleOpen) {
+		if (!this.isColorPuzzleOpen && !isOptionsOpen && !this.isCandleOpen && !this.isScrollOpen) {
 			this.isColorPuzzleOpen = true
 		}
 	},
 
-	// ❌ Cerrar el panel y limpiar los datos introducidos (Antiguo closeModal)
+	// ❌ Cerrar el panel de forma inteligente
 	closeColorPuzzle() {
 		this.isColorPuzzleOpen = false
-		this.colorSelectedSequence = []
-		this.colorsResultText = ""
+		// Solo borramos la secuencia introducida si no han ganado el puzle todavía
+		if (this.colorsResultText !== "9") {
+			this.colorSelectedSequence = []
+			this.colorsResultText = ""
+		}
 	},
 
-	// 🟡 Añadir el color seleccionado al array de control (Antigua función add)
+	// 🟡 Añadir el color seleccionado al array de control
 	addColorToSequence(colorName) {
+		// Bloqueo de seguridad. Si ya se resolvió, congelamos los clics
+		if (this.colorsResultText === "9") {
+			return
+		}
+
 		this.colorsResultText = ""
 		this.colorSelectedSequence.push(colorName)
 	},
 
-	// ⚙️ Validar combinación calculando la solución dinámicamente según el orden de las velas (Antiguo check)
+	// ⚙️ Validar combinación calculando la solución dinámicamente según el orden de las velas
 	checkColorSequence() {
-		// Diccionario de traducción: vincula la ID de la vela física con el string de su color
+		if (this.colorsResultText === "9") {
+			return
+		}
+
 		const colorTranslationMap = {
 			1: "amarillo",
 			2: "azul",
@@ -141,19 +164,31 @@ export const gameState = {
 			4: "morado"
 		}
 
-		// Convierte la secuencia secreta de números en su lista equivalente de colores
-		// Ejemplo: si el orden es, genera ["amarillo", "azul", "verde", "morado"]
 		const correctColorSequence = GAME_PUZZLES.CANDLE_SECRET_ORDER.map(candleId => colorTranslationMap[candleId])
-
-		// Compara la combinación del jugador con la solución autocalculada
 		const isSequenceCorrect = JSON.stringify(this.colorSelectedSequence) === JSON.stringify(correctColorSequence)
 
 		if (isSequenceCorrect) {
-			this.colorsResultText = "9" // Éxito: otorga el número clave del puzle
+			this.colorsResultText = "9" 
 		} else {
 			this.colorsResultText = "❌ COMBINACIÓN ERRÓNEA"
-			this.colorSelectedSequence = [] // Resetea el puzle al fallar (Efecto shake simulado limpiando datos)
+			this.colorSelectedSequence = [] 
 		}
+	},
+
+	// =========================================================================
+	// 📜 🚀 NUEVO - PERGAMINO DESENROLLADO (Habitación 1)
+	// =========================================================================
+	isScrollOpen: false,             // Estado de apertura de la vista del manuscrito
+
+	// 🚪 Abrir el manuscrito de forma segura controlando la jerarquía de interfaces
+	openScroll(isOptionsOpen) {
+		if (!this.isScrollOpen && !isOptionsOpen && !this.isCandleOpen && !this.isColorPuzzleOpen) {
+			this.isScrollOpen = true
+		}
+	},
+
+	// ❌ Cerrar la vista del manuscrito
+	closeScroll() {
+		this.isScrollOpen = false
 	}
 }
-

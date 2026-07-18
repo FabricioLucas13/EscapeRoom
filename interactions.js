@@ -4,31 +4,35 @@ import { INTERFACE_DIMENSIONS, ROOM } from "./config.js"
 // 🚀 ¿CÓMO AÑADIR NUEVOS BOTONES O INTERACCIONES? (Guía rápida para el equipo)
 // =========================================================================
 const gameEngineBridge = {
-	changeRoom: null,          
-	openExitKeypad: null,      
-	getIsMusicMuted: () => false, 
-	toggleMusic: null,    
-	closeOptionsModal: null,      
-	openOptionsModal: null,       
-	getGameMusic: null,           
+	changeRoom: null,
+	openExitKeypad: null,
+	getIsMusicMuted: () => false,
+	toggleMusic: null,
+	closeOptionsModal: null,
+	openOptionsModal: null,
+	getGameMusic: null,
 
 	// Teclado numérico
-	closeExitKeypad: null,     
-	keypadPress: null,         
-	keypadReset: null,         
-	keypadCheck: null,         
+	closeExitKeypad: null,
+	keypadPress: null,
+	keypadReset: null,
+	keypadCheck: null,
 
 	// Puzzle de las velas
-	openCandles: null,         
-	closeCandles: null,        
-	toggleCandle: null,        
+	openCandles: null,
+	closeCandles: null,
+	toggleCandle: null,
 	checkCandles: null,
 
-	// Cables para el Puzzle de Colores
+	// Puzzle de Colores
 	openColorPuzzle: null,
 	closeColorPuzzle: null,
 	addColorToSequence: null,
-	checkColorSequence: null
+	checkColorSequence: null,
+
+	// Pasarela de datos para la vista del pergamino desenrollado
+	openScroll: null,
+	closeScroll: null
 }
 
 export function initializeInteractions(engineActions) {
@@ -54,6 +58,10 @@ export function initializeInteractions(engineActions) {
 	gameEngineBridge.closeColorPuzzle = engineActions.closeColorPuzzle
 	gameEngineBridge.addColorToSequence = engineActions.addColorToSequence
 	gameEngineBridge.checkColorSequence = engineActions.checkColorSequence
+
+	// Conectamos los cables del pergamino
+	gameEngineBridge.openScroll = engineActions.openScroll
+	gameEngineBridge.closeScroll = engineActions.closeScroll
 }
 
 export function toggleMusic() {
@@ -177,7 +185,6 @@ export function getCandleInteractions(canvasElement) {
 	return interactiveCandles
 }
 
-// ZONAS DE CLIC PARA EL PUZZLE DE COLORES
 export function getColorPuzzleInteractions(canvasElement) {
 	const modalWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
 	const modalHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
@@ -194,7 +201,6 @@ export function getColorPuzzleInteractions(canvasElement) {
 
 	const interactiveButtons = []
 
-	// 🛠️ MODIFICADO: El orden de asignación de acciones cambia a: morado, azul, amarillo, verde
 	const colorsList = ["morado", "azul", "amarillo", "verde"]
 	colorsList.forEach((colorName, index) => {
 		interactiveButtons.push({
@@ -226,6 +232,20 @@ export function getColorPuzzleInteractions(canvasElement) {
 	})
 
 	return interactiveButtons
+}
+
+// Zona invisible para cerrar el pergamino blanco al hacer clic fuera
+export function getScrollInteractions(canvasElement) {
+	return [
+		{
+			x: 0,
+			y: 0,
+			width: canvasElement.width,
+			height: canvasElement.height,
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_ZONE"
+		}
+	]
 }
 
 export function getRoomInteractions(canvasElement) {
@@ -281,16 +301,16 @@ export function getRoomInteractions(canvasElement) {
 				action: () => console.log("haz hecho click en puzzle runas")
 			},
 			{
+				// 🛠️ CONFIGURADO: Ahora abre oficialmente la vista del pergamino
 				x: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_X,
 				y: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_Y,
 				width: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_WIDTH,
 				height: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_HEIGHT,
-				action: () => console.log("haz hecho click en el pergamino")
+				action: () => gameEngineBridge.openScroll()
 			}
 		],
 		[ROOM.FOUR]: [
 			{
-
 				x: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_X,
 				y: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_Y,
 				width: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_WIDTH,

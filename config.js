@@ -52,7 +52,13 @@ export const INTERFACE_COLORS = {
 	CANDLE_FLAME_YELLOW: "#ffca28",
 	CANDLE_FLAME_BLUE: "#29b6f6",
 	CANDLE_FLAME_GREEN: "#66bb6a",
-	CANDLE_FLAME_PURPLE: "#ab47bc"
+	CANDLE_FLAME_PURPLE: "#ab47bc",
+
+	// 🚀 NUEVO: Estilos centralizados del pergamino blanco
+	SCROLL_PAPER_BACKGROUND: "#fcf9e8",     // Color blanco hueso / pergamino antiguo
+	SCROLL_PAPER_TEXT: "#1a1310",           // Color de texto oscuro para alta legibilidad
+	SCROLL_PAPER_SECONDARY_TEXT: "#2b221e", // Color secundario para los párrafos de lore
+	SCROLL_PAPER_BORDER: "#8c6f4f"          // Color del borde del manuscrito
 }
 
 // 📏 MEDIDAS DEL JUEGO (Todo está medido en píxeles)
@@ -90,32 +96,37 @@ export const INTERFACE_DIMENSIONS = {
 	ROOM_ONE_CANDLES_WIDTH: 105,
 	ROOM_ONE_CANDLES_HEIGHT: 90,
 
-	// 🛠️ ACTUALIZADO: Tus dimensiones reales aplicadas (Ancho = X_Final - X_Inicio)
 	ROOM_ONE_COLORS_X: 730,
 	ROOM_ONE_COLORS_Y: 165,
-	ROOM_ONE_COLORS_WIDTH: 70,   // Cálculo: 800 - 730
-	ROOM_ONE_COLORS_HEIGHT: 80,  // Cálculo: 245 - 165
+	ROOM_ONE_COLORS_WIDTH: 70,   
+	ROOM_ONE_COLORS_HEIGHT: 80,  
 
 	ROOM_ONE_RUNES_X: 860,
 	ROOM_ONE_RUNES_Y: 270,
-	ROOM_ONE_RUNES_WIDTH: 40,    // Cálculo: 900 - 860
-	ROOM_ONE_RUNES_HEIGHT: 40,   // Cálculo: 310 - 270
+	ROOM_ONE_RUNES_WIDTH: 40,    
+	ROOM_ONE_RUNES_HEIGHT: 40,   
 
-	// Hueco preparado para la mesa (cambia los números cuando los midas)
+	// Dimensiones reales del pergamino en la Habitación Uno
 	ROOM_ONE_SCROLL_X: 520,
 	ROOM_ONE_SCROLL_Y: 390,
 	ROOM_ONE_SCROLL_WIDTH: 105,
 	ROOM_ONE_SCROLL_HEIGHT: 35,
 
+	// Hitbox del puzzle de colores visible en la Habitación Cuatro
 	ROOM_FOUR_COLORS_X: 900,
 	ROOM_FOUR_COLORS_Y: 155,
-	ROOM_FOUR_COLORS_WIDTH: 180,   // Cálculo: 800 - 730
-	ROOM_FOUR_COLORS_HEIGHT: 120,  // Cálculo: 245 - 165
+	ROOM_FOUR_COLORS_WIDTH: 180,   
+	ROOM_FOUR_COLORS_HEIGHT: 120,  
 
+	// Dimensiones reales del teclado de la Habitación Cuatro
 	ROOM_FOUR_KEYPAD_X: 440,
 	ROOM_FOUR_KEYPAD_Y: 180,
 	ROOM_FOUR_KEYPAD_WIDTH: 200,
-	ROOM_FOUR_KEYPAD_HEIGHT: 265
+	ROOM_FOUR_KEYPAD_HEIGHT: 265,
+
+	// 🚀 NUEVO: Medidas centralizadas de la caja del pergamino blanco
+	SCROLL_MODAL_WIDTH: 460,
+	SCROLL_MODAL_HEIGHT: 320
 }
 
 // 🧩 LOS ENIGMAS Y RESPUESTAS DEL JUEGO
