@@ -5,8 +5,8 @@
 // ➡️ SI QUIERES CREAR UNA HABITACIÓN NUEVA:
 //    1. Ponle un número aquí abajo en la lista "ROOM" (por ejemplo: TWO: 2).
 //    2. Dale un color de seguridad abajo en "INTERFACE_COLORS" por si la foto no carga.
-//    3. Abre el archivo "main.js" y añade el nombre de su foto en "imageSources".
-//    4. Abre "interactions.js" y añade sus zonas de clic para que el jugador pueda interactuar.
+//    3. Abre el archivo "main.js" and añade el nombre de su foto en "imageSources".
+//    4. Abre "interactions.js" and añade sus zonas de clic para que el jugador pueda interactuar.
 //
 // ➡️ SI QUIERES CAMBIAR COLORES O TAMAÑOS:
 //    - Cambia los textos con '#' en "INTERFACE_COLORS" o los números en "INTERFACE_DIMENSIONS".
@@ -25,7 +25,7 @@ export const ROOM = {
 export const INTERFACE_COLORS = {
 	BUTTON_BACKGROUND_DEFAULT: "#1a1310",   // Color de fondo de los botones normales
 	BUTTON_BACKGROUND_HOVER: "#241a16",     // Color de fondo de un botón cuando le pasas el ratón por encima
-	BUTTON_BORDER_DEFAULT: "#8c6f4f",       // Color del borde de los botones y del modal
+	BUTTON_BORDER_DEFAULT: "#8c6f4f",       // Color del borde de los botones and del modal
 	BUTTON_BORDER_HOVER: "#d1ab7e",         // Color del borde cuando pasas el ratón por encima (efecto brillo)
 	BUTTON_TEXT_DEFAULT: "#a89276",         // Color de las letras de los botones normales
 	BUTTON_TEXT_HOVER: "#e8d8c3",           // Color de las letras cuando pasas el ratón por encima
@@ -34,19 +34,19 @@ export const INTERFACE_COLORS = {
 	FALLBACK_BACKGROUND_ROOM_FOUR: "#245b3b",  // Color de pantalla si la foto de la habitación 4 no se encuentra
 	NAVIGATION_ARROW: "#ffffff",             // Color centralizado de las flechas de navegación
 	
-	// Interfaz del Teclado Numérico
+	// Interfaz del Teclado Numérico (Abreviaturas BTN -> BUTTON eliminadas)
 	KEYPAD_OVERLAY: "rgba(0, 0, 0, 0.8)",         
 	KEYPAD_SCREEN_TEXT: "#7CFFB2",               
 	KEYPAD_TEXT_SUCCESS: "#7CFFB2",              
 	KEYPAD_TEXT_ERROR: "#ff5a5a",                 
 	KEYPAD_PANEL_BACKGROUND: "#1c1c1c",          
 	KEYPAD_PANEL_BORDER: "#7a6a4f",              
-	KEYPAD_BTN_NUM_BG: "#3a3a3a",                
-	KEYPAD_BTN_NUM_TEXT: "#e8d9b5",              
-	KEYPAD_BTN_RESET_BG: "#7a1f16",              
-	KEYPAD_BTN_RESET_TEXT: "#ffffff",            
-	KEYPAD_BTN_CHECK_BG: "#1f8f4d",              
-	KEYPAD_BTN_CHECK_TEXT: "#000000",             
+	KEYPAD_BUTTON_NUMBER_BACKGROUND: "#3a3a3a",                
+	KEYPAD_BUTTON_NUMBER_TEXT: "#e8d9b5",              
+	KEYPAD_BUTTON_RESET_BACKGROUND: "#7a1f16",              
+	KEYPAD_BUTTON_RESET_TEXT: "#ffffff",            
+	KEYPAD_BUTTON_CHECK_BACKGROUND: "#1f8f4d",              
+	KEYPAD_BUTTON_CHECK_TEXT: "#000000",             
 
 	// Interfaz de las Velas
 	CANDLE_FLAME_YELLOW: "#ffca28",
@@ -57,20 +57,22 @@ export const INTERFACE_COLORS = {
 
 // 📏 MEDIDAS DEL JUEGO (Todo está medido en píxeles)
 export const INTERFACE_DIMENSIONS = {
+	// Menú y Modales Generales
 	MENU_BUTTON_WIDTH: 225,          
 	MENU_BUTTON_HEIGHT: 44,          
 	OPTIONS_MODAL_WIDTH: 300,        
 	OPTIONS_MODAL_HEIGHT: 220,       
 	MODAL_BUTTON_WIDTH: 160,         
 	MODAL_BUTTON_HEIGHT: 38,         
-	NAVIGATION_ARROW_SIZE: 30,       
-	ARROW_Y_ROOM_ONE: 360,       
+	NAVIGATION_ARROW_SIZE: 22,       
+	ARROW_Y_ROOM_ONE: 324,           
+	ARROW_X_ROOM_ONE: 600,           
 	
-	// Medidas del Teclado
+	// Medidas del Teclado (Abreviatura BTN -> BUTTON eliminadas)
 	KEYPAD_WIDTH: 270,                           
 	KEYPAD_HEIGHT: 380,                          
-	KEYPAD_GRID_COLS: 3,                         
-	KEYPAD_BTN_SIZE: 50,                         
+	KEYPAD_GRID_COLUMNS: 3,                         
+	KEYPAD_BUTTON_SIZE: 50,                         
 	KEYPAD_GAP: 10,                               
 
 	// Medidas de las Velas
@@ -79,8 +81,8 @@ export const INTERFACE_DIMENSIONS = {
 	CANDLE_WIDTH: 70,                 
 	CANDLE_HEIGHT: 90,
 	CANDLE_GAP: 10,
-	CANDLE_TITLE_Y: 40,                // 🧹 OPTIMIZADO: Altura fija del título del puzzle
-	CANDLE_RESULT_BOTTOM_GAP: 30,      // 🧹 OPTIMIZADO: Separación inferior para el texto del código/error
+	CANDLE_TITLE_Y: 40,                
+	CANDLE_RESULT_BOTTOM_GAP: 30,      
 
 	// Coordenadas fijas de los objetos interactivos (Hitboxes)
 	ROOM_ONE_CANDLES_X: 130,
@@ -88,10 +90,32 @@ export const INTERFACE_DIMENSIONS = {
 	ROOM_ONE_CANDLES_WIDTH: 105,
 	ROOM_ONE_CANDLES_HEIGHT: 90,
 
-	ROOM_FOUR_KEYPAD_X: 490,
-	ROOM_FOUR_KEYPAD_Y: 235,
-	ROOM_FOUR_KEYPAD_WIDTH: 140,
-	ROOM_FOUR_KEYPAD_HEIGHT: 185
+	// 🛠️ ACTUALIZADO: Tus dimensiones reales aplicadas (Ancho = X_Final - X_Inicio)
+	ROOM_ONE_COLORS_X: 730,
+	ROOM_ONE_COLORS_Y: 165,
+	ROOM_ONE_COLORS_WIDTH: 70,   // Cálculo: 800 - 730
+	ROOM_ONE_COLORS_HEIGHT: 80,  // Cálculo: 245 - 165
+
+	ROOM_ONE_RUNES_X: 860,
+	ROOM_ONE_RUNES_Y: 270,
+	ROOM_ONE_RUNES_WIDTH: 40,    // Cálculo: 900 - 860
+	ROOM_ONE_RUNES_HEIGHT: 40,   // Cálculo: 310 - 270
+
+	// Hueco preparado para la mesa (cambia los números cuando los midas)
+	ROOM_ONE_SCROLL_X: 520,
+	ROOM_ONE_SCROLL_Y: 390,
+	ROOM_ONE_SCROLL_WIDTH: 105,
+	ROOM_ONE_SCROLL_HEIGHT: 35,
+
+	ROOM_FOUR_COLORS_X: 900,
+	ROOM_FOUR_COLORS_Y: 155,
+	ROOM_FOUR_COLORS_WIDTH: 180,   // Cálculo: 800 - 730
+	ROOM_FOUR_COLORS_HEIGHT: 120,  // Cálculo: 245 - 165
+
+	ROOM_FOUR_KEYPAD_X: 440,
+	ROOM_FOUR_KEYPAD_Y: 180,
+	ROOM_FOUR_KEYPAD_WIDTH: 200,
+	ROOM_FOUR_KEYPAD_HEIGHT: 265
 }
 
 // 🧩 LOS ENIGMAS Y RESPUESTAS DEL JUEGO

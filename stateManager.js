@@ -14,7 +14,7 @@ export const gameState = {
 
 	// 🚪 Abrir el panel de forma segura
 	openCandles(isOptionsOpen) {
-		if (!this.isCandleOpen && !isOptionsOpen) {
+		if (!this.isCandleOpen && !isOptionsOpen && !this.isColorPuzzleOpen) {
 			this.isCandleOpen = true
 		}
 	},
@@ -26,13 +26,13 @@ export const gameState = {
 	},
 
 	// 🕯️ Alternar estado (encendido/apagado) de una vela
-	toggleCandleState(num) {
+	toggleCandleState(candleId) {
 		this.candleResultText = ""
 
-		if (this.candlesOn.includes(num)) {
-			this.candlesOn = this.candlesOn.filter(x => x !== num)
+		if (this.candlesOn.includes(candleId)) {
+			this.candlesOn = this.candlesOn.filter(activeId => activeId !== candleId)
 		} else {
-			this.candlesOn.push(num)
+			this.candlesOn.push(candleId)
 		}
 	},
 
@@ -44,9 +44,9 @@ export const gameState = {
 
 	// ⚙️ Validar el orden secuencial de encendido desde config.js
 	checkCandles() {
-		const isCorrect = JSON.stringify(this.candlesOn) === JSON.stringify(GAME_PUZZLES.CANDLE_SECRET_ORDER)
+		const correctOrderMatch = JSON.stringify(this.candlesOn) === JSON.stringify(GAME_PUZZLES.CANDLE_SECRET_ORDER)
 
-		if (isCorrect) {
+		if (correctOrderMatch) {
 			this.candleResultText = "3"
 		} else {
 			this.candleResultText = "❌ ERROR: Las velas se han apagado"
@@ -78,9 +78,9 @@ export const gameState = {
 	},
 
 	// 🎹 Registrar la pulsación de un número
-	pressKey(num) {
+	pressKey(keypadNumber) {
 		if (this.keypadInput.length < 3) {
-			this.keypadInput += num
+			this.keypadInput += keypadNumber
 			this.keypadResultText = ""
 		}
 	},
@@ -102,5 +102,58 @@ export const gameState = {
 			this.keypadResultStatus = "error"
 			this.keypadInput = ""
 		}
+	},
+
+	// =========================================================================
+	// 🎨 🚀 PUZZLE DE COLORES INTERCONECTADO (Habitación 1)
+	// =========================================================================
+	isColorPuzzleOpen: false,        // Estado de apertura del puzle de colores
+	colorSelectedSequence: [],       // Secuencia de colores pulsada por el usuario (Antiguo let a)
+	colorsResultText: "",            // Mensaje en pantalla de éxito ("9") o error
+
+	// 🚪 Abrir el panel de forma segura controlando que no haya otros puzles abiertos
+	openColorPuzzle(isOptionsOpen) {
+		if (!this.isColorPuzzleOpen && !isOptionsOpen && !this.isCandleOpen) {
+			this.isColorPuzzleOpen = true
+		}
+	},
+
+	// ❌ Cerrar el panel y limpiar los datos introducidos (Antiguo closeModal)
+	closeColorPuzzle() {
+		this.isColorPuzzleOpen = false
+		this.colorSelectedSequence = []
+		this.colorsResultText = ""
+	},
+
+	// 🟡 Añadir el color seleccionado al array de control (Antigua función add)
+	addColorToSequence(colorName) {
+		this.colorsResultText = ""
+		this.colorSelectedSequence.push(colorName)
+	},
+
+	// ⚙️ Validar combinación calculando la solución dinámicamente según el orden de las velas (Antiguo check)
+	checkColorSequence() {
+		// Diccionario de traducción: vincula la ID de la vela física con el string de su color
+		const colorTranslationMap = {
+			1: "amarillo",
+			2: "azul",
+			3: "verde",
+			4: "morado"
+		}
+
+		// Convierte la secuencia secreta de números en su lista equivalente de colores
+		// Ejemplo: si el orden es, genera ["amarillo", "azul", "verde", "morado"]
+		const correctColorSequence = GAME_PUZZLES.CANDLE_SECRET_ORDER.map(candleId => colorTranslationMap[candleId])
+
+		// Compara la combinación del jugador con la solución autocalculada
+		const isSequenceCorrect = JSON.stringify(this.colorSelectedSequence) === JSON.stringify(correctColorSequence)
+
+		if (isSequenceCorrect) {
+			this.colorsResultText = "9" // Éxito: otorga el número clave del puzle
+		} else {
+			this.colorsResultText = "❌ COMBINACIÓN ERRÓNEA"
+			this.colorSelectedSequence = [] // Resetea el puzle al fallar (Efecto shake simulado limpiando datos)
+		}
 	}
 }
+

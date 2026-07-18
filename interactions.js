@@ -3,70 +3,63 @@ import { INTERFACE_DIMENSIONS, ROOM } from "./config.js"
 // =========================================================================
 // 🚀 ¿CÓMO AÑADIR NUEVOS BOTONES O INTERACCIONES? (Guía rápida para el equipo)
 // =========================================================================
-//
-// ➡️ SI QUIERES PONER ZONAS DE CLIC EN UNA HABITACIÓN NUEVA:
-//    - Añade una lista nueva abajo del todo dentro de "getRoomInteractions".
-//    - Ejemplo para la Habitación Dos: 
-//      [ROOM.TWO]: [ { x: 100, y: 150, width: 50, height: 50, action: () => { ... } } ]
-//
-// ➡️ SI QUIERES HACER ALGO COMPLEJO (como guardar datos o cambiar un estado de main.js):
-//    - Primero escribe la función en "main.js" y pásala dentro de "initializeInteractions".
-//    - Añade su nombre en la lista "gameEngineBridge" de aquí abajo y úsala en tu botón.
-//
-// =========================================================================
-
-// 🔗 ENLACES HACIA EL ARCHIVO PRINCIPAL (Pasarela de funciones hacia main.js)
 const gameEngineBridge = {
-	changeRoomRef: null,          // Cambia la habitación actual
-	openExitKeypadRef: null,      // Abre el panel del teclado numérico
-	getIsMusicMuted: () => false, // Consulta si el audio del juego está silenciado
-	toggleMusicCallback: null,    // Invierte el estado del silenciador de música
-	closeOptionsModal: null,      // Cierra la ventana flotante de opciones
-	openOptionsModal: null,       // Abre la ventana flotante de opciones
-	getGameMusic: null,           // Entrega acceso directo al reproductor de sonido
+	changeRoom: null,          
+	openExitKeypad: null,      
+	getIsMusicMuted: () => false, 
+	toggleMusic: null,    
+	closeOptionsModal: null,      
+	openOptionsModal: null,       
+	getGameMusic: null,           
 
-	// Canales de control para el teclado numérico (Habitación 4)
-	closeExitKeypadRef: null,     // Cierra el teclado numérico
-	keypadPressRef: null,         // Añade un número a la pantalla del teclado
-	keypadResetRef: null,         // Borra los números de la pantalla
-	keypadCheckRef: null,         // Valida el código secreto de escape
+	// Teclado numérico
+	closeExitKeypad: null,     
+	keypadPress: null,         
+	keypadReset: null,         
+	keypadCheck: null,         
 
-	// Canales de control para el puzzle de las velas (Habitación 1)
-	openCandlesRef: null,         // Abre el escenario de las velas
-	closeCandlesRef: null,        // Cierra el escenario de las velas y regresa a la sala
-	toggleCandleRef: null,        // Cambia el estado (encendido/apagado) de una vela
-	checkCandlesRef: null         // Valida el orden secuencial de encendido
+	// Puzzle de las velas
+	openCandles: null,         
+	closeCandles: null,        
+	toggleCandle: null,        
+	checkCandles: null,
+
+	// Cables para el Puzzle de Colores
+	openColorPuzzle: null,
+	closeColorPuzzle: null,
+	addColorToSequence: null,
+	checkColorSequence: null
 }
 
-// 🟢 CONECTAR LOS ARCHIVOS (Asigna los cables de control al iniciar el motor)
 export function initializeInteractions(engineActions) {
-	gameEngineBridge.changeRoomRef = engineActions.changeRoom
-	gameEngineBridge.openExitKeypadRef = engineActions.openExitKeypad
+	gameEngineBridge.changeRoom = engineActions.changeRoom
+	gameEngineBridge.openExitKeypad = engineActions.openExitKeypad
 	gameEngineBridge.getIsMusicMuted = engineActions.getIsMusicMuted
-	gameEngineBridge.toggleMusicCallback = engineActions.toggleMusic
+	gameEngineBridge.toggleMusic = engineActions.toggleMusic
 	gameEngineBridge.closeOptionsModal = engineActions.closeOptionsModal
 	gameEngineBridge.openOptionsModal = engineActions.openOptionsModal
 	gameEngineBridge.getGameMusic = engineActions.getGameMusic
 
-	// Enlaces del teclado numérico
-	gameEngineBridge.closeExitKeypadRef = engineActions.closeExitKeypad
-	gameEngineBridge.keypadPressRef = engineActions.keypadPress
-	gameEngineBridge.keypadResetRef = engineActions.keypadReset
-	gameEngineBridge.keypadCheckRef = engineActions.keypadCheck
+	gameEngineBridge.closeExitKeypad = engineActions.closeExitKeypad
+	gameEngineBridge.keypadPress = engineActions.keypadPress
+	gameEngineBridge.keypadReset = engineActions.keypadReset
+	gameEngineBridge.keypadCheck = engineActions.keypadCheck
 
-	// Enlaces del puzzle de las velas
-	gameEngineBridge.openCandlesRef = engineActions.openCandles
-	gameEngineBridge.closeCandlesRef = engineActions.closeCandles
-	gameEngineBridge.toggleCandleRef = engineActions.toggleCandle
-	gameEngineBridge.checkCandlesRef = engineActions.checkCandles
+	gameEngineBridge.openCandles = engineActions.openCandles
+	gameEngineBridge.closeCandles = engineActions.closeCandles
+	gameEngineBridge.toggleCandle = engineActions.toggleCandle
+	gameEngineBridge.checkCandles = engineActions.checkCandles
+
+	gameEngineBridge.openColorPuzzle = engineActions.openColorPuzzle
+	gameEngineBridge.closeColorPuzzle = engineActions.closeColorPuzzle
+	gameEngineBridge.addColorToSequence = engineActions.addColorToSequence
+	gameEngineBridge.checkColorSequence = engineActions.checkColorSequence
 }
 
-// 🎵 DISPARADOR DE AUDIO (Silencia o activa la pista)
 export function toggleMusic() {
-	gameEngineBridge.toggleMusicCallback()
+	gameEngineBridge.toggleMusic()
 }
 
-// 🔳 ZONAS DE CLIC PARA EL MENÚ DE OPCIONES (Ajustes de Sonido)
 export function getModalInteractions(canvasElement) {
 	const modalTopY = canvasElement.height / 2 - INTERFACE_DIMENSIONS.OPTIONS_MODAL_HEIGHT / 2
 	const modalButtonLeftX = canvasElement.width / 2 - INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH / 2
@@ -89,113 +82,152 @@ export function getModalInteractions(canvasElement) {
 	]
 }
 
-// 🔢 ZONAS DE CLIC DINÁMICAS PARA EL TECLADO NUMÉRICO (Rejilla de botones)
 export function getKeypadInteractions(canvasElement) {
-	const padWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
-	const padHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
-	const btnSize = INTERFACE_DIMENSIONS.KEYPAD_BTN_SIZE || 50
+	const keypadWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
+	const keypadHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
+	const buttonSize = INTERFACE_DIMENSIONS.KEYPAD_BUTTON_SIZE || 50
 	const gap = INTERFACE_DIMENSIONS.KEYPAD_GAP || 10
 
-	const panelX = canvasElement.width / 2 - padWidth / 2
-	const panelY = canvasElement.height / 2 - padHeight / 2
+	const panelX = canvasElement.width / 2 - keypadWidth / 2
+	const panelY = canvasElement.height / 2 - keypadHeight / 2
 
-	const startGridX = panelX + (padWidth - (btnSize * 3 + gap * 2)) / 2
+	const startGridX = panelX + (keypadWidth - (buttonSize * 3 + gap * 2)) / 2
 	const startGridY = panelY + 130
 
 	const layout = [
-		{ label: "1", action: () => gameEngineBridge.keypadPressRef("1") },
-		{ label: "2", action: () => gameEngineBridge.keypadPressRef("2") },
-		{ label: "3", action: () => gameEngineBridge.keypadPressRef("3") },
-		{ label: "4", action: () => gameEngineBridge.keypadPressRef("4") },
-		{ label: "5", action: () => gameEngineBridge.keypadPressRef("5") },
-		{ label: "6", action: () => gameEngineBridge.keypadPressRef("6") },
-		{ label: "7", action: () => gameEngineBridge.keypadPressRef("7") },
-		{ label: "8", action: () => gameEngineBridge.keypadPressRef("8") },
-		{ label: "9", action: () => gameEngineBridge.keypadPressRef("9") },
-		{ label: "←", action: () => gameEngineBridge.keypadResetRef() },
-		{ label: "0", action: () => gameEngineBridge.keypadPressRef("0") },
-		{ label: "✓", action: () => gameEngineBridge.keypadCheckRef() }
+		{ label: "1", action: () => gameEngineBridge.keypadPress("1") },
+		{ label: "2", action: () => gameEngineBridge.keypadPress("2") },
+		{ label: "3", action: () => gameEngineBridge.keypadPress("3") },
+		{ label: "4", action: () => gameEngineBridge.keypadPress("4") },
+		{ label: "5", action: () => gameEngineBridge.keypadPress("5") },
+		{ label: "6", action: () => gameEngineBridge.keypadPress("6") },
+		{ label: "7", action: () => gameEngineBridge.keypadPress("7") },
+		{ label: "8", action: () => gameEngineBridge.keypadPress("8") },
+		{ label: "9", action: () => gameEngineBridge.keypadPress("9") },
+		{ label: "←", action: () => gameEngineBridge.closeExitKeypad() },
+		{ label: "0", action: () => gameEngineBridge.keypadPress("0") },
+		{ label: "✓", action: () => gameEngineBridge.keypadCheck() }
 	]
 
-	const zones = []
+	const interactiveButtons = []
 
-	layout.forEach((btn, index) => {
-		const col = index % 3
+	layout.forEach((button, index) => {
+		const column = index % 3
 		const row = Math.floor(index / 3)
 
-		zones.push({
-			x: startGridX + col * (btnSize + gap),
-			y: startGridY + row * (btnSize + gap),
-			width: btnSize,
-			height: btnSize,
-			action: btn.action,
-			label: btn.label
+		interactiveButtons.push({
+			x: startGridX + column * (buttonSize + gap),
+			y: startGridY + row * (buttonSize + gap),
+			width: buttonSize,
+			height: buttonSize,
+			action: button.action,
+			label: button.label
 		})
 	})
 
-	zones.push({
-		x: panelX + padWidth - 30,
-		y: panelY + 10,
-		width: 20,
-		height: 20,
-		action: () => gameEngineBridge.closeExitKeypadRef(),
-		label: "✕"
-	})
-
-	return zones
+	return interactiveButtons
 }
 
-// 🕯️ ZONAS DE CLIC PARA EL PANEL DE LAS VELAS (Fila horizontal de botones)
 export function getCandleInteractions(canvasElement) {
-	const padWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
-	const padHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
-	const btnWidth = INTERFACE_DIMENSIONS.CANDLE_WIDTH || 70
-	const btnHeight = INTERFACE_DIMENSIONS.CANDLE_HEIGHT || 90
+	const candlePanelWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
+	const candlePanelHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
+	const candleWidth = INTERFACE_DIMENSIONS.CANDLE_WIDTH || 70
+	const candleHeight = INTERFACE_DIMENSIONS.CANDLE_HEIGHT || 90
 	const gap = INTERFACE_DIMENSIONS.CANDLE_GAP || 10
 
-	const panelX = canvasElement.width / 2 - padWidth / 2
-	const panelY = canvasElement.height / 2 - padHeight / 2
+	const panelX = canvasElement.width / 2 - candlePanelWidth / 2
+	const panelY = canvasElement.height / 2 - candlePanelHeight / 2
 
-	const totalGridWidth = (btnWidth * 4) + (gap * 3)
-	const startGridX = panelX + (padWidth - totalGridWidth) / 2
+	const totalGridWidth = (candleWidth * 4) + (gap * 3)
+	const startGridX = panelX + (candlePanelWidth - totalGridWidth) / 2
 	const startGridY = panelY + 70
 
-	const zones = []
+	const interactiveCandles = []
 
 	const candleLabels = ["1", "2", "3", "4"]
 	candleLabels.forEach((label, index) => {
-		zones.push({
-			x: startGridX + index * (btnWidth + gap),
+		interactiveCandles.push({
+			x: startGridX + index * (candleWidth + gap),
 			y: startGridY,
-			width: btnWidth,
-			height: btnHeight,
-			action: () => gameEngineBridge.toggleCandleRef(index + 1),
+			width: candleWidth,
+			height: candleHeight,
+			action: () => gameEngineBridge.toggleCandle(index + 1),
 			label: `candle_${index + 1}`
 		})
 	})
 
-	zones.push({
+	interactiveCandles.push({
 		x: canvasElement.width / 2 - 120 / 2,
-		y: panelY + padHeight - 55,
+		y: panelY + candlePanelHeight - 55,
 		width: 120,
 		height: 35,
-		action: () => gameEngineBridge.checkCandlesRef(),
+		action: () => gameEngineBridge.checkCandles(),
 		label: "⚙️ Ejecutar"
 	})
 
-	zones.push({
-		x: panelX + padWidth - 30,
-		y: panelY + 10,
-		width: 20,
-		height: 20,
-		action: () => gameEngineBridge.closeCandlesRef(),
-		label: "✕"
+	interactiveCandles.push({
+		x: 0,
+		y: 0,
+		width: canvasElement.width,
+		height: canvasElement.height,
+		action: () => gameEngineBridge.closeCandles(),
+		label: "BACKGROUND_CLOSE_ZONE"
 	})
 
-	return zones
+	return interactiveCandles
 }
 
-// 🗺️ MAPA DE CLICS DE TODO EL JUEGO (Zonas fijas en escenarios estáticos)
+// ZONAS DE CLIC PARA EL PUZZLE DE COLORES
+export function getColorPuzzleInteractions(canvasElement) {
+	const modalWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
+	const modalHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
+	const slotWidth = INTERFACE_DIMENSIONS.CANDLE_WIDTH || 70
+	const slotHeight = INTERFACE_DIMENSIONS.CANDLE_HEIGHT || 90
+	const gap = INTERFACE_DIMENSIONS.CANDLE_GAP || 10
+
+	const panelX = canvasElement.width / 2 - modalWidth / 2
+	const panelY = canvasElement.height / 2 - modalHeight / 2
+
+	const totalGridWidth = (slotWidth * 4) + (gap * 3)
+	const startGridX = panelX + (modalWidth - totalGridWidth) / 2
+	const startGridY = panelY + 70
+
+	const interactiveButtons = []
+
+	// 🛠️ MODIFICADO: El orden de asignación de acciones cambia a: morado, azul, amarillo, verde
+	const colorsList = ["morado", "azul", "amarillo", "verde"]
+	colorsList.forEach((colorName, index) => {
+		interactiveButtons.push({
+			x: startGridX + index * (slotWidth + gap),
+			y: startGridY,
+			width: slotWidth,
+			height: slotHeight,
+			action: () => gameEngineBridge.addColorToSequence(colorName),
+			label: `color_${colorName}`
+		})
+	})
+
+	interactiveButtons.push({
+		x: canvasElement.width / 2 - 120 / 2,
+		y: panelY + modalHeight - 55,
+		width: 120,
+		height: 35,
+		action: () => gameEngineBridge.checkColorSequence(),
+		label: "⚙️ Ejecutar"
+	})
+
+	interactiveButtons.push({
+		x: 0,
+		y: 0,
+		width: canvasElement.width,
+		height: canvasElement.height,
+		action: () => gameEngineBridge.closeColorPuzzle(),
+		label: "BACKGROUND_CLOSE_ZONE"
+	})
+
+	return interactiveButtons
+}
+
 export function getRoomInteractions(canvasElement) {
 	return {
 		[ROOM.START]: [
@@ -205,7 +237,7 @@ export function getRoomInteractions(canvasElement) {
 				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH,
 				height: INTERFACE_DIMENSIONS.MENU_BUTTON_HEIGHT,
 				action: () => {
-					gameEngineBridge.changeRoomRef(ROOM.ONE)
+					gameEngineBridge.changeRoom(ROOM.ONE)
 					if (!gameEngineBridge.getIsMusicMuted()) {
 						gameEngineBridge.getGameMusic().play().catch(() => { })
 					}
@@ -221,36 +253,63 @@ export function getRoomInteractions(canvasElement) {
 		],
 		[ROOM.ONE]: [
 			{
-				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
+				x: INTERFACE_DIMENSIONS.ARROW_X_ROOM_ONE - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
 				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE,
 				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
 				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
-				action: () => gameEngineBridge.changeRoomRef(ROOM.FOUR)
+				action: () => gameEngineBridge.changeRoom(ROOM.FOUR)
 			},
 			{
-				// 🧹 OPTIMIZADO: Coordenadas centralizadas leídas de config.js
 				x: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_X,
 				y: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_Y,
 				width: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_WIDTH,
 				height: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_HEIGHT,
-				action: () => gameEngineBridge.openCandlesRef()
+				action: () => gameEngineBridge.openCandles()
+			},
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_HEIGHT,
+				action: () => gameEngineBridge.openColorPuzzle()
+			},
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_HEIGHT,
+				action: () => console.log("haz hecho click en puzzle runas")
+			},
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_HEIGHT,
+				action: () => console.log("haz hecho click en el pergamino")
 			}
 		],
 		[ROOM.FOUR]: [
+			{
+
+				x: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_X,
+				y: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_HEIGHT,
+				action: () => gameEngineBridge.openColorPuzzle()
+			},
 			{
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
 				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10,
 				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
 				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
-				action: () => gameEngineBridge.changeRoomRef(ROOM.ONE)
+				action: () => gameEngineBridge.changeRoom(ROOM.ONE)
 			},
 			{
-				// 🧹 OPTIMIZADO: Coordenadas centralizadas leídas de config.js
 				x: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_X,
 				y: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_Y,
 				width: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_WIDTH,
 				height: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_HEIGHT,
-				action: () => gameEngineBridge.openExitKeypadRef()
+				action: () => gameEngineBridge.openExitKeypad()
 			}
 		]
 	}

@@ -6,11 +6,11 @@ import { getKeypadInteractions } from "./interactions.js"
  * 🖲️ DIBUJAR EL TECLADO NUMÉRICO (Componente Autónomo)
  * Delegamos todo el renderizado visual que antes saturaba el main.js
  */
-export function drawKeypadPuzzle(canvasContext, canvasElement, state) {
-	const padWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
-	const padHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
-	const padLeftX = canvasElement.width / 2 - padWidth / 2
-	const padTopY = canvasElement.height / 2 - padHeight / 2
+export function drawKeypadPuzzle(canvasContext, canvasElement, gameState) {
+	const keypadWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
+	const keypadHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
+	const keypadLeftX = canvasElement.width / 2 - keypadWidth / 2
+	const keypadTopY = canvasElement.height / 2 - keypadHeight / 2
 
 	// 1. Fondo oscuro translúcido (El .overlay de CSS)
 	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_OVERLAY
@@ -18,14 +18,14 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, state) {
 
 	// 2. El panel con esquinas biseladas (El .panel de CSS)
 	canvasContext.beginPath()
-	canvasContext.moveTo(padLeftX + 15, padTopY)
-	canvasContext.lineTo(padLeftX + padWidth - 15, padTopY)
-	canvasContext.lineTo(padLeftX + padWidth, padTopY + 15)
-	canvasContext.lineTo(padLeftX + padWidth, padTopY + padHeight - 15)
-	canvasContext.lineTo(padLeftX + padWidth - 15, padTopY + padHeight)
-	canvasContext.lineTo(padLeftX + 15, padTopY + padHeight)
-	canvasContext.lineTo(padLeftX, padTopY + padHeight - 15)
-	canvasContext.lineTo(padLeftX, padTopY + 15)
+	canvasContext.moveTo(keypadLeftX + 15, keypadTopY)
+	canvasContext.lineTo(keypadLeftX + keypadWidth - 15, keypadTopY)
+	canvasContext.lineTo(keypadLeftX + keypadWidth, keypadTopY + 15)
+	canvasContext.lineTo(keypadLeftX + keypadWidth, keypadTopY + keypadHeight - 15)
+	canvasContext.lineTo(keypadLeftX + keypadWidth - 15, keypadTopY + keypadHeight)
+	canvasContext.lineTo(keypadLeftX + 15, keypadTopY + keypadHeight)
+	canvasContext.lineTo(keypadLeftX, keypadTopY + keypadHeight - 15)
+	canvasContext.lineTo(keypadLeftX, keypadTopY + 15)
 	canvasContext.closePath()
 
 	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_PANEL_BACKGROUND
@@ -38,55 +38,49 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, state) {
 	canvasContext.textAlign = "center"
 	canvasContext.textBaseline = "middle"
 
-	// 3. Título (🧹 OPTIMIZADO: Ahora usa el color de texto hover del config)
+	// 3. Título 
 	canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER
 	canvasContext.font = "bold 16px 'Georgia', serif"
-	canvasContext.fillText("DANOS TU CÓDIGO", canvasElement.width / 2, padTopY + 40)
+	canvasContext.fillText("DANOS TU CÓDIGO", canvasElement.width / 2, keypadTopY + 40)
 
 	// 4. Pantalla digital con puntos y guiones (.screen)
-	let displayPoints = state.keypadInput.replace(/./g, "•")
-	displayPoints = displayPoints.padEnd(3, "-")
+	let maskedInputText = gameState.keypadInput.replace(/./g, "•")
+	maskedInputText = maskedInputText.padEnd(3, "-")
 
 	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_SCREEN_TEXT
 	canvasContext.font = "42px 'Georgia', serif"
-	canvasContext.fillText(displayPoints, canvasElement.width / 2, padTopY + 85)
+	canvasContext.fillText(maskedInputText, canvasElement.width / 2, keypadTopY + 85)
 
-	// 5. Dibujar los 12 botones y la Cruz (El .grid)
-	const keypadZones = getKeypadInteractions(canvasElement)
+	// 5. Dibujar los botones del teclado numérico (La cruz visual ha sido eliminada)
+	const keypadButtonZones = getKeypadInteractions(canvasElement)
 	
-	keypadZones.forEach(zone => {
-		const isHovered = isMouseInsideZone(state.mouseX, state.mouseY, zone)
-
-		if (zone.label === "✕") {
-			// 🧹 OPTIMIZADO: Aspa de cerrar unificada con los colores de la config central
-			canvasContext.fillStyle = isHovered ? INTERFACE_COLORS.KEYPAD_TEXT_ERROR : INTERFACE_COLORS.BUTTON_TEXT_DEFAULT
-			canvasContext.font = "bold 20px Arial"
-			canvasContext.fillText(zone.label, zone.x + zone.width / 2, zone.y + zone.height / 2)
+	keypadButtonZones.forEach(zone => {
+		const isHovered = isMouseInsideZone(gameState.mouseX, gameState.mouseY, zone)
+		let buttonColors = { ...INTERFACE_COLORS }
+		let currentButtonLabel = zone.label
+		
+		if (zone.label === "←") {
+			buttonColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_RESET_BACKGROUND
+			buttonColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_RESET_TEXT
+			currentButtonLabel = "←" // 🛠️ MODIFICADO: Ahora el botón rojo dice CLOSE en lugar de la flecha
+		} else if (zone.label === "✓") {
+			buttonColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_CHECK_BACKGROUND
+			buttonColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_CHECK_TEXT
 		} else {
-			let customColors = { ...INTERFACE_COLORS }
-			
-			if (zone.label === "←") {
-				customColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BTN_RESET_BG
-				customColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_BTN_RESET_TEXT
-			} else if (zone.label === "✓") {
-				customColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BTN_CHECK_BG
-				customColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_BTN_CHECK_TEXT
-			} else {
-				customColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BTN_NUM_BG
-				customColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_BTN_NUM_TEXT
-			}
-
-			canvasContext.font = "20px 'Georgia', serif"
-			drawBeveledButton(canvasContext, canvasElement, customColors, zone, isHovered, zone.label, 6)
+			buttonColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_NUMBER_BACKGROUND
+			buttonColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_NUMBER_TEXT
 		}
+
+		// Ajustar dinámicamente el tamaño de fuente si el texto es largo como "CLOSE"
+		canvasContext.font = currentButtonLabel === "CLOSE" ? "bold 12px Arial" : "20px 'Georgia', serif"
+		drawBeveledButton(canvasContext, canvasElement, buttonColors, zone, isHovered, currentButtonLabel, 6)
 	})
 
 	// 6. Mensaje de resultado (Error / Éxito)
-	if (state.keypadResultText !== "") {
-		canvasContext.fillStyle = (state.keypadResultStatus === "success") ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
+	if (gameState.keypadResultText !== "") {
+		canvasContext.fillStyle = (gameState.keypadResultStatus === "success") ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
 		canvasContext.font = "bold 16px 'Georgia', serif"
-		// 🧹 UNIFICADO: Calcula la altura exacta idéntica a las velas usando el fondo del lienzo y la constante centralizada
-		canvasContext.fillText(state.keypadResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
+		canvasContext.fillText(gameState.keypadResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
 	}
 
 	// Restauramos fuentes por defecto del motor

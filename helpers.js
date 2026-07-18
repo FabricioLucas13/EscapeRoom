@@ -1,34 +1,34 @@
 import { INTERFACE_COLORS } from "./config.js"
 
 // 🎯 COMPROBAR SI EL RATÓN ESTÁ ENCIMA DE UN BOTÓN (Detectar clics y hovers)
-export function isMouseInsideZone(inputX, inputY, interactionZone) {
-	return inputX >= interactionZone.x &&
-		inputX <= interactionZone.x + interactionZone.width &&
-		inputY >= interactionZone.y &&
-		inputY <= interactionZone.y + interactionZone.height
+export function isMouseInsideZone(mouseX, mouseY, interactionZone) {
+	return mouseX >= interactionZone.x &&
+		mouseX <= interactionZone.x + interactionZone.width &&
+		mouseY >= interactionZone.y &&
+		mouseY <= interactionZone.y + interactionZone.height
 }
 
 // 🖌️ DIBUJAR UN BOTÓN CON ESQUINAS DIAGONALES (Estilo Medieval)
-export function drawBeveledButton(canvasContext, canvasElement, colorsObject, buttonZone, isHovered, textLabel, bevelSize = 8) {
+export function drawBeveledButton(canvasContext, canvasElement, interfaceColors, button, isHovered, buttonText, bevelSize = 8) {
 	canvasContext.beginPath()
-	canvasContext.moveTo(buttonZone.x + bevelSize, buttonZone.y)
-	canvasContext.lineTo(buttonZone.x + buttonZone.width - bevelSize, buttonZone.y)
-	canvasContext.lineTo(buttonZone.x + buttonZone.width, buttonZone.y + bevelSize)
-	canvasContext.lineTo(buttonZone.x + buttonZone.width, buttonZone.y + buttonZone.height - bevelSize)
-	canvasContext.lineTo(buttonZone.x + buttonZone.width - bevelSize, buttonZone.y + buttonZone.height)
-	canvasContext.lineTo(buttonZone.x + bevelSize, buttonZone.y + buttonZone.height)
-	canvasContext.lineTo(buttonZone.x, buttonZone.y + buttonZone.height - bevelSize)
-	canvasContext.lineTo(buttonZone.x, buttonZone.y + bevelSize)
+	canvasContext.moveTo(button.x + bevelSize, button.y)
+	canvasContext.lineTo(button.x + button.width - bevelSize, button.y)
+	canvasContext.lineTo(button.x + button.width, button.y + bevelSize)
+	canvasContext.lineTo(button.x + button.width, button.y + button.height - bevelSize)
+	canvasContext.lineTo(button.x + button.width - bevelSize, button.y + button.height)
+	canvasContext.lineTo(button.x + bevelSize, button.y + button.height)
+	canvasContext.lineTo(button.x, button.y + button.height - bevelSize)
+	canvasContext.lineTo(button.x, button.y + bevelSize)
 	canvasContext.closePath()
 
-	canvasContext.fillStyle = isHovered ? colorsObject.BUTTON_BACKGROUND_HOVER : colorsObject.BUTTON_BACKGROUND_DEFAULT
+	canvasContext.fillStyle = isHovered ? interfaceColors.BUTTON_BACKGROUND_HOVER : interfaceColors.BUTTON_BACKGROUND_DEFAULT
 	canvasContext.fill()
-	canvasContext.strokeStyle = isHovered ? colorsObject.BUTTON_BORDER_HOVER : colorsObject.BUTTON_BORDER_DEFAULT
+	canvasContext.strokeStyle = isHovered ? interfaceColors.BUTTON_BORDER_HOVER : interfaceColors.BUTTON_BORDER_DEFAULT
 	canvasContext.lineWidth = isHovered ? 2 : 1.5
 	canvasContext.stroke()
 
-	canvasContext.fillStyle = isHovered ? colorsObject.BUTTON_TEXT_HOVER : colorsObject.BUTTON_TEXT_DEFAULT
-	canvasContext.fillText(textLabel, buttonZone.x + buttonZone.width / 2, buttonZone.y + buttonZone.height / 2)
+	canvasContext.fillStyle = isHovered ? interfaceColors.BUTTON_TEXT_HOVER : interfaceColors.BUTTON_TEXT_DEFAULT
+	canvasContext.fillText(buttonText, button.x + button.width / 2, button.y + button.height / 2)
 }
 
 // 🖼️ ADAPTAR LA IMAGEN DE FONDO (Para el Menú de Inicio)
@@ -60,19 +60,21 @@ export function drawStandardRoomBackground(canvasContext, canvasElement, roomIma
 }
 
 // 📐 DIBUJAR LAS FLECHAS DE NAVEGACIÓN (Triángulos de Color Centralizado)
-export function drawNavigationArrow(canvasContext, canvasElement, arrowSize, direction, arrowTipY) {
-	const centerX = canvasElement.width / 2 
-	canvasContext.fillStyle = INTERFACE_COLORS.NAVIGATION_ARROW // 🧹 OPTIMIZADO: Ahora usa el color del config.js
+export function drawNavigationArrow(canvasContext, canvasElement, arrowSize, direction, arrowTipY, customX = null) {
+	// 🛠️ MODIFICADO: Si customX tiene un número, usa ese. Si es null, calcula el centro de la pantalla de forma automática.
+	const targetX = customX !== null ? customX : (canvasElement.width / 2)
+	
+	canvasContext.fillStyle = INTERFACE_COLORS.NAVIGATION_ARROW 
 	canvasContext.beginPath()
 
 	if (direction === "UP") {
-		canvasContext.moveTo(centerX, arrowTipY)
-		canvasContext.lineTo(centerX - arrowSize, arrowTipY + arrowSize)
-		canvasContext.lineTo(centerX + arrowSize, arrowTipY + arrowSize)
+		canvasContext.moveTo(targetX, arrowTipY)
+		canvasContext.lineTo(targetX - arrowSize, arrowTipY + arrowSize)
+		canvasContext.lineTo(targetX + arrowSize, arrowTipY + arrowSize)
 	} else if (direction === "DOWN") {
-		canvasContext.moveTo(centerX, arrowTipY)
-		canvasContext.lineTo(centerX - arrowSize, arrowTipY - arrowSize)
-		canvasContext.lineTo(centerX + arrowSize, arrowTipY - arrowSize)
+		canvasContext.moveTo(targetX, arrowTipY)
+		canvasContext.lineTo(targetX - arrowSize, arrowTipY - arrowSize)
+		canvasContext.lineTo(targetX + arrowSize, arrowTipY - arrowSize)
 	}
 
 	canvasContext.closePath()
