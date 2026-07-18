@@ -3,10 +3,11 @@
  */
 import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton, drawProportionalBackground, drawStandardRoomBackground, drawNavigationArrow } from "./helpers.js"
-import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions } from "./interactions.js"
+import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions } from "./interactions.js"
 import { drawKeypadPuzzle } from "./puzzleKeypad.js"
+// 🆕 Importamos el nuevo componente visual de las velas
+import { drawCandlePuzzle } from "./candlesPuzzle.js"
 import { playMusic, toggleMusic, getIsMuted } from "./audioEngine.js"
-// 🆕 Traemos el administrador de estados centralizado
 import { gameState } from "./stateManager.js"
 
 // --- CONFIGURAR EL CANVAS (El lienzo de dibujo) ---
@@ -25,15 +26,21 @@ initializeInteractions({
 	openExitKeypad: () => { gameState.openKeypad(isOptionsOpen) },
 	getIsMusicMuted: () => getIsMuted(), 
 	getGameMusic: () => ({ play: () => Promise.resolve(playMusic()) }), 
-	openOptionsModal: () => { if (!isOptionsOpen && !gameState.isKeypadOpen) isOptionsOpen = true },
+	openOptionsModal: () => { if (!isOptionsOpen && !gameState.isKeypadOpen && !gameState.isCandleOpen) isOptionsOpen = true },
 	closeOptionsModal: () => { isOptionsOpen = false },
 	toggleMusic: () => { toggleMusic() }, 
 
-	// 🚀 LIMPIEZA TOTAL: Las funciones delegan directamente en el administrador de estados
+	// FUNCIONES DEL TECLADO CONECTADAS
 	closeExitKeypad: () => { gameState.closeKeypad() },
 	keypadPress: (num) => { gameState.pressKey(num) },
 	keypadReset: () => { gameState.resetKeypad() },
-	keypadCheck: () => { gameState.checkKeypad() }
+	keypadCheck: () => { gameState.checkKeypad() },
+
+	// 🆕 NUEVOS CABLES DEL PUZZLE DE LAS VELAS CONECTADOS AL GESTOR DE ESTADO
+	openCandles: () => { gameState.openCandles(isOptionsOpen) },
+	closeCandles: () => { gameState.closeCandles() },
+	toggleCandle: (num) => { gameState.toggleCandleState(num) },
+	checkCandles: () => { gameState.checkCandles() }
 })
 
 // --- GENERAR EL MAPA DE BOTONES Y HITBOXES ---
@@ -41,7 +48,7 @@ const roomInteractions = getRoomInteractions(canvasElement)
 
 // --- CARGAR LAS IMÁGENES AUTOMÁTICAMENTE ---
 const gameImages = {}
-const imageSources = { start: "roomStart.png", one: "roomOne.jpg", four: "roomFour.jpg" }
+const imageSources = { start: "roomStart.png", one: "roomOne.jpg", four: "roomFour.jpg", candlesDetail: "roomTwo.jpg"}
 
 Object.entries(imageSources).forEach(([key, filename]) => {
 	gameImages[key] = new Image()
@@ -62,9 +69,12 @@ canvasElement.addEventListener("click", (event) => {
 	const clickX = event.clientX - boundaries.left
 	const clickY = event.clientY - boundaries.top
 
+	// PRIORIDAD JERÁRQUICA: Teclado > Velas > Opciones > Habitación normal
 	let activeZones = []
 	if (gameState.isKeypadOpen) {
 		activeZones = getKeypadInteractions(canvasElement)
+	} else if (gameState.isCandleOpen) {
+		activeZones = getCandleInteractions(canvasElement)
 	} else if (currentRoom === ROOM.START && isOptionsOpen) {
 		activeZones = getModalInteractions(canvasElement)
 	} else {
@@ -99,6 +109,7 @@ function draw() {
 				drawProportionalBackground(canvasContext, canvasElement, gameImages.start)
 
 				const startZones = roomInteractions[ROOM.START]
+				// 🧹 REPARADO: Añadidos los índices [0] y [1] para que detecte bien el botón individual
 				const isMouseOverPlay = isMouseInsideZone(mouseX, mouseY, startZones[0])
 				const isMouseOverOptions = isMouseInsideZone(mouseX, mouseY, startZones[1])
 
@@ -138,6 +149,7 @@ function draw() {
 					canvasContext.fillText("SONIDO", canvasElement.width / 2, modalTopY + 30)
 
 					const modalZones = getModalInteractions(canvasElement)
+					// 🧹 REPARADO: Añadidos los índices [0] y [1] para el modal de sonido
 					const isMouseOverAudio = isMouseInsideZone(mouseX, mouseY, modalZones[0])
 					const isMouseOverBack = isMouseInsideZone(mouseX, mouseY, modalZones[1])
 
@@ -179,8 +191,14 @@ function draw() {
 	// 🖲️ INTERFAZ DEL POP-UP: TECLADO NUMÉRICO (Prioridad y delegación limpia)
 	// =========================================================================
 	if (gameState.isKeypadOpen) {
-		// 🧹 LIMPIEZA: Pasamos el objeto global directo con todas sus propiedades mutadas
 		drawKeypadPuzzle(canvasContext, canvasElement, gameState)
+	}
+
+	// =========================================================================
+	// 🕯️ INTERFAZ DEL POP-UP: PUZZLE DE LAS VELAS (Delegación limpia)
+	// =========================================================================
+	if (gameState.isCandleOpen) {
+		drawCandlePuzzle(canvasContext, canvasElement, gameState, gameImages.candlesDetail)
 	}
 
 	// Ejecuta la herramienta que pinta la posición X e Y del ratón

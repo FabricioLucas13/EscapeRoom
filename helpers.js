@@ -59,13 +59,13 @@ export function drawProportionalBackground(canvasContext, canvasElement, backgro
 	const scaleFactor = Math.min(canvasElement.width / backgroundImage.width, canvasElement.height / backgroundImage.height)
 	const renderWidth = backgroundImage.width * scaleFactor
 	const renderHeight = backgroundImage.height * scaleFactor
-	
+
 	// Dibujamos la foto bien centrada en la pantalla
 	canvasContext.drawImage(
-		backgroundImage, 
-		(canvasElement.width - renderWidth) / 2, 
-		(canvasElement.height - renderHeight) / 2, 
-		renderWidth, 
+		backgroundImage,
+		(canvasElement.width - renderWidth) / 2,
+		(canvasElement.height - renderHeight) / 2,
+		renderWidth,
 		renderHeight
 	)
 }
@@ -98,7 +98,7 @@ export function drawNavigationArrow(canvasContext, canvasElement, arrowSize, dir
 		canvasContext.lineTo(centerX - arrowSize, arrowTipY - arrowSize)
 		canvasContext.lineTo(centerX + arrowSize, arrowTipY - arrowSize)
 	}
-	
+
 	canvasContext.closePath()
 	canvasContext.fill()
 }

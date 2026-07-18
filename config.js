@@ -48,7 +48,13 @@ export const INTERFACE_COLORS = {
 	KEYPAD_BTN_RESET_BG: "#7a1f16",              // Color rojo para el botón de borrar (←)
 	KEYPAD_BTN_RESET_TEXT: "#ffffff",            // Color de la flecha de borrar
 	KEYPAD_BTN_CHECK_BG: "#1f8f4d",              // Color verde para el botón de validar (✓)
-	KEYPAD_BTN_CHECK_TEXT: "#000000"             // Color del check de validar
+	KEYPAD_BTN_CHECK_TEXT: "#000000",             // Color del check de validar
+
+	//colores de la llamas de las velas
+	CANDLE_FLAME_YELLOW: "#ffca28",
+	CANDLE_FLAME_BLUE: "#29b6f6",
+	CANDLE_FLAME_GREEN: "#66bb6a",
+	CANDLE_FLAME_PURPLE: "#ab47bc",
 }
 
 
@@ -66,10 +72,23 @@ export const INTERFACE_DIMENSIONS = {
 	KEYPAD_HEIGHT: 380,                          // Alto total del panel del teclado
 	KEYPAD_GRID_COLS: 3,                         // Columnas de botones
 	KEYPAD_BTN_SIZE: 50,                         // Tamaño cuadrado de cada botón numérico
-	KEYPAD_GAP: 10                               // Separación entre botones
+	KEYPAD_GAP: 10,                               // Separación entre botones
+
+	CANDLE_MODAL_WIDTH: 420,          // Ancho del panel de las velas
+	CANDLE_MODAL_HEIGHT: 260,         // Alto del panel de las velas
+	CANDLE_WIDTH: 70,                 // Ancho de cada botón de vela
+	CANDLE_HEIGHT: 90                 // Alto de cada botón de vela
+
+
 }
 
+
+
 // Añade la solución del enigma al final del archivo
+
+
 export const GAME_PUZZLES = {
-	EXIT_SECRET_CODE: "739"                      // Contraseña que programó el equipo
+	EXIT_SECRET_CODE: "739",                      // Contraseña que programó el equipo
+	CANDLES_SECRET_ORDER: [1, 2, 3, 4] // El orden correcto de encendido
+
 }

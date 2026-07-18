@@ -24,12 +24,18 @@ const gameEngineBridge = {
 	closeOptionsModal: null,      // Función para cerrar el cuadro de opciones
 	openOptionsModal: null,       // Función para abrir el cuadro de opciones
 	getGameMusic: null,            // Accede al reproductor de música del juego
-	
+
 	// Enlaces nuevos para el teclado numérico:
 	closeExitKeypadRef: null,     // Función para cerrar el teclado numérico
 	keypadPressRef: null,         // Función para registrar un número pulsado
 	keypadResetRef: null,         // Función para borrar (botón flecha)
-	keypadCheckRef: null          // Función para comprobar la contraseña (botón check)
+	keypadCheckRef: null,          // Función para comprobar la contraseña (botón check)
+
+	// Enlaces nuevos para el puzzle de las velas:
+	openCandlesRef: null,         // Función para abrir el panel de las velas
+	closeCandlesRef: null,        // Función para cerrar el panel de las velas
+	toggleCandleRef: null,        // Función para encender/apagar una vela
+	checkCandlesRef: null         // Función para comprobar el orden de las velas
 }
 
 // 🟢 CONECTAR LOS ARCHIVOS (Se ejecuta una sola vez al arrancar el juego)
@@ -41,12 +47,18 @@ export function initializeInteractions(engineActions) {
 	gameEngineBridge.closeOptionsModal = engineActions.closeOptionsModal
 	gameEngineBridge.openOptionsModal = engineActions.openOptionsModal
 	gameEngineBridge.getGameMusic = engineActions.getGameMusic
-	
+
 	// Conexión de las nuevas funciones del teclado:
 	gameEngineBridge.closeExitKeypadRef = engineActions.closeExitKeypad
 	gameEngineBridge.keypadPressRef = engineActions.keypadPress
 	gameEngineBridge.keypadResetRef = engineActions.keypadReset
 	gameEngineBridge.keypadCheckRef = engineActions.keypadCheck
+
+	// Conexión de las nuevas funciones del puzzle de las velas:
+	gameEngineBridge.openCandlesRef = engineActions.openCandles
+	gameEngineBridge.closeCandlesRef = engineActions.closeCandles
+	gameEngineBridge.toggleCandleRef = engineActions.toggleCandle
+	gameEngineBridge.checkCandlesRef = engineActions.checkCandles
 }
 
 // 🎵 SILENCIAR O ACTIVAR LA MÚSICA
@@ -60,19 +72,19 @@ export function getModalInteractions(canvasElement) {
 	const modalButtonLeftX = canvasElement.width / 2 - INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH / 2
 
 	return [
-		{ 
-			x: modalButtonLeftX, 
-			y: modalTopY + 70, 
-			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH, 
-			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT, 
-			action: toggleMusic 
+		{
+			x: modalButtonLeftX,
+			y: modalTopY + 70,
+			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH,
+			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT,
+			action: toggleMusic
 		},
-		{ 
-			x: modalButtonLeftX, 
-			y: modalTopY + 140, 
-			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH, 
-			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT, 
-			action: () => gameEngineBridge.closeOptionsModal() 
+		{
+			x: modalButtonLeftX,
+			y: modalTopY + 140,
+			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH,
+			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT,
+			action: () => gameEngineBridge.closeOptionsModal()
 		}
 	]
 }
@@ -86,12 +98,10 @@ export function getKeypadInteractions(canvasElement) {
 
 	const panelX = canvasElement.width / 2 - padWidth / 2
 	const panelY = canvasElement.height / 2 - padHeight / 2
-	
-	// El teclado empieza a calcular sus botones abajo del título y la pantalla (Y: +130)
+
 	const startGridX = panelX + (padWidth - (btnSize * 3 + gap * 2)) / 2
 	const startGridY = panelY + 130
 
-	// Orden exacto de los botones tal y como lo diseñó el equipo en el HTML
 	const layout = [
 		{ label: "1", action: () => gameEngineBridge.keypadPressRef("1") },
 		{ label: "2", action: () => gameEngineBridge.keypadPressRef("2") },
@@ -109,7 +119,6 @@ export function getKeypadInteractions(canvasElement) {
 
 	const zones = []
 
-	// Generamos matemáticamente las cajas de colisión para los 12 botones
 	layout.forEach((btn, index) => {
 		const col = index % 3
 		const row = Math.floor(index / 3)
@@ -120,11 +129,10 @@ export function getKeypadInteractions(canvasElement) {
 			width: btnSize,
 			height: btnSize,
 			action: btn.action,
-			label: btn.label // Pasamos la etiqueta para que main.js la dibuje
+			label: btn.label
 		})
 	})
 
-	// Añadimos la cruz (✕) para poder cerrar el pop-up arriba a la derecha
 	zones.push({
 		x: panelX + padWidth - 30,
 		y: panelY + 10,
@@ -137,53 +145,117 @@ export function getKeypadInteractions(canvasElement) {
 	return zones
 }
 
-// 🗺️ MAPA DE CLICS DE TODO EL JUEGO (Zonas interactivas)
+// 🕯️ ZONAS DE CLIC PARA EL PANEL DE LAS VELAS (4 velas alineadas + Cruz + Ejecutar)
+export function getCandleInteractions(canvasElement) {
+	const padWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
+	const padHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
+	const btnWidth = INTERFACE_DIMENSIONS.CANDLE_WIDTH || 70
+	const btnHeight = INTERFACE_DIMENSIONS.CANDLE_HEIGHT || 90
+	const gap = INTERFACE_DIMENSIONS.CANDLE_GAP || 10
+
+	const panelX = canvasElement.width / 2 - padWidth / 2
+	const panelY = canvasElement.height / 2 - padHeight / 2
+
+	// Centramos la fila de las 4 velas horizontalmente
+	const totalGridWidth = (btnWidth * 4) + (gap * 3)
+	const startGridX = panelX + (padWidth - totalGridWidth) / 2
+	const startGridY = panelY + 70
+
+	const zones = []
+
+	// Mapeamos los 4 botones de velas sin usar un bucle "for" rígido
+	const candleLabels = ["1", "2", "3", "4"]
+	candleLabels.forEach((label, index) => {
+		zones.push({
+			x: startGridX + index * (btnWidth + gap),
+			y: startGridY,
+			width: btnWidth,
+			height: btnHeight,
+			action: () => gameEngineBridge.toggleCandleRef(index + 1),
+			label: `candle_${index + 1}`
+		})
+	})
+
+	// Botón inferior para ejecutar/validar el orden
+	const execBtnWidth = 120
+	const execBtnHeight = 35
+	zones.push({
+		x: canvasElement.width / 2 - execBtnWidth / 2,
+		y: panelY + padHeight - 55,
+		width: execBtnWidth,
+		height: execBtnHeight,
+		action: () => gameEngineBridge.checkCandlesRef(),
+		label: "⚙️ Ejecutar"
+	})
+
+	// Botón de aspa (✕) para cerrar el modal arriba a la derecha
+	zones.push({
+		x: panelX + padWidth - 30,
+		y: panelY + 10,
+		width: 20,
+		height: 20,
+		action: () => gameEngineBridge.closeCandlesRef(),
+		label: "✕"
+	})
+
+	return zones
+}
+
+// 🗺️ MAPA DE CLICS DE TODO EL JUEGO (Zonas interactivas de cada habitación)
 export function getRoomInteractions(canvasElement) {
 	return {
 		[ROOM.START]: [
 			{
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH / 2,
 				y: canvasElement.height / 2 - 35,
-				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH, 
+				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH,
 				height: INTERFACE_DIMENSIONS.MENU_BUTTON_HEIGHT,
-				action: () => { 
-					gameEngineBridge.changeRoomRef(ROOM.ONE) 
+				action: () => {
+					gameEngineBridge.changeRoomRef(ROOM.ONE)
 					if (!gameEngineBridge.getIsMusicMuted()) {
-						gameEngineBridge.getGameMusic().play().catch(() => {})
+						gameEngineBridge.getGameMusic().play().catch(() => { })
 					}
 				}
 			},
 			{
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH / 2,
 				y: canvasElement.height / 2 + 25,
-				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH, 
+				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH,
 				height: INTERFACE_DIMENSIONS.MENU_BUTTON_HEIGHT,
 				action: () => gameEngineBridge.openOptionsModal()
 			}
 		],
 		[ROOM.ONE]: [
-			{ 
-				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, 
-				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE, 
-				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2, 
-				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10, 
-				action: () => gameEngineBridge.changeRoomRef(ROOM.FOUR) 
+			{
+				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
+				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE,
+				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
+				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
+				action: () => gameEngineBridge.changeRoomRef(ROOM.FOUR)
+			},
+			{
+				x: 200,
+				y: 220,
+				width: 80,
+				height: 70,
+				// 🚀 CONECTADO: Al pinchar en las velas se llama al puente real del motor
+				action: () => gameEngineBridge.openCandlesRef()
 			}
 		],
 		[ROOM.FOUR]: [
-			{ 
-				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, 
-				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10, 
-				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2, 
-				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10, 
-				action: () => gameEngineBridge.changeRoomRef(ROOM.ONE) 
+			{
+				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
+				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10,
+				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
+				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
+				action: () => gameEngineBridge.changeRoomRef(ROOM.ONE)
 			},
-			{ 
-				x: 490, 
-				y: 235, 
-				width: 140, 
-				height: 185, 
-				action: () => gameEngineBridge.openExitKeypadRef() 
+			{
+				x: 490,
+				y: 235,
+				width: 140,
+				height: 185,
+				action: () => gameEngineBridge.openExitKeypadRef()
 			}
 		]
 	}
