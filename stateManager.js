@@ -1,15 +1,18 @@
+import { GAME_PUZZLES } from "./config.js"
+
 /**
  * 🗃️ GESTOR DE ESTADO GLOBAL DEL JUEGO (State Manager)
  * Centraliza las variables de juego y su lógica para mantener el main.js limpio.
  */
 export const gameState = {
-		// 📦 Variables de estado para el puzzle de las velas
-	isCandleOpen: false,
-	candlesOn: [], // Guardará el orden de las velas encendidas (ej:)
-	candleResultText: "", // Guardará el código "3" o el aviso de error
-	candlesSecretOrder:[1, 2, 3, 4], // El orden correcto que programó el equipo
+	// =========================================================================
+	// 🕯️ PUZZLE DE LAS VELAS (Habitación 1)
+	// =========================================================================
+	isCandleOpen: false,    // Estado de apertura del panel
+	candlesOn: [],          // Orden de las velas encendidas
+	candleResultText: "",   // Mensaje de código "3" o error
 
-	// 🚪 Abrir el panel de las velas de forma segura
+	// 🚪 Abrir el panel de forma segura
 	openCandles(isOptionsOpen) {
 		if (!this.isCandleOpen && !isOptionsOpen) {
 			this.isCandleOpen = true
@@ -22,15 +25,13 @@ export const gameState = {
 		this.resetCandles()
 	},
 
-	// 🕯️ Encender o apagar una vela (Lógica del .toggle de las compañeras)
+	// 🕯️ Alternar estado (encendido/apagado) de una vela
 	toggleCandleState(num) {
-		this.candleResultText = "" // Limpia mensajes anteriores
+		this.candleResultText = ""
 
 		if (this.candlesOn.includes(num)) {
-			// Si ya estaba encendida, la apagamos (la sacamos del array)
 			this.candlesOn = this.candlesOn.filter(x => x !== num)
 		} else {
-			// Si estaba apagada, la encendemos (la metemos al array)
 			this.candlesOn.push(num)
 		}
 	},
@@ -41,26 +42,25 @@ export const gameState = {
 		this.candleResultText = ""
 	},
 
-	// ⚙️ Botón Ejecutar: Validar el orden de encendido
+	// ⚙️ Validar el orden secuencial de encendido desde config.js
 	checkCandles() {
-		// Comparamos si el array actual es igual al secreto [1, 2, 3, 4]
-		const isCorrect = JSON.stringify(this.candlesOn) === JSON.stringify(this.candlesSecretOrder)
+		const isCorrect = JSON.stringify(this.candlesOn) === JSON.stringify(GAME_PUZZLES.CANDLE_SECRET_ORDER)
 
 		if (isCorrect) {
-			this.candleResultText = "3" // Da el código de recompensa del HTML
+			this.candleResultText = "3"
 		} else {
 			this.candleResultText = "❌ ERROR: Las velas se han apagado"
-			this.candlesOn = [] // Al fallar las apaga todas automáticamente como en su código
+			this.candlesOn = []
 		}
 	},
 
-	
-	// 📦 Variables de estado del teclado numérico
-	isKeypadOpen: false,
-	keypadInput: "",
-	keypadResultText: "",
-	keypadResultStatus: "",
-	secretCode: "739", // La contraseña se queda protegida dentro de su lógica
+	// =========================================================================
+	// 🔢 TECLADO NUMÉRICO (Habitación 4)
+	// =========================================================================
+	isKeypadOpen: false,       // Estado de apertura del teclado
+	keypadInput: "",           // Dígitos pulsados (máx 3)
+	keypadResultText: "",      // Texto de éxito o fallo
+	keypadResultStatus: "",    // Estado de validación ("success"/"error")
 
 	// 🚪 Abrir el teclado de forma segura
 	openKeypad(isOptionsOpen) {
@@ -77,31 +77,30 @@ export const gameState = {
 		this.keypadResultStatus = ""
 	},
 
-	// 🎹 Registrar la pulsación de un número (máx 3)
+	// 🎹 Registrar la pulsación de un número
 	pressKey(num) {
 		if (this.keypadInput.length < 3) {
 			this.keypadInput += num
-			this.keypadResultText = "" // Limpia texto anterior al volver a escribir
+			this.keypadResultText = ""
 		}
 	},
 
-	// ← Borrar todo el contenido de la pantalla
+	// ← Borrar la pantalla digital
 	resetKeypad() {
 		this.keypadInput = ""
 		this.keypadResultText = ""
 		this.keypadResultStatus = ""
 	},
 
-	// ✓ Validar si el código introducido es el correcto
+	// ✓ Validar la contraseña de escape desde config.js
 	checkKeypad() {
-		if (this.keypadInput === this.secretCode) {
+		if (this.keypadInput === GAME_PUZZLES.EXIT_SECRET_CODE) {
 			this.keypadResultText = "🎉 ACCESO CONCEDIDO"
 			this.keypadResultStatus = "success"
 		} else {
 			this.keypadResultText = "💀 ERROR"
 			this.keypadResultStatus = "error"
-			this.keypadInput = "" // Resetea automáticamente como el HTML original
+			this.keypadInput = ""
 		}
 	}
-
 }

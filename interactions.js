@@ -15,30 +15,30 @@ import { INTERFACE_DIMENSIONS, ROOM } from "./config.js"
 //
 // =========================================================================
 
-// 🔗 ENLACES HACIA EL ARCHIVO PRINCIPAL (main.js)
+// 🔗 ENLACES HACIA EL ARCHIVO PRINCIPAL (Pasarela de funciones hacia main.js)
 const gameEngineBridge = {
-	changeRoomRef: null,          // Guarda la función para cambiar de habitación
-	openExitKeypadRef: null,      // Guarda la función para abrir el teclado numérico
-	getIsMusicMuted: () => false, // Mira si la música está silenciada en el menú principal
-	toggleMusicCallback: null,    // Función para silenciar o activar la música
-	closeOptionsModal: null,      // Función para cerrar el cuadro de opciones
-	openOptionsModal: null,       // Función para abrir el cuadro de opciones
-	getGameMusic: null,            // Accede al reproductor de música del juego
+	changeRoomRef: null,          // Cambia la habitación actual
+	openExitKeypadRef: null,      // Abre el panel del teclado numérico
+	getIsMusicMuted: () => false, // Consulta si el audio del juego está silenciado
+	toggleMusicCallback: null,    // Invierte el estado del silenciador de música
+	closeOptionsModal: null,      // Cierra la ventana flotante de opciones
+	openOptionsModal: null,       // Abre la ventana flotante de opciones
+	getGameMusic: null,           // Entrega acceso directo al reproductor de sonido
 
-	// Enlaces nuevos para el teclado numérico:
-	closeExitKeypadRef: null,     // Función para cerrar el teclado numérico
-	keypadPressRef: null,         // Función para registrar un número pulsado
-	keypadResetRef: null,         // Función para borrar (botón flecha)
-	keypadCheckRef: null,          // Función para comprobar la contraseña (botón check)
+	// Canales de control para el teclado numérico (Habitación 4)
+	closeExitKeypadRef: null,     // Cierra el teclado numérico
+	keypadPressRef: null,         // Añade un número a la pantalla del teclado
+	keypadResetRef: null,         // Borra los números de la pantalla
+	keypadCheckRef: null,         // Valida el código secreto de escape
 
-	// Enlaces nuevos para el puzzle de las velas:
-	openCandlesRef: null,         // Función para abrir el panel de las velas
-	closeCandlesRef: null,        // Función para cerrar el panel de las velas
-	toggleCandleRef: null,        // Función para encender/apagar una vela
-	checkCandlesRef: null         // Función para comprobar el orden de las velas
+	// Canales de control para el puzzle de las velas (Habitación 1)
+	openCandlesRef: null,         // Abre el escenario de las velas
+	closeCandlesRef: null,        // Cierra el escenario de las velas y regresa a la sala
+	toggleCandleRef: null,        // Cambia el estado (encendido/apagado) de una vela
+	checkCandlesRef: null         // Valida el orden secuencial de encendido
 }
 
-// 🟢 CONECTAR LOS ARCHIVOS (Se ejecuta una sola vez al arrancar el juego)
+// 🟢 CONECTAR LOS ARCHIVOS (Asigna los cables de control al iniciar el motor)
 export function initializeInteractions(engineActions) {
 	gameEngineBridge.changeRoomRef = engineActions.changeRoom
 	gameEngineBridge.openExitKeypadRef = engineActions.openExitKeypad
@@ -48,25 +48,25 @@ export function initializeInteractions(engineActions) {
 	gameEngineBridge.openOptionsModal = engineActions.openOptionsModal
 	gameEngineBridge.getGameMusic = engineActions.getGameMusic
 
-	// Conexión de las nuevas funciones del teclado:
+	// Enlaces del teclado numérico
 	gameEngineBridge.closeExitKeypadRef = engineActions.closeExitKeypad
 	gameEngineBridge.keypadPressRef = engineActions.keypadPress
 	gameEngineBridge.keypadResetRef = engineActions.keypadReset
 	gameEngineBridge.keypadCheckRef = engineActions.keypadCheck
 
-	// Conexión de las nuevas funciones del puzzle de las velas:
+	// Enlaces del puzzle de las velas
 	gameEngineBridge.openCandlesRef = engineActions.openCandles
 	gameEngineBridge.closeCandlesRef = engineActions.closeCandles
 	gameEngineBridge.toggleCandleRef = engineActions.toggleCandle
 	gameEngineBridge.checkCandlesRef = engineActions.checkCandles
 }
 
-// 🎵 SILENCIAR O ACTIVAR LA MÚSICA
+// 🎵 DISPARADOR DE AUDIO (Silencia o activa la pista)
 export function toggleMusic() {
 	gameEngineBridge.toggleMusicCallback()
 }
 
-// 🔳 ZONAS DE CLIC PARA EL MENÚ DE OPCIONES (El cuadro de sonido)
+// 🔳 ZONAS DE CLIC PARA EL MENÚ DE OPCIONES (Ajustes de Sonido)
 export function getModalInteractions(canvasElement) {
 	const modalTopY = canvasElement.height / 2 - INTERFACE_DIMENSIONS.OPTIONS_MODAL_HEIGHT / 2
 	const modalButtonLeftX = canvasElement.width / 2 - INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH / 2
@@ -89,7 +89,7 @@ export function getModalInteractions(canvasElement) {
 	]
 }
 
-// 🔢 ZONAS DE CLIC DINÁMICAS PARA EL TECLADO NUMÉRICO (Grid 3x4 + Cruz de cerrar)
+// 🔢 ZONAS DE CLIC DINÁMICAS PARA EL TECLADO NUMÉRICO (Rejilla de botones)
 export function getKeypadInteractions(canvasElement) {
 	const padWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
 	const padHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
@@ -145,7 +145,7 @@ export function getKeypadInteractions(canvasElement) {
 	return zones
 }
 
-// 🕯️ ZONAS DE CLIC PARA EL PANEL DE LAS VELAS (4 velas alineadas + Cruz + Ejecutar)
+// 🕯️ ZONAS DE CLIC PARA EL PANEL DE LAS VELAS (Fila horizontal de botones)
 export function getCandleInteractions(canvasElement) {
 	const padWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
 	const padHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
@@ -156,14 +156,12 @@ export function getCandleInteractions(canvasElement) {
 	const panelX = canvasElement.width / 2 - padWidth / 2
 	const panelY = canvasElement.height / 2 - padHeight / 2
 
-	// Centramos la fila de las 4 velas horizontalmente
 	const totalGridWidth = (btnWidth * 4) + (gap * 3)
 	const startGridX = panelX + (padWidth - totalGridWidth) / 2
 	const startGridY = panelY + 70
 
 	const zones = []
 
-	// Mapeamos los 4 botones de velas sin usar un bucle "for" rígido
 	const candleLabels = ["1", "2", "3", "4"]
 	candleLabels.forEach((label, index) => {
 		zones.push({
@@ -176,19 +174,15 @@ export function getCandleInteractions(canvasElement) {
 		})
 	})
 
-	// Botón inferior para ejecutar/validar el orden
-	const execBtnWidth = 120
-	const execBtnHeight = 35
 	zones.push({
-		x: canvasElement.width / 2 - execBtnWidth / 2,
+		x: canvasElement.width / 2 - 120 / 2,
 		y: panelY + padHeight - 55,
-		width: execBtnWidth,
-		height: execBtnHeight,
+		width: 120,
+		height: 35,
 		action: () => gameEngineBridge.checkCandlesRef(),
 		label: "⚙️ Ejecutar"
 	})
 
-	// Botón de aspa (✕) para cerrar el modal arriba a la derecha
 	zones.push({
 		x: panelX + padWidth - 30,
 		y: panelY + 10,
@@ -201,7 +195,7 @@ export function getCandleInteractions(canvasElement) {
 	return zones
 }
 
-// 🗺️ MAPA DE CLICS DE TODO EL JUEGO (Zonas interactivas de cada habitación)
+// 🗺️ MAPA DE CLICS DE TODO EL JUEGO (Zonas fijas en escenarios estáticos)
 export function getRoomInteractions(canvasElement) {
 	return {
 		[ROOM.START]: [
@@ -234,11 +228,11 @@ export function getRoomInteractions(canvasElement) {
 				action: () => gameEngineBridge.changeRoomRef(ROOM.FOUR)
 			},
 			{
-				x: 200,
-				y: 220,
-				width: 80,
-				height: 70,
-				// 🚀 CONECTADO: Al pinchar en las velas se llama al puente real del motor
+				// 🧹 OPTIMIZADO: Coordenadas centralizadas leídas de config.js
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_HEIGHT,
 				action: () => gameEngineBridge.openCandlesRef()
 			}
 		],
@@ -251,10 +245,11 @@ export function getRoomInteractions(canvasElement) {
 				action: () => gameEngineBridge.changeRoomRef(ROOM.ONE)
 			},
 			{
-				x: 490,
-				y: 235,
-				width: 140,
-				height: 185,
+				// 🧹 OPTIMIZADO: Coordenadas centralizadas leídas de config.js
+				x: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_X,
+				y: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_HEIGHT,
 				action: () => gameEngineBridge.openExitKeypadRef()
 			}
 		]

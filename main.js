@@ -5,7 +5,6 @@ import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton, drawProportionalBackground, drawStandardRoomBackground, drawNavigationArrow } from "./helpers.js"
 import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions } from "./interactions.js"
 import { drawKeypadPuzzle } from "./puzzleKeypad.js"
-// 🆕 Importamos el nuevo componente visual de las velas
 import { drawCandlePuzzle } from "./candlesPuzzle.js"
 import { playMusic, toggleMusic, getIsMuted } from "./audioEngine.js"
 import { gameState } from "./stateManager.js"
@@ -36,7 +35,7 @@ initializeInteractions({
 	keypadReset: () => { gameState.resetKeypad() },
 	keypadCheck: () => { gameState.checkKeypad() },
 
-	// 🆕 NUEVOS CABLES DEL PUZZLE DE LAS VELAS CONECTADOS AL GESTOR DE ESTADO
+	// CABLES DEL PUZZLE DE LAS VELAS CONECTADOS AL GESTOR DE ESTADO
 	openCandles: () => { gameState.openCandles(isOptionsOpen) },
 	closeCandles: () => { gameState.closeCandles() },
 	toggleCandle: (num) => { gameState.toggleCandleState(num) },
@@ -48,7 +47,7 @@ const roomInteractions = getRoomInteractions(canvasElement)
 
 // --- CARGAR LAS IMÁGENES AUTOMÁTICAMENTE ---
 const gameImages = {}
-const imageSources = { start: "roomStart.png", one: "roomOne.jpg", four: "roomFour.jpg", candlesDetail: "roomTwo.jpg"}
+const imageSources = { start: "roomStart.png", one: "roomOne.jpg", four: "roomFour.jpg", candlesDetail: "roomTwo.jpg" }
 
 Object.entries(imageSources).forEach(([key, filename]) => {
 	gameImages[key] = new Image()
@@ -109,7 +108,7 @@ function draw() {
 				drawProportionalBackground(canvasContext, canvasElement, gameImages.start)
 
 				const startZones = roomInteractions[ROOM.START]
-				// 🧹 REPARADO: Añadidos los índices [0] y [1] para que detecte bien el botón individual
+				// 🚀 REPARADO: Volvemos a poner los índices fijos para el ratón
 				const isMouseOverPlay = isMouseInsideZone(mouseX, mouseY, startZones[0])
 				const isMouseOverOptions = isMouseInsideZone(mouseX, mouseY, startZones[1])
 
@@ -133,7 +132,7 @@ function draw() {
 					canvasContext.lineTo(modalLeftX + modalWidth, modalTopY + modalBevelSize)
 					canvasContext.lineTo(modalLeftX + modalWidth, modalTopY + modalHeight - modalBevelSize)
 					canvasContext.lineTo(modalLeftX + modalWidth - modalBevelSize, modalTopY + modalHeight)
-					canvasContext.lineTo(modalLeftX + modalBevelSize, modalTopY + modalHeight)
+					canvasContext.lineTo(modalLeftX + modalBevelSize, modalTopY + modalHeight) 
 					canvasContext.lineTo(modalLeftX, modalTopY + modalHeight - modalBevelSize)
 					canvasContext.lineTo(modalLeftX, modalTopY + modalBevelSize)
 					canvasContext.closePath()
@@ -149,7 +148,7 @@ function draw() {
 					canvasContext.fillText("SONIDO", canvasElement.width / 2, modalTopY + 30)
 
 					const modalZones = getModalInteractions(canvasElement)
-					// 🧹 REPARADO: Añadidos los índices [0] y [1] para el modal de sonido
+					// 🚀 REPARADO: Volvemos a poner los índices fijos para el modal de sonido
 					const isMouseOverAudio = isMouseInsideZone(mouseX, mouseY, modalZones[0])
 					const isMouseOverBack = isMouseInsideZone(mouseX, mouseY, modalZones[1])
 

@@ -3,122 +3,103 @@ import { isMouseInsideZone, drawBeveledButton } from "./helpers.js"
 import { getCandleInteractions } from "./interactions.js"
 
 /**
- * 🕯️ DIBUJAR EL PUZZLE DE LAS VELAS (Componente Autónomo)
- * Renderiza el modal, las velas medievales y las llamas de colores según su estado.
+ * 🕯️ DIBUJAR EL PUZZLE DE LAS VELAS (Vista de Detalle)
+ * Sustituye la habitación y dibuja la imagen de cerca a pantalla completa con las llamas encima.
  */
-export function drawCandlePuzzle(canvasContext, canvasElement, state) {
-	
-	const padWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
-	const padHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
-	const padLeftX = canvasElement.width / 2 - padWidth / 2
-	const padTopY = canvasElement.height / 2 - padHeight / 2
-
-	// 1. Fondo oscuro translúcido (El .overlay de CSS)
-	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_OVERLAY
+export function drawCandlePuzzle(canvasContext, canvasElement, state, bgImage) {
+	// 1. Pintamos el fondo negro por si la imagen tarda unos milisegundos en cargar
+	canvasContext.fillStyle = "black"
 	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
 
-	// 2. El panel con esquinas biseladas (El .modal de CSS)
-	canvasContext.beginPath()
-	canvasContext.moveTo(padLeftX + 15, padTopY)
-	canvasContext.lineTo(padLeftX + padWidth - 15, padTopY)
-	canvasContext.lineTo(padLeftX + padWidth, padTopY + 15)
-	canvasContext.lineTo(padLeftX + padWidth, padTopY + padHeight - 15)
-	canvasContext.lineTo(padLeftX + padWidth - 15, padTopY + padHeight)
-	canvasContext.lineTo(padLeftX + 15, padTopY + padHeight)
-	canvasContext.lineTo(padLeftX, padTopY + padHeight - 15)
-	canvasContext.lineTo(padLeftX, padTopY + 15)
-	canvasContext.closePath()
+	// 2. EFECTO SCENARIO: Dibujamos la foto de cerca a pantalla completa
+	if (bgImage && bgImage.complete) {
+		canvasContext.drawImage(bgImage, 0, 0, canvasElement.width, canvasElement.height)
+	} else {
+		canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_PANEL_BACKGROUND
+		canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
+	}
 
-	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_PANEL_BACKGROUND
-	canvasContext.fill()
-	canvasContext.strokeStyle = INTERFACE_COLORS.KEYPAD_PANEL_BORDER
-	canvasContext.lineWidth = 2
-	canvasContext.stroke()
-
-	// Configuración base de textos para el cuadro
+	// Configuración base de textos para los títulos
 	canvasContext.textAlign = "center"
 	canvasContext.textBaseline = "middle"
 
-	// 3. Título (<h2>)
-	canvasContext.fillStyle = "#e0d2a8"
+	// 3. Título del puzzle
+	canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER
 	canvasContext.font = "bold 16px 'Georgia', serif"
-	canvasContext.fillText("ENCIENDE LAS VELAS", canvasElement.width / 2, padTopY + 35)
+	canvasContext.fillText("ENCIENDE LAS VELAS", canvasElement.width / 2, INTERFACE_DIMENSIONS.CANDLE_TITLE_Y)
 
 	// 4. Dibujar los botones del Grid (Las 4 velas, Ejecutar y Cruz)
 	const candleZones = getCandleInteractions(canvasElement)
 	
-	// Mapeamos los colores de fuego específicos que programó el equipo en el CSS
 	const flameColors = [
-		INTERFACE_COLORS.CANDLE_FLAME_YELLOW, // Vela 1
-		INTERFACE_COLORS.CANDLE_FLAME_BLUE,   // Vela 2
-		INTERFACE_COLORS.CANDLE_FLAME_GREEN,  // Vela 3
-		INTERFACE_COLORS.CANDLE_FLAME_PURPLE  // Vela 4
+		INTERFACE_COLORS.CANDLE_FLAME_YELLOW, 
+		INTERFACE_COLORS.CANDLE_FLAME_BLUE,   
+		INTERFACE_COLORS.CANDLE_FLAME_GREEN,  
+		INTERFACE_COLORS.CANDLE_FLAME_PURPLE  
 	]
 
 	candleZones.forEach((zone, index) => {
 		const isHovered = isMouseInsideZone(state.mouseX, state.mouseY, zone)
 
 		if (zone.label === "✕") {
-			// Cruz de cerrar arriba a la derecha
-			canvasContext.fillStyle = isHovered ? "#ff5a5a" : "#c9b98a"
+			// Cruz de cerrar arriba a la derecha (Regresa a la Habitación Uno)
+			canvasContext.fillStyle = isHovered ? INTERFACE_COLORS.KEYPAD_TEXT_ERROR : INTERFACE_COLORS.BUTTON_TEXT_DEFAULT
 			canvasContext.font = "bold 24px Arial"
 			canvasContext.fillText(zone.label, zone.x + zone.width / 2, zone.y + zone.height / 2)
 		} else if (zone.label === "⚙️ Ejecutar") {
 			// Botón de validar inferior (.dev-btn)
 			let execColors = { ...INTERFACE_COLORS }
-			execColors.BUTTON_BACKGROUND_DEFAULT = "#333333"
-			execColors.BUTTON_TEXT_DEFAULT = "#7cffb2"
+			execColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BTN_NUM_BG
+			execColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_SCREEN_TEXT
 			canvasContext.font = "14px monospace"
 			drawBeveledButton(canvasContext, canvasElement, execColors, zone, isHovered, zone.label, 6)
 		} else {
-			// Es una de las 4 velas
-			const candleNum = index + 1 // Número de la vela (1 al 4)
-			const isOn = state.candlesOn.includes(candleNum) // ¿Está encendida en el state manager?
+			// Es una de las 4 velas físicas
+			const candleNum = index + 1 
+			const isOn = state.candlesOn.includes(candleNum) 
 
 			// Dibujamos la caja base medieval gris de la vela
 			let candleColors = { ...INTERFACE_COLORS }
-			candleColors.BUTTON_BACKGROUND_DEFAULT = "#222222"
+			candleColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.BUTTON_BACKGROUND_HOVER
 			drawBeveledButton(canvasContext, canvasElement, candleColors, zone, isHovered, "", 8)
 
-			// Dibujamos los elementos internos de la vela (Cuerpo y Mecha)
 			const centerX = zone.x + zone.width / 2
 
 			// Cuerpo de la vela (.bodyCandle)
-			canvasContext.fillStyle = "#efe8c8"
+			canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_BTN_NUM_TEXT
 			canvasContext.fillRect(centerX - 11, zone.y + zone.height - 55, 22, 40)
 
 			// Mecha de la vela (.wick)
-			canvasContext.fillStyle = "black"
+			canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_BACKGROUND_DEFAULT
 			canvasContext.fillRect(centerX - 1, zone.y + 24, 2, 8)
 
-			// 🎛️ Lógica de la Llama (.flame): Solo se pinta si la vela está en el array "on"
+			// Lógica de la Llama (.flame): Solo se pinta si la vela está encendida
 			if (isOn) {
-				canvasContext.fillStyle = flameColors[index] // Asigna su color radial correspondiente
+				canvasContext.fillStyle = flameColors[index] 
 				canvasContext.beginPath()
-				// Dibujamos una pequeña forma de gota/llama de fuego en el Canvas sobre la mecha
 				canvasContext.arc(centerX, zone.y + 18, 7, 0, Math.PI, false)
 				canvasContext.lineTo(centerX, zone.y + 5)
 				canvasContext.closePath()
 				canvasContext.fill()
 				
-				// Efecto de brillo de la llama (.box-shadow)
+				// Efecto de brillo de la llama (.box-shadow simulado)
 				canvasContext.shadowColor = flameColors[index]
 				canvasContext.shadowBlur = isHovered ? 12 : 6
 				canvasContext.fill()
-				canvasContext.shadowBlur = 0 // Quitamos el sombreado para no pintar borroso el resto
+				canvasContext.shadowBlur = 0 
 			}
 		}
 	})
 
-	// 5. Mensaje de resultado o feedback debajo de los botones (<p id="r2">)
+	// 5. Mensaje de resultado o código final debajo de los botones
 	if (state.candleResultText !== "") {
-		// Si es el código correcto "3", lo pinta en verde. Si es error, en rojo.
-		canvasContext.fillStyle = (state.candleResultText === "3") ? "#7CFFB2" : "#ff5a5a"
+		canvasContext.fillStyle = (state.candleResultText === "3") ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
 		canvasContext.font = "bold 16px 'Georgia', serif"
-		canvasContext.fillText(state.candleResultText, canvasElement.width / 2, padTopY + padHeight - 20)
+		// 🧹 OPTIMIZADO: Ahora calcula la altura leyendo la medida exacta de config.js
+		canvasContext.fillText(state.candleResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
 	}
 
-	// Restauramos fuentes por defecto del motor
+	// Restauramos fuentes por defecto del motor gráfico
 	canvasContext.textAlign = "left"
 	canvasContext.textBaseline = "alphabetic"
 }

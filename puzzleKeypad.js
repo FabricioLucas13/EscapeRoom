@@ -38,8 +38,8 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, state) {
 	canvasContext.textAlign = "center"
 	canvasContext.textBaseline = "middle"
 
-	// 3. Título
-	canvasContext.fillStyle = "#e0d2a8"
+	// 3. Título (🧹 OPTIMIZADO: Ahora usa el color de texto hover del config)
+	canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER
 	canvasContext.font = "bold 16px 'Georgia', serif"
 	canvasContext.fillText("DANOS TU CÓDIGO", canvasElement.width / 2, padTopY + 40)
 
@@ -58,7 +58,8 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, state) {
 		const isHovered = isMouseInsideZone(state.mouseX, state.mouseY, zone)
 
 		if (zone.label === "✕") {
-			canvasContext.fillStyle = isHovered ? "#ff5a5a" : "#c9b98a"
+			// 🧹 OPTIMIZADO: Aspa de cerrar unificada con los colores de la config central
+			canvasContext.fillStyle = isHovered ? INTERFACE_COLORS.KEYPAD_TEXT_ERROR : INTERFACE_COLORS.BUTTON_TEXT_DEFAULT
 			canvasContext.font = "bold 20px Arial"
 			canvasContext.fillText(zone.label, zone.x + zone.width / 2, zone.y + zone.height / 2)
 		} else {
@@ -83,8 +84,9 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, state) {
 	// 6. Mensaje de resultado (Error / Éxito)
 	if (state.keypadResultText !== "") {
 		canvasContext.fillStyle = (state.keypadResultStatus === "success") ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
-		canvasContext.font = "bold 14px 'Georgia', serif"
-		canvasContext.fillText(state.keypadResultText, canvasElement.width / 2, padTopY + padHeight - 30)
+		canvasContext.font = "bold 16px 'Georgia', serif"
+		// 🧹 UNIFICADO: Calcula la altura exacta idéntica a las velas usando el fondo del lienzo y la constante centralizada
+		canvasContext.fillText(state.keypadResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
 	}
 
 	// Restauramos fuentes por defecto del motor
