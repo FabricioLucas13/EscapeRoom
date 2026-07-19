@@ -58,7 +58,12 @@ export const INTERFACE_COLORS = {
 	SCROLL_PAPER_BACKGROUND: "#fcf9e8",     // Color blanco hueso / pergamino antiguo
 	SCROLL_PAPER_TEXT: "#1a1310",           // Color de texto oscuro para alta legibilidad
 	SCROLL_PAPER_SECONDARY_TEXT: "#2b221e", // Color secundario para los párrafos de lore
-	SCROLL_PAPER_BORDER: "#8c6f4f"          // Color del borde del manuscrito
+	SCROLL_PAPER_BORDER: "#8c6f4f",         // Color del borde del manuscrito
+
+	// Caja de diálogo inferior
+	DIALOG_BOX_BACKGROUND: "rgba(0, 0, 0, 0.72)",
+	DIALOG_BOX_BORDER: "#e8d8c3",
+	DIALOG_BOX_TEXT: "#e8d8c3"
 }
 
 // 📏 MEDIDAS DEL JUEGO (Todo está medido en píxeles)
@@ -126,11 +131,80 @@ export const INTERFACE_DIMENSIONS = {
 
 	// 🚀 NUEVO: Medidas centralizadas de la caja del pergamino blanco
 	SCROLL_MODAL_WIDTH: 460,
-	SCROLL_MODAL_HEIGHT: 320
+	SCROLL_MODAL_HEIGHT: 320,
+
+	// 🛠️ NUEVAS MEDIDAS EXTRAÍDAS DE SCROLLTEXT.JS
+	SCROLL_BORDER_LINE_WIDTH: 4,
+	SCROLL_TITLE_PADDING_Y: 30,
+	SCROLL_TEXT_START_PADDING_Y: 85,
+	SCROLL_TEXT_LINE_SPACING_Y: 20,
+	SCROLL_FOOTER_PADDING_BOTTOM: 25,
+
+	// Caja de diálogo inferior
+	DIALOG_BOX_Y: 500,
+	DIALOG_BOX_HEIGHT: 90,
+	DIALOG_BOX_MARGIN: 24,
+	DIALOG_BOX_BORDER_WIDTH: 2,
+	DIALOG_BOX_TEXT_PADDING: 18,
+	DIALOG_BOX_TEXT_LINE_HEIGHT: 20,
+
+	// =====================
+	// Visual tuning constants (extracts from components)
+	// =====================
+	BEVEL_SIZE_DEFAULT: 8,
+	BEVEL_SIZE_SMALL: 6,
+	BUTTON_STROKE_WIDTH_DEFAULT: 1.5,
+	BUTTON_STROKE_WIDTH_HOVER: 2,
+
+	SHADOW_BLUR_SMALL: 6,
+	SHADOW_BLUR_MEDIUM: 10,
+	SHADOW_BLUR_LARGE: 20,
+
+	COLOR_SPHERE_RADIUS: 18,
+	CANDLE_FLAME_RADIUS: 7,
+
+	BUTTON_INNER_RECT_WIDTH: 22,
+	BUTTON_INNER_RECT_HEIGHT: 40,
+
+	CANDLE_STEM_WIDTH: 2,
+	CANDLE_STEM_Y_OFFSET: 24,
+	CANDLE_STEM_HEIGHT: 8,
+	CANDLE_FLAME_Y_OFFSET: 18,
+
+	// Keypad specific offsets
+	KEYPAD_TITLE_Y_OFFSET: 40,
+	KEYPAD_SCREEN_Y_OFFSET: 85
+}
+
+// 🔤 TIPOGRAFÍAS Y FUENTES CENTRALIZADAS (Nombres completamente descriptivos en inglés)
+export const INTERFACE_FONTS = {
+	SCROLL_TITLE: "bold 20px 'Georgia', serif",
+	SCROLL_BODY: "14px 'Georgia', serif",
+	SCROLL_FOOTER: "italic 11px Arial",
+	DIALOG_BOX_BODY: "14px 'Georgia', serif",
+
+	// Keypad and common UI fonts
+	BUTTON_TITLE: "bold 16px 'Georgia', serif",
+	KEYPAD_TITLE: "bold 16px 'Georgia', serif",
+	KEYPAD_SCREEN: "42px 'Georgia', serif",
+	KEYPAD_BUTTON: "20px 'Georgia', serif",
+	KEYPAD_BUTTON_SMALL: "bold 12px Arial",
+	KEYPAD_RESULT: "bold 16px 'Georgia', serif",
+	ACTION_BUTTON: "14px monospace"
 }
 
 // 🧩 LOS ENIGMAS Y RESPUESTAS DEL JUEGO
 export const GAME_PUZZLES = {
 	EXIT_SECRET_CODE: "739",                      
-	CANDLE_SECRET_ORDER: [1, 2, 3, 4]  
+	CANDLE_SECRET_ORDER: [2,3,1,4],
+
+	// 🛠️ NUEVO ARRAY DE TEXTOS CENTRALIZADOS DEL LORE
+	SCROLL_LORE_LINES: [
+		"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor",
+		"incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.",
+		"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore",
+		"eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
+		"Sunt in culpa qui officia deserunt mollit anim id est laborum. El misterio",
+		"aguarda en las sombras de la cripta, sigue el rastro de la luz ancestral."
+	]
 }

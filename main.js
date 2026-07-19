@@ -8,6 +8,7 @@ import { drawKeypadPuzzle } from "./puzzleKeypad.js"
 import { drawCandlePuzzle } from "./candlesPuzzle.js"
 import { drawColorPuzzle } from "./colorsPuzzle.js" 
 import { drawScrollText } from "./scrollText.js" 
+import { drawDialogBox } from "./dialogBox.js"
 import { playMusic, toggleMusic, getIsMuted } from "./audioEngine.js"
 import { gameState } from "./stateManager.js"
 
@@ -23,7 +24,12 @@ let isOptionsOpen = false
 
 // --- CONECTAR NUESTRAS VARIABLES CON EL ARCHIVO DE CLICS ---
 initializeInteractions({
-	changeRoom: (targetRoom) => { currentRoom = targetRoom },
+	changeRoom: (targetRoom) => {
+		currentRoom = targetRoom
+		if (targetRoom === ROOM.ONE) {
+			gameState.startIntroSequence()
+		}
+	},
 	openExitKeypad: () => { gameState.openKeypad(isOptionsOpen) },
 	getIsMusicMuted: () => getIsMuted(), 
 	getGameMusic: () => ({ play: () => Promise.resolve(playMusic()) }), 
@@ -65,7 +71,8 @@ const imageSources = {
 	four: "roomFour.jpg", 
 	candlesDetail: "roomTwo.jpg",
 	colorsDetail: "roomThree.jpg",
-	scrollDetail: "roomFive.jpg"
+	scrollDetail: "roomFive.jpg",
+	winDoor: "winDoor.jpg"
 }
 
 Object.entries(imageSources).forEach(([key, filename]) => {
@@ -127,6 +134,32 @@ function drawMouseCoordinates() {
 // 🔄 EL MOTOR DE ANIMACIÓN DEL JUEGO (Game Loop)
 // =========================================================================
 export function draw() {
+	if (gameState.gameWon) {
+		const elapsed = Date.now() - gameState.winTriggeredAt
+
+		if (elapsed >= 2000) {
+			canvasContext.fillStyle = "white"
+			canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
+
+			canvasContext.fillStyle = "black"
+			canvasContext.font = "bold 36px 'Georgia', serif"
+			canvasContext.textAlign = "center"
+			canvasContext.textBaseline = "middle"
+			canvasContext.fillText("HAS ESCAPADO", canvasElement.width / 2, canvasElement.height / 2)
+			requestAnimationFrame(draw)
+			return
+		}
+
+		if (gameImages.winDoor && gameImages.winDoor.complete) {
+			canvasContext.drawImage(gameImages.winDoor, 0, 0, canvasElement.width, canvasElement.height)
+		} else {
+			canvasContext.fillStyle = "black"
+			canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
+		}
+		requestAnimationFrame(draw)
+		return
+	}
+
 	switch (currentRoom) {
 
 		// 🏠 CASO 1: ESTAMOS EN EL MENÚ DE INICIO
@@ -208,6 +241,7 @@ export function draw() {
 
 	// --- DIBUJAR LAS FLECHAS PARA MOVERSE ENTRE SALAS ---
 	if (currentRoom === ROOM.ONE) {
+		drawDialogBox(canvasContext, canvasElement, gameState, "intro")
 		drawNavigationArrow(
 			canvasContext, 
 			canvasElement, 
@@ -227,6 +261,10 @@ export function draw() {
 	// =========================================================================
 	// 🖲️ INTERFAZ DEL POP-UP: TECLADO NUMÉRICO (Prioridad y delegación limpia)
 	// =========================================================================
+	if (currentRoom === ROOM.ONE) {
+		gameState.updateIntroSequence()
+	}
+
 	if (gameState.isKeypadOpen) {
 		drawKeypadPuzzle(canvasContext, canvasElement, gameState)
 	}

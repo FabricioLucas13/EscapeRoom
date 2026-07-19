@@ -11,11 +11,14 @@ export const gameState = {
 	isCandleOpen: false,    // Estado de apertura del panel
 	candlesOn: [],          // Orden de las velas encendidas
 	candleResultText: "",   // Mensaje de código "3" o error
+	candleHintVisible: false,
+	candleHintSeen: false,
 
 	// 🚪 Abrir el panel de forma segura
 	openCandles(isOptionsOpen) {
 		if (!this.isCandleOpen && !isOptionsOpen && !this.isColorPuzzleOpen && !this.isScrollOpen) {
 			this.isCandleOpen = true
+			this.candleHintVisible = true
 		}
 	},
 
@@ -60,8 +63,12 @@ export const gameState = {
 
 		if (correctOrderMatch) {
 			this.candleResultText = "3"
+			this.candleHintVisible = true
+			this.candleHintSeen = true
 		} else {
 			this.candleResultText = "❌ ERROR: Las velas se han apagado"
+			this.candleHintVisible = true
+			this.candleHintSeen = true
 			this.candlesOn = []
 		}
 	},
@@ -71,13 +78,55 @@ export const gameState = {
 	// =========================================================================
 	isKeypadOpen: false,       // Estado de apertura del teclado
 	keypadInput: "",           // Dígitos pulsados (máx 3)
-	keypadResultText: "",      // Texto de éxito o fallo
 	keypadResultStatus: "",    // Estado de validación ("success"/"error")
+	keypadHintVisible: false,
+	keypadHintSeen: false,
+	thirdPuzzleResolved: true,  // Se asume resuelto temporalmente hasta definir el tercer puzzle
+	gameWon: false,
+	winTriggeredAt: null,
+
+	// =========================================================================
+	// SECUENCIA DE INTRO DEL JUEGO
+	// =========================================================================
+	introVisible: false,
+	introStage: 0,
+	introStartedAt: null,
+	introSeen: false,
 
 	// 🚪 Abrir el teclado de forma segura
 	openKeypad(isOptionsOpen) {
 		if (!this.isKeypadOpen && !isOptionsOpen) {
 			this.isKeypadOpen = true
+			this.keypadHintVisible = true
+		}
+	},
+
+	// 🚀 Inicia la secuencia de introducción cuando el jugador entra a la sala principal
+	startIntroSequence() {
+		if (this.introSeen || this.introVisible) {
+			return
+		}
+		this.introVisible = true
+		this.introStage = 1
+		this.introStartedAt = Date.now()
+	},
+
+	updateIntroSequence() {
+		if (!this.introVisible || !this.introStartedAt) {
+			return
+		}
+
+		const elapsed = Date.now() - this.introStartedAt
+
+		if (elapsed >= 2000) {
+			this.introVisible = false
+			this.introSeen = true
+			this.introStage = 0
+			return
+		}
+
+		if (elapsed >= 1000) {
+			this.introStage = 2
 		}
 	},
 
@@ -85,33 +134,40 @@ export const gameState = {
 	closeKeypad() {
 		this.isKeypadOpen = false
 		this.keypadInput = ""
-		this.keypadResultText = ""
 		this.keypadResultStatus = ""
+		this.keypadHintVisible = false
+		this.keypadHintSeen = true
 	},
 
 	// 🎹 Registrar la pulsación de un número
 	pressKey(keypadNumber) {
 		if (this.keypadInput.length < 3) {
 			this.keypadInput += keypadNumber
-			this.keypadResultText = ""
 		}
 	},
 
 	// ← Borrar la pantalla digital
 	resetKeypad() {
 		this.keypadInput = ""
-		this.keypadResultText = ""
 		this.keypadResultStatus = ""
 	},
 
 	// ✓ Validar la contraseña de escape desde config.js
 	checkKeypad() {
 		if (this.keypadInput === GAME_PUZZLES.EXIT_SECRET_CODE) {
-			this.keypadResultText = "🎉 ACCESO CONCEDIDO"
 			this.keypadResultStatus = "success"
+			this.keypadHintVisible = false
+			this.keypadHintSeen = true
+			this.isKeypadOpen = false
+			this.isCandleOpen = false
+			this.isColorPuzzleOpen = false
+			this.isScrollOpen = false
+			this.gameWon = true
+			this.winTriggeredAt = Date.now()
 		} else {
-			this.keypadResultText = "💀 ERROR"
 			this.keypadResultStatus = "error"
+			this.keypadHintVisible = true
+			this.keypadHintSeen = true
 			this.keypadInput = ""
 		}
 	},
@@ -122,11 +178,14 @@ export const gameState = {
 	isColorPuzzleOpen: false,        // Estado de apertura del puzle de colores
 	colorSelectedSequence: [],       // Secuencia de colores pulsada por el usuario
 	colorsResultText: "",            // Mensaje en pantalla de éxito ("9") o error
+	colorHintVisible: false,
+	colorHintSeen: false,
 
 	// 🚪 Abrir el panel de forma segura controlando que no haya otros puzles abiertos
 	openColorPuzzle(isOptionsOpen) {
 		if (!this.isColorPuzzleOpen && !isOptionsOpen && !this.isCandleOpen && !this.isScrollOpen) {
 			this.isColorPuzzleOpen = true
+			this.colorHintVisible = true
 		}
 	},
 
@@ -168,10 +227,14 @@ export const gameState = {
 		const isSequenceCorrect = JSON.stringify(this.colorSelectedSequence) === JSON.stringify(correctColorSequence)
 
 		if (isSequenceCorrect) {
-			this.colorsResultText = "9" 
+			this.colorsResultText = "9"
+			this.colorHintVisible = true
+			this.colorHintSeen = true
 		} else {
 			this.colorsResultText = "❌ COMBINACIÓN ERRÓNEA"
-			this.colorSelectedSequence = [] 
+			this.colorHintVisible = true
+			this.colorHintSeen = true
+			this.colorSelectedSequence = []
 		}
 	},
 
@@ -179,16 +242,21 @@ export const gameState = {
 	// 📜 🚀 NUEVO - PERGAMINO DESENROLLADO (Habitación 1)
 	// =========================================================================
 	isScrollOpen: false,             // Estado de apertura de la vista del manuscrito
+	scrollHintVisible: false,
+	scrollHintSeen: false,
 
 	// 🚪 Abrir el manuscrito de forma segura controlando la jerarquía de interfaces
 	openScroll(isOptionsOpen) {
 		if (!this.isScrollOpen && !isOptionsOpen && !this.isCandleOpen && !this.isColorPuzzleOpen) {
 			this.isScrollOpen = true
+			this.scrollHintVisible = true
 		}
 	},
 
 	// ❌ Cerrar la vista del manuscrito
 	closeScroll() {
 		this.isScrollOpen = false
+		this.scrollHintVisible = false
+		this.scrollHintSeen = true
 	}
 }

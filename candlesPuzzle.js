@@ -1,6 +1,7 @@
 import { INTERFACE_DIMENSIONS, INTERFACE_COLORS } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton } from "./helpers.js"
 import { getCandleInteractions } from "./interactions.js"
+import { drawDialogBox } from "./dialogBox.js"
 
 export function drawCandlePuzzle(canvasContext, canvasElement, gameState, backgroundImage) {
 	canvasContext.fillStyle = "black"
@@ -54,23 +55,28 @@ export function drawCandlePuzzle(canvasContext, canvasElement, gameState, backgr
 			const centerX = zone.x + zone.width / 2
 
 			canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_BUTTON_NUMBER_TEXT
-			canvasContext.fillRect(centerX - 11, zone.y + zone.height - 55, 22, 40)
+			canvasContext.fillRect(
+				centerX - INTERFACE_DIMENSIONS.BUTTON_INNER_RECT_WIDTH / 2,
+				zone.y + zone.height - INTERFACE_DIMENSIONS.BUTTON_INNER_RECT_HEIGHT - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP + INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP,
+				INTERFACE_DIMENSIONS.BUTTON_INNER_RECT_WIDTH,
+				INTERFACE_DIMENSIONS.BUTTON_INNER_RECT_HEIGHT
+			)
 
 			canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_BACKGROUND_DEFAULT
-			canvasContext.fillRect(centerX - 1, zone.y + 24, 2, 8)
+			canvasContext.fillRect(centerX - INTERFACE_DIMENSIONS.CANDLE_STEM_WIDTH / 2, zone.y + INTERFACE_DIMENSIONS.CANDLE_STEM_Y_OFFSET, INTERFACE_DIMENSIONS.CANDLE_STEM_WIDTH, INTERFACE_DIMENSIONS.CANDLE_STEM_HEIGHT)
 
 			if (isCandleActive) {
-				canvasContext.fillStyle = flameColors[index] 
+				canvasContext.fillStyle = flameColors[index]
 				canvasContext.beginPath()
-				canvasContext.arc(centerX, zone.y + 18, 7, 0, Math.PI, false)
+				canvasContext.arc(centerX, zone.y + INTERFACE_DIMENSIONS.CANDLE_FLAME_Y_OFFSET, INTERFACE_DIMENSIONS.CANDLE_FLAME_RADIUS, 0, Math.PI, false)
 				canvasContext.lineTo(centerX, zone.y + 5)
 				canvasContext.closePath()
 				canvasContext.fill()
-				
+
 				canvasContext.shadowColor = flameColors[index]
-				canvasContext.shadowBlur = isHovered ? 12 : 6
+				canvasContext.shadowBlur = isHovered ? INTERFACE_DIMENSIONS.SHADOW_BLUR_LARGE : INTERFACE_DIMENSIONS.SHADOW_BLUR_SMALL
 				canvasContext.fill()
-				canvasContext.shadowBlur = 0 
+				canvasContext.shadowBlur = 0
 			}
 		}
 	})
@@ -80,6 +86,8 @@ export function drawCandlePuzzle(canvasContext, canvasElement, gameState, backgr
 		canvasContext.font = "bold 16px 'Georgia', serif"
 		canvasContext.fillText(gameState.candleResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
 	}
+
+	drawDialogBox(canvasContext, canvasElement, gameState, "candles")
 
 	canvasContext.textAlign = "left"
 	canvasContext.textBaseline = "alphabetic"

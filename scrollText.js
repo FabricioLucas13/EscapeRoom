@@ -1,15 +1,16 @@
-import { INTERFACE_DIMENSIONS, INTERFACE_COLORS } from "./config.js"
+import { INTERFACE_DIMENSIONS, INTERFACE_COLORS, INTERFACE_FONTS, GAME_PUZZLES } from "./config.js"
+import { drawDialogBox } from "./dialogBox.js"
 
 /**
- * 📜 DIBUJAR EL PERGAMINO DESENROLLADO (Vista de Detalle de Texto)
- * EFECTO SCENARIO: Dibuja la foto roomFive.jpg a pantalla completa con un pop-up blanco de texto encima.
+ * 📜 DRAW UNROLLED SCROLL (Text Detail View Component)
+ * SCENARIO EFFECT: Renders the background texture with an ancient interactive pop-up document layered over it.
  */
 export function drawScrollText(canvasContext, canvasElement, gameState, backgroundImage) {
-	// 1. Pintamos el fondo negro por si la imagen tarda unos milisegundos en cargar
+	// 1. Solid black fallback canvas backdrop while loading textures
 	canvasContext.fillStyle = "black"
 	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
 
-	// 2. Dibujamos la foto de cerca a pantalla completa (roomFive.jpg)
+	// 2. Render background scene image asset safely
 	if (backgroundImage && backgroundImage.complete) {
 		canvasContext.drawImage(backgroundImage, 0, 0, canvasElement.width, canvasElement.height)
 	} else {
@@ -17,75 +18,50 @@ export function drawScrollText(canvasContext, canvasElement, gameState, backgrou
 		canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
 	}
 
-	// 3. Medidas leídas directamente desde config.js
-	const scrollWidth = INTERFACE_DIMENSIONS.SCROLL_MODAL_WIDTH || 460
-	const scrollHeight = INTERFACE_DIMENSIONS.SCROLL_MODAL_HEIGHT || 320
+	// 3. Coordinate layouts fetched securely from configurations
+	const scrollWidth = INTERFACE_DIMENSIONS.SCROLL_MODAL_WIDTH
+	const scrollHeight = INTERFACE_DIMENSIONS.SCROLL_MODAL_HEIGHT
 	const scrollLeftX = canvasElement.width / 2 - scrollWidth / 2
 	const scrollTopY = canvasElement.height / 2 - scrollHeight / 2
 
-	// 4. Dibujar la hoja de papel blanca usando los colores centralizados
+	// 4. Render ancient container paper card layers
 	canvasContext.fillStyle = INTERFACE_COLORS.SCROLL_PAPER_BACKGROUND
 	canvasContext.fillRect(scrollLeftX, scrollTopY, scrollWidth, scrollHeight)
 	
 	canvasContext.strokeStyle = INTERFACE_COLORS.SCROLL_PAPER_BORDER
-	canvasContext.lineWidth = 4
+	canvasContext.lineWidth = INTERFACE_DIMENSIONS.SCROLL_BORDER_LINE_WIDTH
 	canvasContext.strokeRect(scrollLeftX, scrollTopY, scrollWidth, scrollHeight)
 
-	// 5. Configuración base para el texto
+	// 5. Standard context global alignment properties
 	canvasContext.textAlign = "center"
 	canvasContext.textBaseline = "top"
 
-	// Título principal
+	// 6. Header title text rendering
 	canvasContext.fillStyle = INTERFACE_COLORS.SCROLL_PAPER_TEXT
-	canvasContext.font = "bold 20px 'Georgia', serif"
-	canvasContext.fillText("MANUSCRITO ANTIGUO", canvasElement.width / 2, scrollTopY + 30)
+	canvasContext.font = INTERFACE_FONTS.SCROLL_TITLE
+	canvasContext.fillText("MANUSCRITO ANTIGUO", canvasElement.width / 2, scrollTopY + INTERFACE_DIMENSIONS.SCROLL_TITLE_PADDING_Y)
 
-	// Configuración de los párrafos de Lore/Pistas
-	canvasContext.font = "14px 'Georgia', serif"
+	// 7. Dynamic text calculation loops mapping lore text array segments
+	canvasContext.font = INTERFACE_FONTS.SCROLL_BODY
 	canvasContext.fillStyle = INTERFACE_COLORS.SCROLL_PAPER_SECONDARY_TEXT
 
-	// PÁRRAFO 1 
-	canvasContext.fillText(
-		"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor",
-		canvasElement.width / 2, 
-		scrollTopY + 85
-	)
-	canvasContext.fillText(
-		"incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.",
-		canvasElement.width / 2, 
-		scrollTopY + 105
-	)
+	GAME_PUZZLES.SCROLL_LORE_LINES.forEach((lineText, lineIndex) => {
+		const targetY = scrollTopY + INTERFACE_DIMENSIONS.SCROLL_TEXT_START_PADDING_Y + (lineIndex * INTERFACE_DIMENSIONS.SCROLL_TEXT_LINE_SPACING_Y)
+		canvasContext.fillText(lineText, canvasElement.width / 2, targetY)
+	})
 
-	// PÁRRAFO 2 
-	canvasContext.fillText(
-		"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore",
-		canvasElement.width / 2, 
-		scrollTopY + 155
-	)
-	canvasContext.fillText(
-		"eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
-		canvasElement.width / 2, 
-		scrollTopY + 175
-	)
-
-	// PÁRRAFO 3 
-	canvasContext.fillText(
-		"Sunt in culpa qui officia deserunt mollit anim id est laborum. El misterio",
-		canvasElement.width / 2, 
-		scrollTopY + 225
-	)
-	canvasContext.fillText(
-		"aguarda en las sombras de la cripta, sigue el rastro de la luz ancestral.",
-		canvasElement.width / 2, 
-		scrollTopY + 245
-	)
-
-	// Texto de ayuda inferior
+	// 8. Footer notification guidance hint
 	canvasContext.fillStyle = INTERFACE_COLORS.SCROLL_PAPER_BORDER
-	canvasContext.font = "italic 11px Arial"
-	canvasContext.fillText("(Haz clic en cualquier lugar fuera del pergamino para guardarlo)", canvasElement.width / 2, scrollTopY + scrollHeight - 25)
+	canvasContext.font = INTERFACE_FONTS.SCROLL_FOOTER
+	canvasContext.fillText(
+		"(Haz clic en cualquier lugar fuera del pergamino para guardarlo)", 
+		canvasElement.width / 2, 
+		scrollTopY + scrollHeight - INTERFACE_DIMENSIONS.SCROLL_FOOTER_PADDING_BOTTOM
+	)
 
-	// Restauramos fuentes por defecto del motor gráfico
+	drawDialogBox(canvasContext, canvasElement, gameState, "scroll")
+
+	// Revert canvas graphics engine base configurations
 	canvasContext.textAlign = "left"
 	canvasContext.textBaseline = "alphabetic"
 }

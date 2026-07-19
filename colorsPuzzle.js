@@ -1,6 +1,7 @@
 import { INTERFACE_DIMENSIONS, INTERFACE_COLORS } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton } from "./helpers.js"
 import { getColorPuzzleInteractions } from "./interactions.js"
+import { drawDialogBox } from "./dialogBox.js"
 
 /**
  * 🎨 DIBUJAR EL PUZZLE DE COLORES (Vista de Detalle Autónoma)
@@ -63,7 +64,7 @@ export function drawColorPuzzle(canvasContext, canvasElement, gameState, backgro
 			// Es una de las 4 esferas de colores
 			let customColors = { ...INTERFACE_COLORS }
 			customColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.BUTTON_BACKGROUND_HOVER
-			drawBeveledButton(canvasContext, canvasElement, customColors, zone, isHovered, "", 8)
+			drawBeveledButton(canvasContext, canvasElement, customColors, zone, isHovered, "", INTERFACE_DIMENSIONS.BEVEL_SIZE_DEFAULT)
 
 			const centerX = zone.x + zone.width / 2
 			const centerY = zone.y + zone.height / 2
@@ -74,27 +75,27 @@ export function drawColorPuzzle(canvasContext, canvasElement, gameState, backgro
 			// Pintar la esfera de color base centralizada en su botón
 			canvasContext.fillStyle = colorSphereValues[index]
 			canvasContext.beginPath()
-			canvasContext.arc(centerX, centerY, 18, 0, Math.PI * 2)
+			canvasContext.arc(centerX, centerY, INTERFACE_DIMENSIONS.COLOR_SPHERE_RADIUS, 0, Math.PI * 2)
 			canvasContext.closePath()
 			canvasContext.fill()
 
 			// Si ya está pulsada, brilla con intensidad. Si no, solo brilla si el ratón está encima
 			if (isAlreadyPressed) {
 				canvasContext.shadowColor = colorSphereValues[index]
-				canvasContext.shadowBlur = 20 
+				canvasContext.shadowBlur = INTERFACE_DIMENSIONS.SHADOW_BLUR_LARGE
 				canvasContext.beginPath()
-				canvasContext.arc(centerX, centerY, 18, 0, Math.PI * 2)
+				canvasContext.arc(centerX, centerY, INTERFACE_DIMENSIONS.COLOR_SPHERE_RADIUS, 0, Math.PI * 2)
 				canvasContext.closePath()
 				canvasContext.fill()
-				canvasContext.shadowBlur = 0 
+				canvasContext.shadowBlur = 0
 			} else if (isHovered) {
 				canvasContext.shadowColor = colorSphereValues[index]
-				canvasContext.shadowBlur = 10 
+				canvasContext.shadowBlur = INTERFACE_DIMENSIONS.SHADOW_BLUR_MEDIUM
 				canvasContext.beginPath()
-				canvasContext.arc(centerX, centerY, 18, 0, Math.PI * 2)
+				canvasContext.arc(centerX, centerY, INTERFACE_DIMENSIONS.COLOR_SPHERE_RADIUS, 0, Math.PI * 2)
 				canvasContext.closePath()
 				canvasContext.fill()
-				canvasContext.shadowBlur = 0 
+				canvasContext.shadowBlur = 0
 			}
 		}
 	})
@@ -105,6 +106,8 @@ export function drawColorPuzzle(canvasContext, canvasElement, gameState, backgro
 		canvasContext.font = "bold 16px 'Georgia', serif"
 		canvasContext.fillText(gameState.colorsResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
 	}
+
+	drawDialogBox(canvasContext, canvasElement, gameState, "colors")
 
 	// Restauramos fuentes por defecto del motor gráfico
 	canvasContext.textAlign = "left"

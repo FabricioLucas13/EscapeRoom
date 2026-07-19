@@ -1,4 +1,4 @@
-import { INTERFACE_COLORS } from "./config.js"
+import { INTERFACE_COLORS, INTERFACE_DIMENSIONS } from "./config.js"
 
 // 🎯 COMPROBAR SI EL RATÓN ESTÁ ENCIMA DE UN BOTÓN (Detectar clics y hovers)
 export function isMouseInsideZone(mouseX, mouseY, interactionZone) {
@@ -9,7 +9,7 @@ export function isMouseInsideZone(mouseX, mouseY, interactionZone) {
 }
 
 // 🖌️ DIBUJAR UN BOTÓN CON ESQUINAS DIAGONALES (Estilo Medieval)
-export function drawBeveledButton(canvasContext, canvasElement, interfaceColors, button, isHovered, buttonText, bevelSize = 8) {
+export function drawBeveledButton(canvasContext, canvasElement, interfaceColors, button, isHovered, buttonText, bevelSize = INTERFACE_DIMENSIONS.BEVEL_SIZE_DEFAULT) {
 	canvasContext.beginPath()
 	canvasContext.moveTo(button.x + bevelSize, button.y)
 	canvasContext.lineTo(button.x + button.width - bevelSize, button.y)
@@ -24,7 +24,7 @@ export function drawBeveledButton(canvasContext, canvasElement, interfaceColors,
 	canvasContext.fillStyle = isHovered ? interfaceColors.BUTTON_BACKGROUND_HOVER : interfaceColors.BUTTON_BACKGROUND_DEFAULT
 	canvasContext.fill()
 	canvasContext.strokeStyle = isHovered ? interfaceColors.BUTTON_BORDER_HOVER : interfaceColors.BUTTON_BORDER_DEFAULT
-	canvasContext.lineWidth = isHovered ? 2 : 1.5
+	canvasContext.lineWidth = isHovered ? INTERFACE_DIMENSIONS.BUTTON_STROKE_WIDTH_HOVER : INTERFACE_DIMENSIONS.BUTTON_STROKE_WIDTH_DEFAULT
 	canvasContext.stroke()
 
 	canvasContext.fillStyle = isHovered ? interfaceColors.BUTTON_TEXT_HOVER : interfaceColors.BUTTON_TEXT_DEFAULT
