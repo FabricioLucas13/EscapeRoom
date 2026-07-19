@@ -81,13 +81,13 @@ function getDialogText(gameState, dialogType) {
 			return isAllPuzzlesSolved(gameState) ? DIALOG_TEXT.keypad.solvedAll : DIALOG_TEXT.keypad.needsClues
 
 		case "runes":
-			if (gameState.runeChestStatus === "solved") {
+			if (gameState.isRuneChestSolved) {
 				return DIALOG_TEXT.runes.solved
 			}
 			if (gameState.runeChestStatus === "failed") {
 				return DIALOG_TEXT.runes.failed
 			}
-			if (gameState.runeChestStatus === "opened" || gameState.runeChestStatus === "opening") {
+			if (gameState.runeChestStatus === "intro_open" || gameState.runeChestStatus === "modal") {
 				return DIALOG_TEXT.runes.opened
 			}
 			return DIALOG_TEXT.runes.firstOpen

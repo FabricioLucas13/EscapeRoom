@@ -5,11 +5,45 @@ import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS, GAME_PUZZLES }
 import { drawBeveledButton } from "./helpers.js"
 
 const runeImageKeys = GAME_PUZZLES.RUNE_IMAGE_KEYS
+const RUNE_CLOSE_GUARD_AFTER_SOLVE_MS = 200
+const RUNE_SLOT_ROW_Y = 88
+const RUNE_ROW_Y = 178
+const RUNE_ROW_GAP = 18
+const RUNE_SLOT_GAP = 44
+
+function createRuneLayout() {
+	const runeSize = INTERFACE_DIMENSIONS.RUNE_SIZE
+	const totalWidth = runeSize * 4 + RUNE_ROW_GAP * 3
+	const startX = (INTERFACE_DIMENSIONS.RUNE_MODAL_WIDTH - totalWidth) / 2
+
+	return [1, 2, 3, 4].map((id, index) => ({
+		id,
+		x: startX + index * (runeSize + RUNE_ROW_GAP),
+		y: RUNE_ROW_Y,
+		homeX: startX + index * (runeSize + RUNE_ROW_GAP),
+		homeY: RUNE_ROW_Y,
+		imageKey: runeImageKeys[id]
+	}))
+}
+
+function createPedestalLayout() {
+	const pedestalSize = INTERFACE_DIMENSIONS.RUNE_PEDESTAL_SIZE
+	const totalWidth = pedestalSize * 3 + RUNE_SLOT_GAP * 2
+	const startX = (INTERFACE_DIMENSIONS.RUNE_MODAL_WIDTH - totalWidth) / 2
+
+	return [0, 1, 2].map((id, index) => ({
+		id,
+		x: startX + index * (pedestalSize + RUNE_SLOT_GAP),
+		y: RUNE_SLOT_ROW_Y,
+		assignedRuneId: null
+	}))
+}
 
 export const runesState = {
 	isOpen: false,
 	resultText: "",
 	draggedIndex: null,
+	lastSolvedAt: 0,
 	onSolved: null,
 	onClose: null,
 	onFailed: null,
@@ -29,22 +63,14 @@ export const runesState = {
 		boardTop: INTERFACE_DIMENSIONS.RUNE_BOARD_TOP
 	},
 
-	runes: [
-		{ id: 1, x: INTERFACE_DIMENSIONS.RUNE_START_X, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[1] },
-		{ id: 2, x: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[2] },
-		{ id: 3, x: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 2, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 2, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[3] },
-		{ id: 4, x: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 3, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 3, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[4] }
-	],
+	runes: createRuneLayout(),
 
-	pedestals: [
-		{ id: 0, x: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_START_X, y: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_Y, assignedRuneId: null },
-		{ id: 1, x: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_START_X + INTERFACE_DIMENSIONS.RUNE_PEDESTAL_SPACING, y: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_Y, assignedRuneId: null },
-		{ id: 2, x: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_START_X + INTERFACE_DIMENSIONS.RUNE_PEDESTAL_SPACING * 2, y: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_Y, assignedRuneId: null }
-	],
+	pedestals: createPedestalLayout(),
 
 	reset() {
 		this.resultText = ""
 		this.draggedIndex = null
+		this.lastSolvedAt = 0
 		this.runes.forEach(rune => {
 			rune.x = rune.homeX
 			rune.y = rune.homeY
@@ -62,6 +88,7 @@ export const runesState = {
 
 		if (solution.length === currentOrder.length && solution.every((value, index) => value === currentOrder[index])) {
 			this.resultText = GAME_PUZZLES.RUNES_SOLVED_CODE
+			this.lastSolvedAt = Date.now()
 			if (typeof this.onSolved === "function") {
 				this.onSolved()
 			}
@@ -117,8 +144,11 @@ export function handleRunesMouseup(mouseX, mouseY, canvasWidth, canvasHeight) {
 	runesState.pedestals.forEach(pedestal => {
 		const absX = modalX + pedestal.x
 		const absY = modalY + pedestal.y
+		const centerX = absX + pedestalSize / 2
+		const centerY = absY + pedestalSize / 2
+		const distance = Math.hypot(mouseX - centerX, mouseY - centerY)
 
-		if (mouseX >= absX && mouseX <= absX + pedestalSize && mouseY >= absY && mouseY <= absY + pedestalSize) {
+		if (distance <= pedestalSize / 2) {
 			if (pedestal.assignedRuneId !== null) {
 				const previousRune = runesState.runes.find(entry => entry.id === pedestal.assignedRuneId)
 				if (previousRune) {
@@ -128,7 +158,7 @@ export function handleRunesMouseup(mouseX, mouseY, canvasWidth, canvasHeight) {
 			}
 
 			rune.x = pedestal.x + (pedestalSize - runesState.dimensions.runeSize) / 2
-			rune.y = pedestal.y - 6
+			rune.y = pedestal.y + (pedestalSize - runesState.dimensions.runeSize) / 2
 			pedestal.assignedRuneId = rune.id
 			dropped = true
 		}
@@ -143,7 +173,7 @@ export function handleRunesMouseup(mouseX, mouseY, canvasWidth, canvasHeight) {
 }
 
 export function handleRunesClick(mouseX, mouseY, canvasWidth, canvasHeight) {
-	if (!runesState.isOpen) return
+	if (!runesState.isOpen) return false
 
 	const { modalX, modalY } = getModalPosition(canvasWidth, canvasHeight)
 	const buttonWidth = runesState.dimensions.buttonWidth
@@ -153,17 +183,24 @@ export function handleRunesClick(mouseX, mouseY, canvasWidth, canvasHeight) {
 
 	if (mouseX >= buttonX && mouseX <= buttonX + buttonWidth && mouseY >= buttonY && mouseY <= buttonY + buttonHeight) {
 		runesState.check()
-		return
+		return false
 	}
 
 	const screenInsideModal = mouseX >= modalX && mouseX <= modalX + runesState.dimensions.modalWidth && mouseY >= modalY && mouseY <= modalY + runesState.dimensions.modalHeight
 	if (!screenInsideModal) {
+		if (Date.now() - runesState.lastSolvedAt < RUNE_CLOSE_GUARD_AFTER_SOLVE_MS) {
+			return false
+		}
+
 		if (typeof runesState.onClose === "function") {
-			runesState.onClose()
+			runesState.onClose("outside-click")
 		} else {
 			runesState.isOpen = false
 		}
+		return true
 	}
+
+	return false
 }
 
 // =========================================================================
@@ -187,7 +224,7 @@ export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX
 	if (!runesState.isOpen) return
 
 	const { modalX, modalY } = getModalPosition(canvasElement.width, canvasElement.height)
-	const { modalWidth, modalHeight, runeSize, boardWidth, boardHeight, pedestalSize, buttonWidth, buttonHeight, buttonMarginBottom, resultMarginBottom } = runesState.dimensions
+	const { modalWidth, modalHeight, runeSize, boardWidth, boardHeight, pedestalSize, buttonWidth, buttonHeight, buttonMarginBottom } = runesState.dimensions
 
 	if (runesState.draggedIndex !== null) {
 		runesState.runes[runesState.draggedIndex].x = mouseX - modalX - runeSize / 2
@@ -216,16 +253,28 @@ export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX
 	canvasContext.lineWidth = 1.2
 	canvasContext.strokeRect(boardLeftX, boardTopY, boardWidth, boardHeight)
 
+	canvasContext.strokeStyle = "rgba(232, 216, 195, 0.12)"
+	canvasContext.beginPath()
+	canvasContext.moveTo(boardLeftX + 20, modalY + 150)
+	canvasContext.lineTo(boardLeftX + boardWidth - 20, modalY + 150)
+	canvasContext.stroke()
+
 	runesState.pedestals.forEach(pedestal => {
 		const pedestalX = modalX + pedestal.x
 		const pedestalY = modalY + pedestal.y
+		const pedestalCenterX = pedestalX + pedestalSize / 2
+		const pedestalCenterY = pedestalY + pedestalSize / 2
 
 		canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_BACKGROUND_HOVER
-		canvasContext.fillRect(pedestalX, pedestalY, pedestalSize, pedestalSize)
+		canvasContext.beginPath()
+		canvasContext.arc(pedestalCenterX, pedestalCenterY, pedestalSize / 2, 0, Math.PI * 2)
+		canvasContext.fill()
 
 		canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT
 		canvasContext.lineWidth = 2
-		canvasContext.strokeRect(pedestalX, pedestalY, pedestalSize, pedestalSize)
+		canvasContext.beginPath()
+		canvasContext.arc(pedestalCenterX, pedestalCenterY, pedestalSize / 2, 0, Math.PI * 2)
+		canvasContext.stroke()
 	})
 
 	const buttonZone = {
@@ -263,9 +312,4 @@ export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX
 		}
 	})
 
-	if (runesState.resultText !== "") {
-		canvasContext.fillStyle = runesState.resultText === GAME_PUZZLES.RUNES_SOLVED_CODE ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
-		canvasContext.font = "bold 24px 'Georgia', serif"
-		canvasContext.fillText(runesState.resultText, modalX + modalWidth / 2, modalY + modalHeight - resultMarginBottom)
-	}
 }

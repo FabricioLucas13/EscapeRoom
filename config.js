@@ -16,12 +16,9 @@
 
 // 🗺️ LISTA DE HABITACIONES Y PANTALLAS (Los números que controlan dónde está el jugador)
 export const ROOM = {
-	START: 0,      // El menú principal donde empiezas
-	ONE: 1,        // La primera habitación
-	FOUR: 4,       // La última habitación del puzzle
-	MAIN: 1,       // Alias de compatibilidad
-	EXIT_DOOR: 4,  // Alias de compatibilidad
-	EXIT_GATE: 4   // Alias de compatibilidad
+	START: 0,         // Menú principal: roomStart.jpg
+	MAIN: 1,          // Habitación principal con los puzzles: roomMain.jpg
+	EXIT_GATE: 2      // Última habitación: roomExitGate.jpg
 }
 
 // 🎨 LOS COLORES DEL JUEGO (Copia y pega aquí tus códigos de color)
@@ -33,10 +30,10 @@ export const INTERFACE_COLORS = {
 	BUTTON_TEXT_DEFAULT: "#a89276",         // Color de las letras de los botones normales
 	BUTTON_TEXT_HOVER: "#e8d8c3",           // Color de las letras cuando pasas el ratón por encima
 	OPTIONS_MODAL_OVERLAY: "rgba(18, 13, 11, 0.95)", // El color oscuro de fondo que tapa el juego al abrir las opciones
-	FALLBACK_BACKGROUND_ROOM_ONE: "#2d2d2d",   // Color de pantalla si la foto de la habitación 1 no se encuentra
-	FALLBACK_BACKGROUND_ROOM_FOUR: "#245b3b",  // Color de pantalla si la foto de la habitación 4 no se encuentra
-	FALLBACK_BACKGROUND_ROOM_MAIN: "#2d2d2d",  // Alias de compatibilidad
-	FALLBACK_BACKGROUND_ROOM_EXIT_GATE: "#245b3b", // Alias de compatibilidad
+	FALLBACK_BACKGROUND_ROOM_MAIN: "#2d2d2d",   // Color de pantalla si la foto de la habitación principal no se encuentra
+	FALLBACK_BACKGROUND_ROOM_EXIT_GATE: "#245b3b", // Color de pantalla si la foto de la salida no se encuentra
+	FALLBACK_BACKGROUND_ROOM_ONE: "#2d2d2d",    // Alias de compatibilidad
+	FALLBACK_BACKGROUND_ROOM_FOUR: "#245b3b",   // Alias de compatibilidad
 	NAVIGATION_ARROW: "#ffffff",             // Color centralizado de las flechas de navegación
 	
 	// Interfaz del Teclado Numérico (Abreviaturas BTN -> BUTTON eliminadas)

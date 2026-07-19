@@ -24,6 +24,17 @@ let currentRoom = ROOM.START
 let isOptionsOpen = false
 let timerStartedAt = null
 let timerActive = false
+
+function changeToRoom(targetRoom) {
+	currentRoom = targetRoom
+	if (targetRoom === ROOM.MAIN) {
+		gameState.startIntroSequence()
+		if (!timerActive) {
+			timerActive = true
+			timerStartedAt = Date.now()
+		}
+	}
+}
 let lossSequenceState = {
 	triggered: false,
 	phase: "idle",
@@ -33,14 +44,7 @@ let lossSequenceState = {
 // --- CONECTAR NUESTRAS VARIABLES CON EL ARCHIVO DE CLICS ---
 initializeInteractions({
 	changeRoom: (targetRoom) => {
-		currentRoom = targetRoom
-		if (targetRoom === ROOM.ONE) {
-			gameState.startIntroSequence()
-			if (!timerActive) {
-				timerActive = true
-				timerStartedAt = Date.now()
-			}
-		}
+		changeToRoom(targetRoom)
 	},
 	openExitKeypad: () => { gameState.openKeypad(isOptionsOpen) },
 	getIsMusicMuted: () => getIsMuted(),
@@ -82,8 +86,8 @@ const roomInteractions = getRoomInteractions(canvasElement)
 const gameImages = {}
 const imageSources = {
 	start: "roomStart.jpg",
-	one: "roomMain.jpg",
-	four: "roomExitGate.jpg",
+	main: "roomMain.jpg",
+	exitGate: "roomExitGate.jpg",
 	candlesDetail: "candleOff.jpg",
 	colorsDetail: "colorPanelOff.jpg",
 	scrollDetail: "tableScroll.jpg",
@@ -103,7 +107,12 @@ Object.entries(imageSources).forEach(([key, filename]) => {
 })
 
 runesState.onSolved = () => { gameState.solveRuneChest() }
-runesState.onClose = () => { gameState.closeRuneChest() }
+runesState.onClose = (closeReason) => {
+	gameState.closeRuneChest()
+	if (closeReason === "outside-click") {
+		changeToRoom(ROOM.MAIN)
+	}
+	}
 runesState.onFailed = () => { gameState.failRuneChest() }
 
 // =========================================================================
@@ -120,6 +129,10 @@ canvasElement.addEventListener("mousedown", (event) => {
 	const clickX = event.clientX - boundaries.left
 	const clickY = event.clientY - boundaries.top
 
+	if (gameState.introVisible) {
+		return
+	}
+
 	if (runesState.isOpen) {
 		handleRunesMousedown(clickX, clickY, canvasElement.width, canvasElement.height)
 	}
@@ -129,6 +142,10 @@ canvasElement.addEventListener("mouseup", (event) => {
 	const boundaries = canvasElement.getBoundingClientRect()
 	const clickX = event.clientX - boundaries.left
 	const clickY = event.clientY - boundaries.top
+
+	if (gameState.introVisible) {
+		return
+	}
 
 	if (runesState.isOpen) {
 		handleRunesMouseup(clickX, clickY, canvasElement.width, canvasElement.height)
@@ -140,9 +157,17 @@ canvasElement.addEventListener("click", (event) => {
 	const clickX = event.clientX - boundaries.left
 	const clickY = event.clientY - boundaries.top
 
+	if (gameState.introVisible) {
+		return
+	}
+
 	// PRIORIDAD JERÁRQUICA: Teclado > Velas > Colores > Manuscrito > Runas > Opciones > Habitación normal
 	if (runesState.isOpen) {
 		handleRunesClick(clickX, clickY, canvasElement.width, canvasElement.height)
+		return
+	}
+
+	if (gameState.isRuneChestOpen && !runesState.isOpen) {
 		return
 	}
 
@@ -284,24 +309,24 @@ export function draw() {
 			}
 		}
 
-		// Actualizar la imagen principal de la habitación 1 según el estado de los puzzles
+		// Actualizar la imagen principal de la habitación principal según el estado de los puzzles
 		try {
 			const candleDone = gameState.candleResultText === "3"
 			const colorDone = gameState.colorsResultText === "9"
-			let desiredOne = "assets/roomMain.jpg"
+			let desiredMain = "assets/roomMain.jpg"
 			if (candleDone && !colorDone) {
-				desiredOne = "assets/roomMainCandleOn.jpg"
+				desiredMain = "assets/roomMainCandleOn.jpg"
 			} else if (colorDone && !candleDone) {
-				desiredOne = "assets/roomMainColorPanelOn.jpg"
+				desiredMain = "assets/roomMainColorPanelOn.jpg"
 			} else if (candleDone && colorDone) {
-				desiredOne = "assets/roomMainPuzzleOn.jpg"
+				desiredMain = "assets/roomMainPuzzleOn.jpg"
 			}
 
-			if (gameImages.one && !gameImages.one.src.includes(desiredOne.split('/').pop())) {
-				gameImages.one.src = desiredOne
+			if (gameImages.main && !gameImages.main.src.includes(desiredMain.split('/').pop())) {
+				gameImages.main.src = desiredMain
 			}
 		} catch (e) {
-			console.warn("Error actualizando fondo de la habitación 1:", e)
+			console.warn("Error actualizando fondo de la habitación principal:", e)
 		}
 	} catch (e) {
 		// No bloquear el bucle de dibujo por errores menores
@@ -401,23 +426,21 @@ export function draw() {
 			}
 			break
 
-		// 🚪 CASO 2: ESTAMOS EN LA HABITACIÓN UNO
-		case ROOM.ONE: {
-			let roomOneBackground = gameImages.one
-			if (gameState.runeChestStatus === "opening") {
-				roomOneBackground = gameImages.chestClosed || gameImages.one
-			} else if (gameState.runeChestStatus === "opened") {
-				roomOneBackground = gameImages.chestOpenRune || gameImages.one
-			} else if (gameState.runeChestStatus === "solved") {
-				roomOneBackground = gameImages.chestClosed || gameImages.one
+		// 🚪 CASO 2: ESTAMOS EN LA HABITACIÓN PRINCIPAL
+		case ROOM.MAIN: {
+			let mainRoomBackground = gameImages.main
+			if (gameState.runeChestStatus === "intro_closed") {
+				mainRoomBackground = gameImages.chestClosed || gameImages.main
+			} else if (gameState.runeChestStatus === "intro_open" || gameState.runeChestStatus === "modal" || gameState.runeChestStatus === "failed") {
+				mainRoomBackground = gameImages.chestOpenRune || gameImages.main
 			}
-			drawStandardRoomBackground(canvasContext, canvasElement, roomOneBackground, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
+			drawStandardRoomBackground(canvasContext, canvasElement, mainRoomBackground, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_MAIN)
 			break
 		}
 
-		// 🗝️ CASO 3: ESTAMOS EN LA HABITACIÓN CUATRO
-		case ROOM.FOUR:
-			drawStandardRoomBackground(canvasContext, canvasElement, gameImages.four, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_FOUR)
+		// 🗝️ CASO 3: ESTAMOS EN LA PUERTA DE SALIDA
+		case ROOM.EXIT_GATE:
+			drawStandardRoomBackground(canvasContext, canvasElement, gameImages.exitGate, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_EXIT_GATE)
 			break
 	}
 
@@ -454,18 +477,18 @@ export function draw() {
 	canvasContext.restore()
 
 	// --- DIBUJAR LAS FLECHAS PARA MOVERSE ENTRE SALAS ---
-	if (currentRoom === ROOM.ONE) {
-		drawDialogBox(canvasContext, canvasElement, gameState, "intro")
+	if (currentRoom === ROOM.MAIN && !gameState.isRuneChestOpen) {
 		drawNavigationArrow(
 			canvasContext,
 			canvasElement,
 			INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
 			"UP",
-			INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE,
-			INTERFACE_DIMENSIONS.ARROW_X_ROOM_ONE
+			INTERFACE_DIMENSIONS.ARROW_Y_ROOM_MAIN,
+			INTERFACE_DIMENSIONS.ARROW_X_ROOM_MAIN
 		)
+		drawDialogBox(canvasContext, canvasElement, gameState, "intro")
 	}
-	if (currentRoom === ROOM.FOUR) {
+	if (currentRoom === ROOM.EXIT_GATE) {
 		drawNavigationArrow(canvasContext, canvasElement, INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, "DOWN", canvasElement.height - 5)
 	}
 
@@ -475,7 +498,7 @@ export function draw() {
 	// =========================================================================
 	// 🖲️ INTERFAZ DEL POP-UP: TECLADO NUMÉRICO (Prioridad y delegación limpia)
 	// =========================================================================
-	if (currentRoom === ROOM.ONE) {
+	if (currentRoom === ROOM.MAIN) {
 		gameState.updateIntroSequence()
 	}
 
@@ -508,7 +531,9 @@ export function draw() {
 	// 🗿 INTERFAZ DEL POP-UP: PUZZLE DE RUNAS (Delegación limpia)
 	// =========================================================================
 	drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY)
-	drawDialogBox(canvasContext, canvasElement, gameState, "runes")
+	if (gameState.isRuneChestOpen) {
+		drawDialogBox(canvasContext, canvasElement, gameState, "runes")
+	}
 
 	// Ejecuta la herramienta que pinta la posición X e Y del ratón
 	drawMouseCoordinates()

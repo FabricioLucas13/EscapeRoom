@@ -1,7 +1,8 @@
 import { GAME_PUZZLES } from "./config.js"
 import { runesState } from "./runePuzzle.js"
 
-const RUNE_PUZZLE_APPEAR_DELAY_MS = 1500
+const RUNE_CHEST_CLOSED_STEP_MS = 1500
+const RUNE_CHEST_OPEN_STEP_MS = 1000
 
 /**
  * 🗃️ GESTOR DE ESTADO GLOBAL DEL JUEGO (State Manager)
@@ -28,6 +29,8 @@ export const gameState = {
 	// ❌ Cerrar el panel de forma inteligente
 	closeCandles() {
 		this.isCandleOpen = false
+		this.candleHintVisible = false
+		this.candleHintSeen = true
 		// Solo borramos los datos si el jugador no ha adivinado la secuencia todavía
 		if (this.candleResultText !== "3") {
 			this.resetCandles()
@@ -92,39 +95,76 @@ export const gameState = {
 	// 🗿 PUZZLE DEL COFRE DE RUNAS (Habitación 1)
 	// =========================================================================
 	isRuneChestOpen: false,
-	runeChestStatus: "closed",
+	isRuneChestSolved: false,
+	runeChestStatus: "idle",
 	runeChestHintVisible: false,
 	runeChestHintSeen: false,
+	runeSequenceClosedTimeoutId: null,
+	runeSequenceOpenTimeoutId: null,
 
-	openRuneChest(isOptionsOpen) {
-		if (this.runeChestStatus === "solved") {
-			return
+	clearRuneChestTimers() {
+		if (this.runeSequenceClosedTimeoutId !== null) {
+			clearTimeout(this.runeSequenceClosedTimeoutId)
+			this.runeSequenceClosedTimeoutId = null
 		}
 
-		if (!this.isRuneChestOpen && !isOptionsOpen && !this.isKeypadOpen && !this.isCandleOpen && !this.isColorPuzzleOpen && !this.isScrollOpen) {
-			this.isRuneChestOpen = true
-			this.runeChestStatus = "opening"
-			this.runeChestHintVisible = true
-			this.runeChestHintSeen = true
-			runesState.reset()
-			runesState.isOpen = false
-
-			setTimeout(() => {
-				if (this.runeChestStatus === "opening") {
-					this.runeChestStatus = "opened"
-					runesState.isOpen = true
-				}
-			}, RUNE_PUZZLE_APPEAR_DELAY_MS)
+		if (this.runeSequenceOpenTimeoutId !== null) {
+			clearTimeout(this.runeSequenceOpenTimeoutId)
+			this.runeSequenceOpenTimeoutId = null
 		}
 	},
 
+	openRuneChest(isOptionsOpen) {
+		if (this.isRuneChestOpen || isOptionsOpen || this.isKeypadOpen || this.isCandleOpen || this.isColorPuzzleOpen || this.isScrollOpen) {
+			return
+		}
+
+		this.clearRuneChestTimers()
+		this.isRuneChestOpen = true
+		this.runeChestHintVisible = true
+		this.runeChestHintSeen = true
+
+		if (this.isRuneChestSolved) {
+			this.runeChestStatus = "modal"
+			runesState.isOpen = true
+			runesState.resultText = GAME_PUZZLES.RUNES_SOLVED_CODE
+			return
+		}
+
+		runesState.reset()
+		runesState.isOpen = false
+		runesState.resultText = ""
+		this.runeChestStatus = "intro_closed"
+
+		this.runeSequenceClosedTimeoutId = setTimeout(() => {
+			if (!this.isRuneChestOpen || this.runeChestStatus !== "intro_closed") {
+				return
+			}
+
+			this.runeChestStatus = "intro_open"
+			this.runeSequenceClosedTimeoutId = null
+			this.runeSequenceOpenTimeoutId = setTimeout(() => {
+				if (!this.isRuneChestOpen || this.runeChestStatus !== "intro_open") {
+					return
+				}
+
+				this.runeChestStatus = "modal"
+				runesState.isOpen = true
+				this.runeSequenceOpenTimeoutId = null
+			}, RUNE_CHEST_OPEN_STEP_MS)
+		}, RUNE_CHEST_CLOSED_STEP_MS)
+	},
+
 	closeRuneChest() {
+		this.clearRuneChestTimers()
 		this.isRuneChestOpen = false
 		runesState.isOpen = false
-		if (this.runeChestStatus !== "solved") {
-			this.runeChestStatus = "closed"
+		this.runeChestStatus = "idle"
+		this.runeChestHintVisible = false
+		this.runeChestHintSeen = true
+		if (!this.isRuneChestSolved) {
+			runesState.resultText = ""
 		}
-		this.runeChestHintVisible = true
 	},
 
 	failRuneChest() {
@@ -134,12 +174,26 @@ export const gameState = {
 	},
 
 	solveRuneChest() {
-		this.isRuneChestOpen = false
-		runesState.isOpen = false
-		this.runeChestStatus = "solved"
+		this.clearRuneChestTimers()
+		this.isRuneChestOpen = true
+		this.isRuneChestSolved = true
+		runesState.isOpen = true
+		this.runeChestStatus = "modal"
 		this.runeChestHintVisible = true
 		this.runeChestHintSeen = true
 		runesState.resultText = GAME_PUZZLES.RUNES_SOLVED_CODE
+	},
+
+	resetRuneChestState() {
+		this.clearRuneChestTimers()
+		this.isRuneChestOpen = false
+		this.isRuneChestSolved = false
+		runesState.isOpen = false
+		runesState.reset()
+		runesState.resultText = ""
+		this.runeChestStatus = "idle"
+		this.runeChestHintVisible = true
+		this.runeChestHintSeen = true
 	},
 
 	// =========================================================================
@@ -278,6 +332,8 @@ export const gameState = {
 	// ❌ Cerrar el panel de forma inteligente
 	closeColorPuzzle() {
 		this.isColorPuzzleOpen = false
+		this.colorHintVisible = false
+		this.colorHintSeen = true
 		// Solo borramos la secuencia introducida si no han ganado el puzle todavía
 		if (this.colorsResultText !== "9") {
 			this.colorSelectedSequence = []

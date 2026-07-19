@@ -101,12 +101,6 @@ export function drawColorPuzzle(canvasContext, canvasElement, gameState, backgro
 	})
 
 	// 5. Mensaje de resultado o número "9" final de recompensa
-	if (gameState.colorsResultText !== "") {
-		canvasContext.fillStyle = (gameState.colorsResultText === "9") ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
-		canvasContext.font = "bold 16px 'Georgia', serif"
-		canvasContext.fillText(gameState.colorsResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
-	}
-
 	drawDialogBox(canvasContext, canvasElement, gameState, "colors")
 
 	// Restauramos fuentes por defecto del motor gráfico

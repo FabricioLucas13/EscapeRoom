@@ -81,12 +81,6 @@ export function drawCandlePuzzle(canvasContext, canvasElement, gameState, backgr
 		}
 	})
 
-	if (gameState.candleResultText !== "") {
-		canvasContext.fillStyle = (gameState.candleResultText === "3") ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
-		canvasContext.font = "bold 16px 'Georgia', serif"
-		canvasContext.fillText(gameState.candleResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
-	}
-
 	drawDialogBox(canvasContext, canvasElement, gameState, "candles")
 
 	canvasContext.textAlign = "left"
