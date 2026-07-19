@@ -1,4 +1,7 @@
 import { GAME_PUZZLES } from "./config.js"
+import { runesState } from "./runePuzzle.js"
+
+const RUNE_PUZZLE_APPEAR_DELAY_MS = 1500
 
 /**
  * 🗃️ GESTOR DE ESTADO GLOBAL DEL JUEGO (State Manager)
@@ -86,6 +89,60 @@ export const gameState = {
 	winTriggeredAt: null,
 
 	// =========================================================================
+	// 🗿 PUZZLE DEL COFRE DE RUNAS (Habitación 1)
+	// =========================================================================
+	isRuneChestOpen: false,
+	runeChestStatus: "closed",
+	runeChestHintVisible: false,
+	runeChestHintSeen: false,
+
+	openRuneChest(isOptionsOpen) {
+		if (this.runeChestStatus === "solved") {
+			return
+		}
+
+		if (!this.isRuneChestOpen && !isOptionsOpen && !this.isKeypadOpen && !this.isCandleOpen && !this.isColorPuzzleOpen && !this.isScrollOpen) {
+			this.isRuneChestOpen = true
+			this.runeChestStatus = "opening"
+			this.runeChestHintVisible = true
+			this.runeChestHintSeen = true
+			runesState.reset()
+			runesState.isOpen = false
+
+			setTimeout(() => {
+				if (this.runeChestStatus === "opening") {
+					this.runeChestStatus = "opened"
+					runesState.isOpen = true
+				}
+			}, RUNE_PUZZLE_APPEAR_DELAY_MS)
+		}
+	},
+
+	closeRuneChest() {
+		this.isRuneChestOpen = false
+		runesState.isOpen = false
+		if (this.runeChestStatus !== "solved") {
+			this.runeChestStatus = "closed"
+		}
+		this.runeChestHintVisible = true
+	},
+
+	failRuneChest() {
+		this.runeChestStatus = "failed"
+		this.runeChestHintVisible = true
+		this.runeChestHintSeen = true
+	},
+
+	solveRuneChest() {
+		this.isRuneChestOpen = false
+		runesState.isOpen = false
+		this.runeChestStatus = "solved"
+		this.runeChestHintVisible = true
+		this.runeChestHintSeen = true
+		runesState.resultText = GAME_PUZZLES.RUNES_SOLVED_CODE
+	},
+
+	// =========================================================================
 	// SECUENCIA DE INTRO DEL JUEGO
 	// =========================================================================
 	introVisible: false,
@@ -93,70 +150,6 @@ export const gameState = {
 	introStartedAt: null,
 	introSeen: false,
 
-
-
-
-
-
-
-
-
-
-
-
-// esto tambien lo añadi
-// =========================================================================
-    // 🧩 NUEVAS PROPIEDADES PARA EL PUZZLE DE SÍMBOLOS (Añadir dentro de gameState)
-    // =========================================================================
-    isSymbolsOpen: false,
-    symbolsInput: [],          
-    symbolsResultText: "",     
-    symbolsResultStatus: "",   
-    symbolsShakeTimer: 0,      
-
-    openSymbols(isOptionsOpen) {
-        if (!this.isSymbolsOpen && !isOptionsOpen) {
-            this.isSymbolsOpen = true;
-            this.symbolsInput = [];
-            this.symbolsResultText = "";
-            this.symbolsResultStatus = "";
-            this.symbolsShakeTimer = 0;
-        }
-    },
-
-    closeSymbols() {
-        this.isSymbolsOpen = false;
-        this.symbolsInput = [];
-        this.symbolsResultText = "";
-        this.symbolsResultStatus = "";
-        this.symbolsShakeTimer = 0;
-    },
-
-    pressSymbol(symbolId) {
-        if (this.symbolsResultStatus === "success") return;
-        this.symbolsInput.push(symbolId);
-        this.symbolsResultText = ""; 
-    },
-
-    checkSymbols() {
-        const correctSequence = [4, 1, 2, 3]; // Luna, Sol, Triángulo, Estrella
-        
-        if (JSON.stringify(this.symbolsInput) === JSON.stringify(correctSequence)) {
-            this.symbolsResultText = "CÓDIGO OBTENIDO: 7";
-            this.symbolsResultStatus = "success";
-        } else {
-            this.symbolsInput = [];
-            this.symbolsResultText = "ERROR: INTÉNTALO DE NUEVO";
-            this.symbolsResultStatus = "error";
-            this.symbolsShakeTimer = 24; // Activa el efecto visual de vibración
-        }
-    },
-
-    updateShake() {
-        if (this.symbolsShakeTimer > 0) {
-            this.symbolsShakeTimer--;
-        }
-    },
 
 
 

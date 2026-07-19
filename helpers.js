@@ -27,8 +27,12 @@ export function drawBeveledButton(canvasContext, canvasElement, interfaceColors,
 	canvasContext.lineWidth = isHovered ? INTERFACE_DIMENSIONS.BUTTON_STROKE_WIDTH_HOVER : INTERFACE_DIMENSIONS.BUTTON_STROKE_WIDTH_DEFAULT
 	canvasContext.stroke()
 
+	canvasContext.textAlign = "center"
+	canvasContext.textBaseline = "middle"
 	canvasContext.fillStyle = isHovered ? interfaceColors.BUTTON_TEXT_HOVER : interfaceColors.BUTTON_TEXT_DEFAULT
 	canvasContext.fillText(buttonText, button.x + button.width / 2, button.y + button.height / 2)
+	canvasContext.textAlign = "left"
+	canvasContext.textBaseline = "alphabetic"
 }
 
 // 🖼️ ADAPTAR LA IMAGEN DE FONDO (Para el Menú de Inicio)
