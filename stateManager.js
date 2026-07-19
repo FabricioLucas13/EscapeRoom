@@ -352,21 +352,13 @@ export const gameState = {
 		this.colorSelectedSequence.push(colorName)
 	},
 
-	// ⚙️ Validar combinación calculando la solución dinámicamente según el orden de las velas
+	// ⚙️ Validar combinación usando una secuencia fija desde config.js
 	checkColorSequence() {
 		if (this.colorsResultText === "9") {
 			return
 		}
 
-		const colorTranslationMap = {
-			1: "amarillo",
-			2: "azul",
-			3: "verde",
-			4: "morado"
-		}
-
-		const correctColorSequence = GAME_PUZZLES.CANDLE_SECRET_ORDER.map(candleId => colorTranslationMap[candleId])
-		const isSequenceCorrect = JSON.stringify(this.colorSelectedSequence) === JSON.stringify(correctColorSequence)
+		const isSequenceCorrect = JSON.stringify(this.colorSelectedSequence) === JSON.stringify(GAME_PUZZLES.COLOR_SOLUTION_SEQUENCE)
 
 		if (isSequenceCorrect) {
 			this.colorsResultText = "9"
@@ -400,5 +392,47 @@ export const gameState = {
 		this.isScrollOpen = false
 		this.scrollHintVisible = false
 		this.scrollHintSeen = true
+	},
+
+	resetForNewGame() {
+		this.isCandleOpen = false
+		this.candlesOn = []
+		this.candleResultText = ""
+		this.candleHintVisible = false
+		this.candleHintSeen = false
+
+		this.isKeypadOpen = false
+		this.keypadInput = ""
+		this.keypadResultStatus = ""
+		this.keypadHintVisible = false
+		this.keypadHintSeen = false
+		this.thirdPuzzleResolved = true
+		this.gameWon = false
+		this.winTriggeredAt = null
+
+		this.isColorPuzzleOpen = false
+		this.colorSelectedSequence = []
+		this.colorsResultText = ""
+		this.colorHintVisible = false
+		this.colorHintSeen = false
+
+		this.isScrollOpen = false
+		this.scrollHintVisible = false
+		this.scrollHintSeen = false
+
+		this.clearRuneChestTimers()
+		this.isRuneChestOpen = false
+		this.isRuneChestSolved = false
+		this.runeChestStatus = "idle"
+		this.runeChestHintVisible = false
+		this.runeChestHintSeen = false
+		runesState.isOpen = false
+		runesState.reset()
+		runesState.resultText = ""
+
+		this.introVisible = false
+		this.introStage = 0
+		this.introStartedAt = null
+		this.introSeen = false
 	}
 }

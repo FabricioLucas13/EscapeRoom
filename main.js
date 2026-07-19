@@ -24,6 +24,136 @@ let currentRoom = ROOM.START
 let isOptionsOpen = false
 let timerStartedAt = null
 let timerActive = false
+let lastTouchTimestamp = 0
+
+const replayButton = {
+	width: 225,
+	height: 44
+}
+
+function getReplayButtonZone() {
+	return {
+		x: canvasElement.width / 2 - replayButton.width / 2,
+		y: canvasElement.height - 110,
+		width: replayButton.width,
+		height: replayButton.height
+	}
+}
+
+function isReplayButtonVisibleOnWin() {
+	return gameState.gameWon && gameState.winTriggeredAt !== null && (Date.now() - gameState.winTriggeredAt) >= 2000
+}
+
+function isReplayButtonVisibleOnLoss() {
+	return lossSequenceState.triggered && lossSequenceState.phase === "death"
+}
+
+function resetToStartMenu() {
+	gameState.resetForNewGame()
+	lossSequenceState.triggered = false
+	lossSequenceState.phase = "idle"
+	lossSequenceState.startedAt = null
+	timerStartedAt = null
+	timerActive = false
+	isOptionsOpen = false
+	currentRoom = ROOM.START
+}
+
+function drawReplayButton() {
+	const buttonZone = getReplayButtonZone()
+	const isHovered = isMouseInsideZone(mouseX, mouseY, buttonZone)
+	canvasContext.font = "16px 'Times New Roman', serif"
+	drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, buttonZone, isHovered, "VOLVER A JUGAR")
+}
+
+function getCanvasPointFromMouseEvent(event) {
+	const boundaries = canvasElement.getBoundingClientRect()
+	return {
+		x: event.clientX - boundaries.left,
+		y: event.clientY - boundaries.top
+	}
+}
+
+function getCanvasPointFromTouchEvent(event) {
+	const touch = event.changedTouches && event.changedTouches[0]
+	if (!touch) {
+		return null
+	}
+
+	const boundaries = canvasElement.getBoundingClientRect()
+	return {
+		x: touch.clientX - boundaries.left,
+		y: touch.clientY - boundaries.top
+	}
+}
+
+function processPressStart(clickX, clickY) {
+	if (gameState.introVisible) {
+		return
+	}
+
+	if (runesState.isOpen) {
+		handleRunesMousedown(clickX, clickY, canvasElement.width, canvasElement.height)
+	}
+}
+
+function processPressEnd(clickX, clickY) {
+	if (gameState.introVisible) {
+		return
+	}
+
+	if (runesState.isOpen) {
+		handleRunesMouseup(clickX, clickY, canvasElement.width, canvasElement.height)
+	}
+}
+
+function processPrimaryAction(clickX, clickY) {
+	if (isReplayButtonVisibleOnWin() || isReplayButtonVisibleOnLoss()) {
+		if (isMouseInsideZone(clickX, clickY, getReplayButtonZone())) {
+			resetToStartMenu()
+		}
+		return
+	}
+
+	if (gameState.introVisible) {
+		return
+	}
+
+	// PRIORIDAD JERÁRQUICA: Teclado > Velas > Colores > Manuscrito > Runas > Opciones > Habitación normal
+	if (runesState.isOpen) {
+		handleRunesClick(clickX, clickY, canvasElement.width, canvasElement.height)
+		return
+	}
+
+	if (gameState.isRuneChestOpen && !runesState.isOpen) {
+		return
+	}
+
+	let activeButtons = []
+	if (gameState.isKeypadOpen) {
+		activeButtons = getKeypadInteractions(canvasElement)
+	} else if (gameState.isCandleOpen) {
+		activeButtons = getCandleInteractions(canvasElement)
+	} else if (gameState.isColorPuzzleOpen) {
+		activeButtons = getColorPuzzleInteractions(canvasElement)
+	} else if (gameState.isScrollOpen) {
+		activeButtons = getScrollInteractions(canvasElement)
+	} else if (currentRoom === ROOM.START && isOptionsOpen) {
+		activeButtons = getModalInteractions(canvasElement)
+	} else {
+		activeButtons = roomInteractions[currentRoom]
+	}
+
+	if (activeButtons) {
+		for (let i = 0; i < activeButtons.length; i++) {
+			const button = activeButtons[i]
+			if (isMouseInsideZone(clickX, clickY, button)) {
+				button.action()
+				break
+			}
+		}
+	}
+}
 
 function changeToRoom(targetRoom) {
 	currentRoom = targetRoom
@@ -93,6 +223,9 @@ const imageSources = {
 	scrollDetail: "tableScroll.jpg",
 	chestClosed: "chestClosed.jpeg",
 	chestOpenRune: "chestOpenRune.jpg",
+	mainCharacterIntro: "mainCharacterIntro.png",
+	mainCharacterSolving: "mainCharacterSolving.png",
+	mainCharacterSolvedPuzzle: "mainCharacterSolvedPuzzle.png",
 	runeOne: "runeOne.png",
 	runeTwo: "runeTwo.png",
 	runeThree: "runeThree.png",
@@ -119,83 +252,76 @@ runesState.onFailed = () => { gameState.failRuneChest() }
 // 🎯 CONTROLAR EL RATÓN (Eventos de movimiento y clics)
 // =========================================================================
 canvasElement.addEventListener("mousemove", (event) => {
-	const boundaries = canvasElement.getBoundingClientRect()
-	mouseX = Math.floor(event.clientX - boundaries.left)
-	mouseY = Math.floor(event.clientY - boundaries.top)
+	const point = getCanvasPointFromMouseEvent(event)
+	mouseX = Math.floor(point.x)
+	mouseY = Math.floor(point.y)
 })
 
 canvasElement.addEventListener("mousedown", (event) => {
-	const boundaries = canvasElement.getBoundingClientRect()
-	const clickX = event.clientX - boundaries.left
-	const clickY = event.clientY - boundaries.top
-
-	if (gameState.introVisible) {
-		return
-	}
-
-	if (runesState.isOpen) {
-		handleRunesMousedown(clickX, clickY, canvasElement.width, canvasElement.height)
-	}
+	const point = getCanvasPointFromMouseEvent(event)
+	processPressStart(point.x, point.y)
 })
 
 canvasElement.addEventListener("mouseup", (event) => {
-	const boundaries = canvasElement.getBoundingClientRect()
-	const clickX = event.clientX - boundaries.left
-	const clickY = event.clientY - boundaries.top
-
-	if (gameState.introVisible) {
-		return
-	}
-
-	if (runesState.isOpen) {
-		handleRunesMouseup(clickX, clickY, canvasElement.width, canvasElement.height)
-	}
+	const point = getCanvasPointFromMouseEvent(event)
+	processPressEnd(point.x, point.y)
 })
 
 canvasElement.addEventListener("click", (event) => {
-	const boundaries = canvasElement.getBoundingClientRect()
-	const clickX = event.clientX - boundaries.left
-	const clickY = event.clientY - boundaries.top
-
-	if (gameState.introVisible) {
+	if (Date.now() - lastTouchTimestamp < 600) {
 		return
 	}
 
-	// PRIORIDAD JERÁRQUICA: Teclado > Velas > Colores > Manuscrito > Runas > Opciones > Habitación normal
-	if (runesState.isOpen) {
-		handleRunesClick(clickX, clickY, canvasElement.width, canvasElement.height)
-		return
-	}
-
-	if (gameState.isRuneChestOpen && !runesState.isOpen) {
-		return
-	}
-
-	let activeButtons = []
-	if (gameState.isKeypadOpen) {
-		activeButtons = getKeypadInteractions(canvasElement)
-	} else if (gameState.isCandleOpen) {
-		activeButtons = getCandleInteractions(canvasElement)
-	} else if (gameState.isColorPuzzleOpen) {
-		activeButtons = getColorPuzzleInteractions(canvasElement)
-	} else if (gameState.isScrollOpen) {
-		activeButtons = getScrollInteractions(canvasElement)
-	} else if (currentRoom === ROOM.START && isOptionsOpen) {
-		activeButtons = getModalInteractions(canvasElement)
-	} else {
-		activeButtons = roomInteractions[currentRoom]
-	}
-
-	if (activeButtons) {
-		for (let i = 0; i < activeButtons.length; i++) {
-			const button = activeButtons[i]
-			if (isMouseInsideZone(clickX, clickY, button)) {
-				button.action()
-				break
-			}
-		}
-	}
+	const point = getCanvasPointFromMouseEvent(event)
+	processPrimaryAction(point.x, point.y)
 })
+
+canvasElement.addEventListener("touchstart", (event) => {
+	lastTouchTimestamp = Date.now()
+	const point = getCanvasPointFromTouchEvent(event)
+	if (!point) {
+		return
+	}
+
+	mouseX = Math.floor(point.x)
+	mouseY = Math.floor(point.y)
+	processPressStart(point.x, point.y)
+	event.preventDefault()
+}, { passive: false })
+
+canvasElement.addEventListener("touchmove", (event) => {
+	lastTouchTimestamp = Date.now()
+	const point = getCanvasPointFromTouchEvent(event)
+	if (!point) {
+		return
+	}
+
+	mouseX = Math.floor(point.x)
+	mouseY = Math.floor(point.y)
+	event.preventDefault()
+}, { passive: false })
+
+canvasElement.addEventListener("touchend", (event) => {
+	lastTouchTimestamp = Date.now()
+	const point = getCanvasPointFromTouchEvent(event)
+	if (!point) {
+		return
+	}
+
+	mouseX = Math.floor(point.x)
+	mouseY = Math.floor(point.y)
+	processPressEnd(point.x, point.y)
+	processPrimaryAction(point.x, point.y)
+	event.preventDefault()
+}, { passive: false })
+
+canvasElement.addEventListener("touchcancel", (event) => {
+	lastTouchTimestamp = Date.now()
+	if (runesState.draggedIndex !== null) {
+		runesState.draggedIndex = null
+	}
+	event.preventDefault()
+}, { passive: false })
 
 // =========================================================================
 // 🛠️ HERRAMIENTA DE DESARROLLO: VISOR DE COORDENADAS
@@ -228,12 +354,28 @@ function drawLossSequence(canvasContext, canvasElement, gameImages) {
 		return false
 	}
 
+	const introCharacter = gameImages.mainCharacterIntro
+	const drawIntroCharacterOnLoss = () => {
+		if (!introCharacter || !introCharacter.complete || introCharacter.naturalWidth <= 0) {
+			return
+		}
+
+		const maxHeight = 300
+		const scale = Math.min(1, maxHeight / introCharacter.naturalHeight)
+		const drawWidth = introCharacter.naturalWidth * scale
+		const drawHeight = introCharacter.naturalHeight * scale
+		const drawX = 10
+		const drawY = canvasElement.height - drawHeight - 96
+		canvasContext.drawImage(introCharacter, drawX, drawY, drawWidth, drawHeight)
+	}
+
 	const elapsed = Date.now() - lossSequenceState.startedAt
 	const dialogDurationMs = 1000
 	const waitDurationMs = 2000
 
 	if (lossSequenceState.phase === "dialog") {
 		drawStandardRoomBackground(canvasContext, canvasElement, gameImages.loseDoor, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
+		drawIntroCharacterOnLoss()
 
 		const panelX = 80
 		const panelY = canvasElement.height - 140
@@ -278,7 +420,8 @@ function drawLossSequence(canvasContext, canvasElement, gameImages) {
 	canvasContext.font = "bold 48px 'Georgia', serif"
 	canvasContext.textAlign = "center"
 	canvasContext.textBaseline = "middle"
-	canvasContext.fillText("HAS MUERTO", canvasElement.width / 2, canvasElement.height / 2)
+	canvasContext.fillText("HAS MUERTO", canvasElement.width / 2, canvasElement.height / 2 - 30)
+	drawReplayButton()
 
 	return true
 }
@@ -343,7 +486,8 @@ export function draw() {
 			canvasContext.font = "bold 36px 'Georgia', serif"
 			canvasContext.textAlign = "center"
 			canvasContext.textBaseline = "middle"
-			canvasContext.fillText("HAS ESCAPADO", canvasElement.width / 2, canvasElement.height / 2)
+			canvasContext.fillText("HAS ESCAPADO", canvasElement.width / 2, canvasElement.height / 2 - 30)
+			drawReplayButton()
 			requestAnimationFrame(draw)
 			return
 		}
@@ -486,7 +630,7 @@ export function draw() {
 			INTERFACE_DIMENSIONS.ARROW_Y_ROOM_MAIN,
 			INTERFACE_DIMENSIONS.ARROW_X_ROOM_MAIN
 		)
-		drawDialogBox(canvasContext, canvasElement, gameState, "intro")
+		drawDialogBox(canvasContext, canvasElement, gameState, "intro", gameImages)
 	}
 	if (currentRoom === ROOM.EXIT_GATE) {
 		drawNavigationArrow(canvasContext, canvasElement, INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, "DOWN", canvasElement.height - 5)
@@ -503,28 +647,28 @@ export function draw() {
 	}
 
 	if (gameState.isKeypadOpen) {
-		drawKeypadPuzzle(canvasContext, canvasElement, gameState)
+		drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameImages)
 	}
 
 	// =========================================================================
 	// 🕯️ INTERFAZ DEL POP-UP: PUZZLE DE LAS VELAS (Delegación limpia)
 	// =========================================================================
 	if (gameState.isCandleOpen) {
-		drawCandlePuzzle(canvasContext, canvasElement, gameState, gameImages.candlesDetail)
+		drawCandlePuzzle(canvasContext, canvasElement, gameState, gameImages.candlesDetail, gameImages)
 	}
 
 	// =========================================================================
 	// 🎨 INTERFAZ DEL POP-UP: PUZZLE DE COLORES (Delegación limpia)
 	// =========================================================================
 	if (gameState.isColorPuzzleOpen) {
-		drawColorPuzzle(canvasContext, canvasElement, gameState, gameImages.colorsDetail)
+		drawColorPuzzle(canvasContext, canvasElement, gameState, gameImages.colorsDetail, gameImages)
 	}
 
 	// =========================================================================
 	// 📜 INTERFAZ DEL POP-UP: VISTA DEL PERGAMINO (Delegación limpia)
 	// =========================================================================
 	if (gameState.isScrollOpen) {
-		drawScrollText(canvasContext, canvasElement, gameState, gameImages.scrollDetail)
+		drawScrollText(canvasContext, canvasElement, gameState, gameImages.scrollDetail, gameImages)
 	}
 
 	// =========================================================================
@@ -532,7 +676,7 @@ export function draw() {
 	// =========================================================================
 	drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY)
 	if (gameState.isRuneChestOpen) {
-		drawDialogBox(canvasContext, canvasElement, gameState, "runes")
+		drawDialogBox(canvasContext, canvasElement, gameState, "runes", gameImages)
 	}
 
 	// Ejecuta la herramienta que pinta la posición X e Y del ratón

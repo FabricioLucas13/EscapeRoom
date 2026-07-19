@@ -7,7 +7,7 @@ import { drawDialogBox } from "./dialogBox.js"
  * 🖲️ DIBUJAR EL TECLADO NUMÉRICO (Componente Autónomo)
  * Delegamos todo el renderizado visual que antes saturaba el main.js
  */
-export function drawKeypadPuzzle(canvasContext, canvasElement, gameState) {
+export function drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameImages) {
 	const keypadWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
 	const keypadHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
 	const keypadLeftX = canvasElement.width / 2 - keypadWidth / 2
@@ -78,7 +78,7 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, gameState) {
 	})
 
 	// 6. El diálogo de teclado ahora se maneja en dialogBox.js
-	drawDialogBox(canvasContext, canvasElement, gameState, "keypad")
+	drawDialogBox(canvasContext, canvasElement, gameState, "keypad", gameImages)
 
 	// Restauramos fuentes por defecto del motor
 	canvasContext.textAlign = "left"
