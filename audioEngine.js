@@ -1,6 +1,7 @@
 // --- CONFIGURAR EL REPRODUCTOR DE MÚSICA INTERNO ---
 const backgroundMusic = new Audio("assets/musicEscapeRoom.mp3")
 backgroundMusic.loop = true
+backgroundMusic.preload = "none"
 
 let isAudioMuted = false
 

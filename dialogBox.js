@@ -2,39 +2,44 @@ import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS } from "./confi
 
 function getDialogText(gameState, dialogType) {
 	const DIALOG_TEXT = {
-		candles: {
-			notStarted: "Toca las velas en un orden mágico para descifrar el código.",
-			startedAgain: "Vuelve a probar el orden de las velas.",
-			solved: "¡Perfecto! El código 3 aparecerá en la salida.",
-			error: "No es correcto. Reordena las velas y vuelve a intentarlo."
-		},
-		colors: {
-			notStarted: "Pulsa los colores en un orden oculto para desbloquear la Secuencia 9.",
-			patternHint: "Usa el patrón dejado por las velas para elegir los colores.",
-			alreadySolved: "La secuencia final ya está resuelta.",
-			error: "Secuencia errónea, reinicia la selección y vuelve a probar."
-		},
-		scroll: {
-			firstOpen: "Este manuscrito puede contener una pista importante.",
-			again: "Lee el manuscrito con atención; haz clic fuera para cerrarlo."
-		},
-		keypad: {
-			solvedAll: "Los números serán la combinación...",
-			needsClues: "¿Abrirá pistas de la contraseña?",
-			failed: "No abre.",
-			opened: "Uhh, se ha abierto."
-		},
-		runes: {
-			firstOpen: "Un cofre se ha abierto solo.",
-			opened: "¿Tendrán un orden?",
-			failed: "Hmm, así no es.",
-			solved: "Ha aparecido un 7 en la cerradura."
-		},
-		intro: {
-			whereAmI: "¿Dónde estoy?",
-			mustLeave: "Tengo que salir de aquí."
-		}
+	candles: {
+		notStarted: "Las velas parecen esperar un antiguo ritual. Tal vez el manuscrito sepa cómo despertarlas.",
+		startedAgain: "La llama recuerda... pero el orden aún no es el correcto.",
+		solved: "Una llama cambia de color. Entre las cenizas aparece grabado un 3.",
+		error: "Las llamas se apagan de golpe. El ritual debe seguir otro orden."
+	},
+
+	colors: {
+		notStarted: "Extraños cristales aguardan una secuencia. Sus tonos recuerdan al brillo de las velas.",
+		patternHint: "Las llamas dejaron una pista. Quizá sus colores también lo hagan.",
+		error: "La luz se desvanece antes de completarse el patrón.",
+		solved: "Los cristales vibran un instante. Entre ellos aparece marcado un 9."
+	},
+
+	scroll: {
+		firstOpen: "El pergamino está cubierto de versos. Tal vez oculten algo más que palabras.",
+		again: "Cada estrofa parece guardar un secreto distinto."
+	},
+
+	keypad: {
+		solvedAll: "Tres cifras... tres enigmas... ya puedo probar la combinación.",
+		needsClues: "Aún me faltan partes de la combinación.",
+		failed: "La cerradura permanece inmóvil.",
+		opened: "La puerta cede."
+	},
+
+	runes: {
+		firstOpen: "El cofre se entreabre, como si hubiera esperado este momento.",
+		opened: "Las runas parecen reclamar un orden concreto.",
+		failed: "Las piedras se apagan. No era esa la secuencia.",
+		solved: "Las runas resplandecen. Un 7 aparece grabado en el interior del cofre."
+	},
+
+	intro: {
+		whereAmI: "¿Dónde... estoy?",
+		mustLeave: "Sea lo que sea este lugar, debo encontrar la salida."
 	}
+}
 
 	switch (dialogType) {
 		case "candles":
@@ -48,7 +53,7 @@ function getDialogText(gameState, dialogType) {
 
 		case "colors":
 			if (gameState.colorsResultText === "9") {
-				return DIALOG_TEXT.colors.alreadySolved
+				return DIALOG_TEXT.colors.solved
 			}
 			if (gameState.candleResultText === "3") {
 				return DIALOG_TEXT.colors.patternHint
@@ -75,7 +80,7 @@ function getDialogText(gameState, dialogType) {
 				return DIALOG_TEXT.keypad.failed
 			}
 			if (gameState.keypadHintSeen && !gameState.keypadHintVisible) {
-				return DIALOG_TEXT.keypad.clues
+				return DIALOG_TEXT.keypad.needsClues
 			}
 			return isAllPuzzlesSolved(gameState) ? DIALOG_TEXT.keypad.solvedAll : DIALOG_TEXT.keypad.needsClues
 
@@ -138,16 +143,15 @@ function drawCharacterPortrait(canvasContext, canvasElement, characterImage, dia
 	const scale = Math.min(1, maxHeight / characterImage.naturalHeight)
 	const drawWidth = characterImage.naturalWidth * scale
 	const drawHeight = characterImage.naturalHeight * scale
-	const drawX = 8
+	const drawX = -90
 	const drawY = INTERFACE_DIMENSIONS.DIALOG_BOX_Y - drawHeight - 6
 
 	canvasContext.drawImage(characterImage, drawX, drawY, drawWidth, drawHeight)
 }
 
-function wrapText(canvasContext, text, x, y, maxWidth, lineHeight) {
+function getWrappedLines(canvasContext, text, maxWidth) {
 	const words = text.split(" ")
-
-	const lines = words.reduce((accumulator, word) => {
+	return words.reduce((accumulator, word) => {
 		const previousLine = accumulator[accumulator.length - 1] || ""
 		const testLine = previousLine ? `${previousLine} ${word}` : word
 
@@ -157,10 +161,6 @@ function wrapText(canvasContext, text, x, y, maxWidth, lineHeight) {
 
 		return [...accumulator.slice(0, -1), testLine]
 	}, [""])
-
-	lines.forEach((line, index) => {
-		canvasContext.fillText(line.trim(), x, y + index * lineHeight)
-	})
 }
 
 export function drawDialogBox(canvasContext, canvasElement, gameState, dialogType, gameImages = null) {
@@ -191,7 +191,10 @@ export function drawDialogBox(canvasContext, canvasElement, gameState, dialogTyp
 	const panelHeight = INTERFACE_DIMENSIONS.DIALOG_BOX_HEIGHT
 
 	canvasContext.save()
-	canvasContext.fillStyle = INTERFACE_COLORS.DIALOG_BOX_BACKGROUND
+	const panelGradient = canvasContext.createLinearGradient(panelX, panelY, panelX, panelY + panelHeight)
+	panelGradient.addColorStop(0, "rgba(0, 0, 0, 0.78)")
+	panelGradient.addColorStop(1, "rgba(0, 0, 0, 0.62)")
+	canvasContext.fillStyle = panelGradient
 	canvasContext.fillRect(panelX, panelY, panelWidth, panelHeight)
 
 	canvasContext.strokeStyle = INTERFACE_COLORS.DIALOG_BOX_BORDER
@@ -199,14 +202,43 @@ export function drawDialogBox(canvasContext, canvasElement, gameState, dialogTyp
 	canvasContext.strokeRect(panelX, panelY, panelWidth, panelHeight)
 
 	canvasContext.fillStyle = INTERFACE_COLORS.DIALOG_BOX_TEXT
-	canvasContext.font = INTERFACE_FONTS.DIALOG_BOX_BODY
 	canvasContext.textAlign = "left"
 	canvasContext.textBaseline = "top"
+	canvasContext.shadowColor = "rgba(0, 0, 0, 0.35)"
+	canvasContext.shadowBlur = 1
+	canvasContext.shadowOffsetX = 0
+	canvasContext.shadowOffsetY = 1
 
 	const textX = panelX + INTERFACE_DIMENSIONS.DIALOG_BOX_TEXT_PADDING
 	const textY = panelY + INTERFACE_DIMENSIONS.DIALOG_BOX_TEXT_PADDING
 	const maxTextWidth = panelWidth - INTERFACE_DIMENSIONS.DIALOG_BOX_TEXT_PADDING * 2
+	const maxTextHeight = panelHeight - INTERFACE_DIMENSIONS.DIALOG_BOX_TEXT_PADDING * 2
 
-	wrapText(canvasContext, dialogText, textX, textY, maxTextWidth, INTERFACE_DIMENSIONS.DIALOG_BOX_TEXT_LINE_HEIGHT)
+	const fontCandidates = [
+		{ font: INTERFACE_FONTS.DIALOG_BOX_BODY, lineHeight: INTERFACE_DIMENSIONS.DIALOG_BOX_TEXT_LINE_HEIGHT },
+		{ font: "15px 'Georgia', serif", lineHeight: 19 },
+		{ font: "14px 'Georgia', serif", lineHeight: 18 }
+	]
+
+	let selectedFont = fontCandidates[fontCandidates.length - 1]
+	let selectedLines = []
+	for (let i = 0; i < fontCandidates.length; i++) {
+		canvasContext.font = fontCandidates[i].font
+		const candidateLines = getWrappedLines(canvasContext, dialogText, maxTextWidth)
+		if (candidateLines.length * fontCandidates[i].lineHeight <= maxTextHeight) {
+			selectedFont = fontCandidates[i]
+			selectedLines = candidateLines
+			break
+		}
+
+		selectedLines = candidateLines
+	}
+
+	canvasContext.font = selectedFont.font
+	selectedLines.forEach((line, index) => {
+		canvasContext.fillText(line.trim(), textX, textY + index * selectedFont.lineHeight)
+	})
+
+	canvasContext.shadowColor = "transparent"
 	canvasContext.restore()
 }

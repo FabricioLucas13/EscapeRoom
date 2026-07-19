@@ -35,20 +35,20 @@ export const INTERFACE_COLORS = {
 	FALLBACK_BACKGROUND_ROOM_ONE: "#2d2d2d",    // Alias de compatibilidad
 	FALLBACK_BACKGROUND_ROOM_FOUR: "#245b3b",   // Alias de compatibilidad
 	NAVIGATION_ARROW: "#ffffff",             // Color centralizado de las flechas de navegación
-	
+
 	// Interfaz del Teclado Numérico (Abreviaturas BTN -> BUTTON eliminadas)
-	KEYPAD_OVERLAY: "rgba(0, 0, 0, 0.8)",         
-	KEYPAD_SCREEN_TEXT: "#7CFFB2",               
-	KEYPAD_TEXT_SUCCESS: "#7CFFB2",              
-	KEYPAD_TEXT_ERROR: "#ff5a5a",                 
-	KEYPAD_PANEL_BACKGROUND: "#1c1c1c",          
-	KEYPAD_PANEL_BORDER: "#7a6a4f",              
-	KEYPAD_BUTTON_NUMBER_BACKGROUND: "#3a3a3a",                
-	KEYPAD_BUTTON_NUMBER_TEXT: "#e8d9b5",              
-	KEYPAD_BUTTON_RESET_BACKGROUND: "#7a1f16",              
-	KEYPAD_BUTTON_RESET_TEXT: "#ffffff",            
-	KEYPAD_BUTTON_CHECK_BACKGROUND: "#1f8f4d",              
-	KEYPAD_BUTTON_CHECK_TEXT: "#000000",             
+	KEYPAD_OVERLAY: "rgba(0, 0, 0, 0.8)",
+	KEYPAD_SCREEN_TEXT: "#7CFFB2",
+	KEYPAD_TEXT_SUCCESS: "#7CFFB2",
+	KEYPAD_TEXT_ERROR: "#ff5a5a",
+	KEYPAD_PANEL_BACKGROUND: "#1c1c1c",
+	KEYPAD_PANEL_BORDER: "#7a6a4f",
+	KEYPAD_BUTTON_NUMBER_BACKGROUND: "#3a3a3a",
+	KEYPAD_BUTTON_NUMBER_TEXT: "#e8d9b5",
+	KEYPAD_BUTTON_RESET_BACKGROUND: "#7a1f16",
+	KEYPAD_BUTTON_RESET_TEXT: "#ffffff",
+	KEYPAD_BUTTON_CHECK_BACKGROUND: "#1f8f4d",
+	KEYPAD_BUTTON_CHECK_TEXT: "#000000",
 
 	// Interfaz de las Velas
 	CANDLE_FLAME_YELLOW: "#ffca28",
@@ -234,9 +234,9 @@ export const INTERFACE_DIMENSIONS = {
 // 🔤 TIPOGRAFÍAS Y FUENTES CENTRALIZADAS (Nombres completamente descriptivos en inglés)
 export const INTERFACE_FONTS = {
 	SCROLL_TITLE: "bold 20px 'Georgia', serif",
-	SCROLL_BODY: "14px 'Georgia', serif",
+	SCROLL_BODY: "italic 17px 'Palatino Linotype', 'Book Antiqua', serif",
 	SCROLL_FOOTER: "italic 11px Arial",
-	DIALOG_BOX_BODY: "14px 'Georgia', serif",
+	DIALOG_BOX_BODY: "16px 'Georgia', serif",
 
 	// Keypad and common UI fonts
 	BUTTON_TITLE: "bold 16px 'Georgia', serif",
@@ -250,13 +250,13 @@ export const INTERFACE_FONTS = {
 
 // ⚙️ CONFIGURACIÓN GENERAL DEL JUEGO
 export const GAME_SETTINGS = {
-	TIMER_DURATION_MS: 10  * 60 * 1000
+	TIMER_DURATION_MS: 10 * 60 * 1000
 }
 
 // 🧩 LOS ENIGMAS Y RESPUESTAS DEL JUEGO
 export const GAME_PUZZLES = {
 	EXIT_SECRET_CODE: "739",
-	CANDLE_SECRET_ORDER: [2,3,1,4],
+	CANDLE_SECRET_ORDER: [2, 3, 1, 4],
 	COLOR_SOLUTION_SEQUENCE: ["amarillo", "azul", "verde", "morado"],
 	RUNES_SOLUTION_SEQUENCE: [4, 1, 3],
 	RUNES_SOLVED_CODE: "7",
@@ -267,13 +267,30 @@ export const GAME_PUZZLES = {
 		4: "runeFour"
 	},
 
-	// 🛠️ NUEVO ARRAY DE TEXTOS CENTRALIZADOS DEL LORE
-	SCROLL_LORE_LINES: [
-		"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor",
-		"incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.",
-		"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore",
-		"eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
-		"Sunt in culpa qui officia deserunt mollit anim id est laborum. El misterio",
-		"aguarda en las sombras de la cripta, sigue el rastro de la luz ancestral."
+	// Textos del manuscrito paginados en 3 páginas
+	SCROLL_PAGES: [
+		[
+			"En la danza callada del cirio y la cera,",
+			"no despierta primero quien nació más cercano.",
+			"La que sigue al comienzo reclama la llama,",
+			"y tras ella, su hermana inmediata responde.",
+			"Cuando el fuego ya aprende el camino del viento,",
+			"regresa al origen que aguardaba en silencio.",
+			"La que quedó más lejos contempla la escena,",
+			"hasta heredar al fin la última chispa."
+		],
+		[
+			"El viejo cofre no escucha a todas las voces.",
+			"Primero reclama a quien custodia el final.",
+			"Después reconoce a quien abrió el camino.",
+			"Solo entonces acepta a la que precede al ocaso.",
+			"Una runa aguardará en silencio,",
+			"pues ninguna cerradura recibe todas las llaves."
+		],
+		[
+			"Habla la roca.",
+			"Responde después el fuego.",
+			"El iris despierta."
+		]
 	]
 }

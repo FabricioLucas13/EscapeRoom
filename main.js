@@ -25,6 +25,7 @@ let isOptionsOpen = false
 let timerStartedAt = null
 let timerActive = false
 let lastTouchTimestamp = 0
+const SHOW_MOUSE_COORDINATES = false
 
 const replayButton = {
 	width: 225,
@@ -163,6 +164,7 @@ function changeToRoom(targetRoom) {
 	currentRoom = targetRoom
 	if (targetRoom === ROOM.MAIN) {
 		gameState.startIntroSequence()
+		queueGameplayAssetPreload()
 		if (!timerActive) {
 			timerActive = true
 			timerStartedAt = Date.now()
@@ -208,6 +210,8 @@ initializeInteractions({
 	// CABLES DE LA VISTA DEL PERGAMINO CONECTADOS AL GESTOR DE ESTADO
 	openScroll: () => { gameState.openScroll(isOptionsOpen) },
 	closeScroll: () => { gameState.closeScroll() },
+	nextScrollPage: () => { gameState.nextScrollPage() },
+	previousScrollPage: () => { gameState.previousScrollPage() },
 
 	// COFRE DE RUNAS
 	openRuneChest: () => { gameState.openRuneChest(isOptionsOpen) }
@@ -238,10 +242,90 @@ const imageSources = {
 	loseDoor: "loseDoor.jpg"
 }
 
-Object.entries(imageSources).forEach(([key, filename]) => {
+Object.keys(imageSources).forEach((key) => {
 	gameImages[key] = new Image()
-	gameImages[key].src = `assets/${filename}`
+	gameImages[key].decoding = "async"
 })
+
+const loadedImageKeys = new Set()
+const preloadedRawFiles = new Set()
+
+function loadImageByKey(key) {
+	if (loadedImageKeys.has(key) || !gameImages[key] || !imageSources[key]) {
+		return
+	}
+
+	gameImages[key].src = `assets/${imageSources[key]}`
+	loadedImageKeys.add(key)
+}
+
+function setImageSourceIfNeeded(key, filename) {
+	const image = gameImages[key]
+	if (!image) {
+		return
+	}
+
+	if (!image.src || !image.src.includes(filename)) {
+		image.src = `assets/${filename}`
+	}
+}
+
+function preloadRawFile(filename) {
+	if (preloadedRawFiles.has(filename)) {
+		return
+	}
+
+	const preloadImage = new Image()
+	preloadImage.decoding = "async"
+	preloadImage.src = `assets/${filename}`
+	preloadedRawFiles.add(filename)
+}
+
+function preloadImageBundle(keys) {
+	keys.forEach(loadImageByKey)
+}
+
+function queueGameplayAssetPreload() {
+	const preloadTask = () => {
+		preloadImageBundle([
+			"main",
+			"exitGate",
+			"candlesDetail",
+			"colorsDetail",
+			"scrollDetail",
+			"chestClosed",
+			"chestOpenRune",
+			"mainCharacterIntro",
+			"mainCharacterSolving",
+			"mainCharacterSolvedPuzzle",
+			"runeOne",
+			"runeTwo",
+			"runeThree",
+			"runeFour",
+			"winDoor",
+			"loseDoor"
+		])
+
+		[
+			"candleOn.jpg",
+			"colorPanelOn.jpg",
+			"roomMainCandleOn.jpg",
+			"roomMainColorPanelOn.jpg",
+			"roomMainPuzzleOn.jpg",
+			"roomExitGateColorPanelOn.jpg",
+			"loseDoorColorPanelOn.jpg"
+		].forEach(preloadRawFile)
+	}
+
+	if (typeof window.requestIdleCallback === "function") {
+		window.requestIdleCallback(preloadTask, { timeout: 1200 })
+	} else {
+		setTimeout(preloadTask, 120)
+	}
+}
+
+// Arranque rápido: solo se carga la portada del menú.
+preloadImageBundle(["start"])
 
 runesState.onSolved = () => { gameState.solveRuneChest() }
 runesState.onClose = (closeReason) => {
@@ -436,44 +520,45 @@ function drawLossSequence(canvasContext, canvasElement, gameImages) {
 export function draw() {
 	// Actualizar imágenes de detalle según el estado de los puzzles
 	try {
-		if (gameState.colorsResultText === "9") {
-			if (gameImages.colorsDetail && !gameImages.colorsDetail.src.includes("colorPanelOn.jpg")) {
-				gameImages.colorsDetail.src = "assets/colorPanelOn.jpg"
-			}
-		} else {
-			if (gameImages.colorsDetail && !gameImages.colorsDetail.src.includes("colorPanelOff.jpg")) {
-				gameImages.colorsDetail.src = "assets/colorPanelOff.jpg"
-			}
-		}
+		const hasGameplayStarted = currentRoom !== ROOM.START || timerActive || gameState.gameWon || lossSequenceState.triggered
 
-		if (gameState.candleResultText === "3") {
-			if (gameImages.candlesDetail && !gameImages.candlesDetail.src.includes("candleOn.jpg")) {
-				gameImages.candlesDetail.src = "assets/candleOn.jpg"
-			}
-		} else {
-			if (gameImages.candlesDetail && !gameImages.candlesDetail.src.includes("candleOff.jpg")) {
-				gameImages.candlesDetail.src = "assets/candleOff.jpg"
-			}
-		}
-
-		// Actualizar la imagen principal de la habitación principal según el estado de los puzzles
-		try {
-			const candleDone = gameState.candleResultText === "3"
-			const colorDone = gameState.colorsResultText === "9"
-			let desiredMain = "assets/roomMain.jpg"
-			if (candleDone && !colorDone) {
-				desiredMain = "assets/roomMainCandleOn.jpg"
-			} else if (colorDone && !candleDone) {
-				desiredMain = "assets/roomMainColorPanelOn.jpg"
-			} else if (candleDone && colorDone) {
-				desiredMain = "assets/roomMainPuzzleOn.jpg"
+		if (hasGameplayStarted) {
+			if (gameState.colorsResultText === "9") {
+				setImageSourceIfNeeded("colorsDetail", "colorPanelOn.jpg")
+			} else {
+				setImageSourceIfNeeded("colorsDetail", "colorPanelOff.jpg")
 			}
 
-			if (gameImages.main && !gameImages.main.src.includes(desiredMain.split('/').pop())) {
-				gameImages.main.src = desiredMain
+			if (gameState.candleResultText === "3") {
+				setImageSourceIfNeeded("candlesDetail", "candleOn.jpg")
+			} else {
+				setImageSourceIfNeeded("candlesDetail", "candleOff.jpg")
 			}
-		} catch (e) {
-			console.warn("Error actualizando fondo de la habitación principal:", e)
+
+			const colorPuzzleSolved = gameState.colorsResultText === "9"
+			const desiredExitGate = colorPuzzleSolved ? "roomExitGateColorPanelOn.jpg" : "roomExitGate.jpg"
+			setImageSourceIfNeeded("exitGate", desiredExitGate)
+
+			const desiredLoseDoor = colorPuzzleSolved ? "loseDoorColorPanelOn.jpg" : "loseDoor.jpg"
+			setImageSourceIfNeeded("loseDoor", desiredLoseDoor)
+
+			// Actualizar la imagen principal de la habitación principal según el estado de los puzzles
+			try {
+				const candleDone = gameState.candleResultText === "3"
+				const colorDone = gameState.colorsResultText === "9"
+				let desiredMain = "roomMain.jpg"
+				if (candleDone && !colorDone) {
+					desiredMain = "roomMainCandleOn.jpg"
+				} else if (colorDone && !candleDone) {
+					desiredMain = "roomMainColorPanelOn.jpg"
+				} else if (candleDone && colorDone) {
+					desiredMain = "roomMainPuzzleOn.jpg"
+				}
+
+				setImageSourceIfNeeded("main", desiredMain)
+			} catch (e) {
+				console.warn("Error actualizando fondo de la habitación principal:", e)
+			}
 		}
 	} catch (e) {
 		// No bloquear el bucle de dibujo por errores menores
@@ -651,6 +736,8 @@ export function draw() {
 	}
 
 	if (gameState.isKeypadOpen) {
+		loadImageByKey("mainCharacterSolving")
+		loadImageByKey("mainCharacterSolvedPuzzle")
 		drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameImages)
 	}
 
@@ -658,6 +745,7 @@ export function draw() {
 	// 🕯️ INTERFAZ DEL POP-UP: PUZZLE DE LAS VELAS (Delegación limpia)
 	// =========================================================================
 	if (gameState.isCandleOpen) {
+		loadImageByKey("candlesDetail")
 		drawCandlePuzzle(canvasContext, canvasElement, gameState, gameImages.candlesDetail, gameImages)
 	}
 
@@ -665,6 +753,7 @@ export function draw() {
 	// 🎨 INTERFAZ DEL POP-UP: PUZZLE DE COLORES (Delegación limpia)
 	// =========================================================================
 	if (gameState.isColorPuzzleOpen) {
+		loadImageByKey("colorsDetail")
 		drawColorPuzzle(canvasContext, canvasElement, gameState, gameImages.colorsDetail, gameImages)
 	}
 
@@ -672,19 +761,26 @@ export function draw() {
 	// 📜 INTERFAZ DEL POP-UP: VISTA DEL PERGAMINO (Delegación limpia)
 	// =========================================================================
 	if (gameState.isScrollOpen) {
+		loadImageByKey("scrollDetail")
 		drawScrollText(canvasContext, canvasElement, gameState, gameImages.scrollDetail, gameImages)
 	}
 
 	// =========================================================================
 	// 🗿 INTERFAZ DEL POP-UP: PUZZLE DE RUNAS (Delegación limpia)
 	// =========================================================================
+	loadImageByKey("runeOne")
+	loadImageByKey("runeTwo")
+	loadImageByKey("runeThree")
+	loadImageByKey("runeFour")
 	drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY)
 	if (gameState.isRuneChestOpen) {
 		drawDialogBox(canvasContext, canvasElement, gameState, "runes", gameImages)
 	}
 
-	// Ejecuta la herramienta que pinta la posición X e Y del ratón
-	drawMouseCoordinates()
+	// Herramienta de depuración opcional
+	if (SHOW_MOUSE_COORDINATES) {
+		drawMouseCoordinates()
+	}
 
 	// Le pide al navegador que vuelva a ejecutar esta función 'draw' en el próximo fotograma
 	requestAnimationFrame(draw)

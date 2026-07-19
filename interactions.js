@@ -35,7 +35,9 @@ const gameEngineBridge = {
 
 	// Pasarela de datos para la vista del pergamino desenrollado
 	openScroll: null,
-	closeScroll: null
+	closeScroll: null,
+	nextScrollPage: null,
+	previousScrollPage: null
 }
 
 export function initializeInteractions(engineActions) {
@@ -66,6 +68,8 @@ export function initializeInteractions(engineActions) {
 	// Conectamos los cables del pergamino
 	gameEngineBridge.openScroll = engineActions.openScroll
 	gameEngineBridge.closeScroll = engineActions.closeScroll
+	gameEngineBridge.nextScrollPage = engineActions.nextScrollPage
+	gameEngineBridge.previousScrollPage = engineActions.previousScrollPage
 }
 
 export function toggleMusic() {
@@ -240,14 +244,62 @@ export function getColorPuzzleInteractions(canvasElement) {
 
 // Zona invisible para cerrar el pergamino blanco al hacer clic fuera
 export function getScrollInteractions(canvasElement) {
+	const scrollWidth = INTERFACE_DIMENSIONS.SCROLL_MODAL_WIDTH
+	const scrollHeight = INTERFACE_DIMENSIONS.SCROLL_MODAL_HEIGHT
+	const scrollLeftX = canvasElement.width / 2 - scrollWidth / 2
+	const scrollTopY = canvasElement.height / 2 - scrollHeight / 2
+	const sideButtonWidth = 44
+	const sideButtonHeight = 72
+	const sideButtonY = scrollTopY + scrollHeight / 2 - sideButtonHeight / 2
+
 	return [
+		{
+			x: scrollLeftX - sideButtonWidth - 12,
+			y: sideButtonY,
+			width: sideButtonWidth,
+			height: sideButtonHeight,
+			action: () => gameEngineBridge.previousScrollPage(),
+			label: "SCROLL_PREV_PAGE"
+		},
+		{
+			x: scrollLeftX + scrollWidth + 12,
+			y: sideButtonY,
+			width: sideButtonWidth,
+			height: sideButtonHeight,
+			action: () => gameEngineBridge.nextScrollPage(),
+			label: "SCROLL_NEXT_PAGE"
+		},
 		{
 			x: 0,
 			y: 0,
 			width: canvasElement.width,
-			height: canvasElement.height,
+			height: scrollTopY,
 			action: () => gameEngineBridge.closeScroll(),
-			label: "BACKGROUND_CLOSE_ZONE"
+			label: "BACKGROUND_CLOSE_TOP"
+		},
+		{
+			x: 0,
+			y: scrollTopY + scrollHeight,
+			width: canvasElement.width,
+			height: canvasElement.height - (scrollTopY + scrollHeight),
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_BOTTOM"
+		},
+		{
+			x: 0,
+			y: scrollTopY,
+			width: scrollLeftX,
+			height: scrollHeight,
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_LEFT"
+		},
+		{
+			x: scrollLeftX + scrollWidth,
+			y: scrollTopY,
+			width: canvasElement.width - (scrollLeftX + scrollWidth),
+			height: scrollHeight,
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_RIGHT"
 		}
 	]
 }
