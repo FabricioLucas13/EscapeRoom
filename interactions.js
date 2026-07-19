@@ -35,7 +35,9 @@ const gameEngineBridge = {
 
 	// Pasarela de datos para la vista del pergamino desenrollado
 	openScroll: null,
-	closeScroll: null
+	closeScroll: null,
+	nextScrollPage: null,
+	previousScrollPage: null
 }
 
 export function initializeInteractions(engineActions) {
@@ -66,6 +68,8 @@ export function initializeInteractions(engineActions) {
 	// Conectamos los cables del pergamino
 	gameEngineBridge.openScroll = engineActions.openScroll
 	gameEngineBridge.closeScroll = engineActions.closeScroll
+	gameEngineBridge.nextScrollPage = engineActions.nextScrollPage
+	gameEngineBridge.previousScrollPage = engineActions.previousScrollPage
 }
 
 export function toggleMusic() {
@@ -79,14 +83,14 @@ export function getModalInteractions(canvasElement) {
 	return [
 		{
 			x: modalButtonLeftX,
-			y: modalTopY + 70,
+			y: modalTopY + INTERFACE_DIMENSIONS.OPTIONS_AUDIO_BUTTON_Y_OFFSET,
 			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH,
 			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT,
 			action: toggleMusic
 		},
 		{
 			x: modalButtonLeftX,
-			y: modalTopY + 140,
+			y: modalTopY + INTERFACE_DIMENSIONS.OPTIONS_BACK_BUTTON_Y_OFFSET,
 			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH,
 			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT,
 			action: () => gameEngineBridge.closeOptionsModal()
@@ -104,7 +108,7 @@ export function getKeypadInteractions(canvasElement) {
 	const panelY = canvasElement.height / 2 - keypadHeight / 2
 
 	const startGridX = panelX + (keypadWidth - (buttonSize * 3 + gap * 2)) / 2
-	const startGridY = panelY + 130
+	const startGridY = panelY + INTERFACE_DIMENSIONS.KEYPAD_GRID_START_Y_OFFSET
 
 	const layout = [
 		{ label: "1", action: () => gameEngineBridge.keypadPress("1") },
@@ -152,7 +156,7 @@ export function getCandleInteractions(canvasElement) {
 
 	const totalGridWidth = (candleWidth * 4) + (gap * 3)
 	const startGridX = panelX + (candlePanelWidth - totalGridWidth) / 2
-	const startGridY = panelY + 70
+	const startGridY = panelY + INTERFACE_DIMENSIONS.CANDLE_GRID_START_Y_OFFSET
 
 	const interactiveCandles = []
 
@@ -169,9 +173,9 @@ export function getCandleInteractions(canvasElement) {
 	})
 
 	interactiveCandles.push({
-		x: canvasElement.width / 2 - 120 / 2,
-		y: panelY + candlePanelHeight - 55,
-		width: 120,
+		x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.CANDLE_ACTION_BUTTON_WIDTH / 2,
+		y: panelY + candlePanelHeight - INTERFACE_DIMENSIONS.CANDLE_ACTION_BUTTON_BOTTOM_OFFSET,
+		width: INTERFACE_DIMENSIONS.CANDLE_ACTION_BUTTON_WIDTH,
 		height: 35,
 		action: () => gameEngineBridge.checkCandles(),
 		label: "Activar"
@@ -201,7 +205,7 @@ export function getColorPuzzleInteractions(canvasElement) {
 
 	const totalGridWidth = (slotWidth * 4) + (gap * 3)
 	const startGridX = panelX + (modalWidth - totalGridWidth) / 2
-	const startGridY = panelY + 70
+	const startGridY = panelY + INTERFACE_DIMENSIONS.CANDLE_GRID_START_Y_OFFSET
 
 	const interactiveButtons = []
 
@@ -218,9 +222,9 @@ export function getColorPuzzleInteractions(canvasElement) {
 	})
 
 	interactiveButtons.push({
-		x: canvasElement.width / 2 - 120 / 2,
-		y: panelY + modalHeight - 55,
-		width: 120,
+		x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.CANDLE_ACTION_BUTTON_WIDTH / 2,
+		y: panelY + modalHeight - INTERFACE_DIMENSIONS.CANDLE_ACTION_BUTTON_BOTTOM_OFFSET,
+		width: INTERFACE_DIMENSIONS.CANDLE_ACTION_BUTTON_WIDTH,
 		height: 35,
 		action: () => gameEngineBridge.checkColorSequence(),
 		label: "Activar"
@@ -240,14 +244,62 @@ export function getColorPuzzleInteractions(canvasElement) {
 
 // Zona invisible para cerrar el pergamino blanco al hacer clic fuera
 export function getScrollInteractions(canvasElement) {
+	const scrollWidth = INTERFACE_DIMENSIONS.SCROLL_MODAL_WIDTH
+	const scrollHeight = INTERFACE_DIMENSIONS.SCROLL_MODAL_HEIGHT
+	const scrollLeftX = canvasElement.width / 2 - scrollWidth / 2
+	const scrollTopY = canvasElement.height / 2 - scrollHeight / 2
+	const sideButtonWidth = INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_WIDTH
+	const sideButtonHeight = INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_HEIGHT
+	const sideButtonY = scrollTopY + scrollHeight / 2 - sideButtonHeight / 2
+
 	return [
+		{
+			x: scrollLeftX - sideButtonWidth - INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_GAP_X,
+			y: sideButtonY,
+			width: sideButtonWidth,
+			height: sideButtonHeight,
+			action: () => gameEngineBridge.previousScrollPage(),
+			label: "SCROLL_PREV_PAGE"
+		},
+		{
+			x: scrollLeftX + scrollWidth + INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_GAP_X,
+			y: sideButtonY,
+			width: sideButtonWidth,
+			height: sideButtonHeight,
+			action: () => gameEngineBridge.nextScrollPage(),
+			label: "SCROLL_NEXT_PAGE"
+		},
 		{
 			x: 0,
 			y: 0,
 			width: canvasElement.width,
-			height: canvasElement.height,
+			height: scrollTopY,
 			action: () => gameEngineBridge.closeScroll(),
-			label: "BACKGROUND_CLOSE_ZONE"
+			label: "BACKGROUND_CLOSE_TOP"
+		},
+		{
+			x: 0,
+			y: scrollTopY + scrollHeight,
+			width: canvasElement.width,
+			height: canvasElement.height - (scrollTopY + scrollHeight),
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_BOTTOM"
+		},
+		{
+			x: 0,
+			y: scrollTopY,
+			width: scrollLeftX,
+			height: scrollHeight,
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_LEFT"
+		},
+		{
+			x: scrollLeftX + scrollWidth,
+			y: scrollTopY,
+			width: canvasElement.width - (scrollLeftX + scrollWidth),
+			height: scrollHeight,
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_RIGHT"
 		}
 	]
 }
@@ -280,7 +332,7 @@ export function getRoomInteractions(canvasElement) {
 				x: INTERFACE_DIMENSIONS.ARROW_X_ROOM_ONE - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
 				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE,
 				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
-				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
+				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + INTERFACE_DIMENSIONS.NAVIGATION_ARROW_HITBOX_EXTRA_HEIGHT,
 				action: () => gameEngineBridge.changeRoom(ROOM.EXIT_GATE)
 			},
 			{
@@ -325,7 +377,7 @@ export function getRoomInteractions(canvasElement) {
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
 				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10,
 				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
-				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
+				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + INTERFACE_DIMENSIONS.NAVIGATION_ARROW_HITBOX_EXTRA_HEIGHT,
 				action: () => gameEngineBridge.changeRoom(ROOM.MAIN)
 			},
 			{

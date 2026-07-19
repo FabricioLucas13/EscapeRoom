@@ -1,7 +1,7 @@
 /**
  * 📦 TRAER LAS PIEZAS DE LOS OTROS ARCHIVOS (Imports)
  */
-import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS, GAME_SETTINGS } from "./config.js"
+import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS, GAME_SETTINGS, GAME_RUNTIME, GAME_ASSET_SOURCES } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton, drawProportionalBackground, drawStandardRoomBackground, drawNavigationArrow } from "./helpers.js"
 import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions, getColorPuzzleInteractions, getScrollInteractions } from "./interactions.js"
 import { drawKeypadPuzzle } from "./keypadPuzzle.js"
@@ -25,16 +25,17 @@ let isOptionsOpen = false
 let timerStartedAt = null
 let timerActive = false
 let lastTouchTimestamp = 0
+const SHOW_MOUSE_COORDINATES = GAME_RUNTIME.SHOW_MOUSE_COORDINATES
 
 const replayButton = {
-	width: 225,
-	height: 44
+	width: GAME_RUNTIME.REPLAY_BUTTON.WIDTH,
+	height: GAME_RUNTIME.REPLAY_BUTTON.HEIGHT
 }
 
 function getReplayButtonZone() {
 	return {
 		x: canvasElement.width / 2 - replayButton.width / 2,
-		y: canvasElement.height - 110,
+		y: canvasElement.height - GAME_RUNTIME.REPLAY_BUTTON.BOTTOM_OFFSET_Y,
 		width: replayButton.width,
 		height: replayButton.height
 	}
@@ -68,9 +69,11 @@ function drawReplayButton() {
 
 function getCanvasPointFromMouseEvent(event) {
 	const boundaries = canvasElement.getBoundingClientRect()
+	const scaleX = canvasElement.width / boundaries.width
+	const scaleY = canvasElement.height / boundaries.height
 	return {
-		x: event.clientX - boundaries.left,
-		y: event.clientY - boundaries.top
+		x: (event.clientX - boundaries.left) * scaleX,
+		y: (event.clientY - boundaries.top) * scaleY
 	}
 }
 
@@ -81,9 +84,11 @@ function getCanvasPointFromTouchEvent(event) {
 	}
 
 	const boundaries = canvasElement.getBoundingClientRect()
+	const scaleX = canvasElement.width / boundaries.width
+	const scaleY = canvasElement.height / boundaries.height
 	return {
-		x: touch.clientX - boundaries.left,
-		y: touch.clientY - boundaries.top
+		x: (touch.clientX - boundaries.left) * scaleX,
+		y: (touch.clientY - boundaries.top) * scaleY
 	}
 }
 
@@ -159,6 +164,7 @@ function changeToRoom(targetRoom) {
 	currentRoom = targetRoom
 	if (targetRoom === ROOM.MAIN) {
 		gameState.startIntroSequence()
+		queueGameplayAssetPreload()
 		if (!timerActive) {
 			timerActive = true
 			timerStartedAt = Date.now()
@@ -204,6 +210,8 @@ initializeInteractions({
 	// CABLES DE LA VISTA DEL PERGAMINO CONECTADOS AL GESTOR DE ESTADO
 	openScroll: () => { gameState.openScroll(isOptionsOpen) },
 	closeScroll: () => { gameState.closeScroll() },
+	nextScrollPage: () => { gameState.nextScrollPage() },
+	previousScrollPage: () => { gameState.previousScrollPage() },
 
 	// COFRE DE RUNAS
 	openRuneChest: () => { gameState.openRuneChest(isOptionsOpen) }
@@ -214,30 +222,92 @@ const roomInteractions = getRoomInteractions(canvasElement)
 
 // --- CARGAR LAS IMÁGENES AUTOMÁTIMAMENTE ---
 const gameImages = {}
-const imageSources = {
-	start: "roomStart.jpg",
-	main: "roomMain.jpg",
-	exitGate: "roomExitGate.jpg",
-	candlesDetail: "candleOff.jpg",
-	colorsDetail: "colorPanelOff.jpg",
-	scrollDetail: "tableScroll.jpg",
-	chestClosed: "chestClosed.jpeg",
-	chestOpenRune: "chestOpenRune.jpg",
-	mainCharacterIntro: "mainCharacterIntro.png",
-	mainCharacterSolving: "mainCharacterSolving.png",
-	mainCharacterSolvedPuzzle: "mainCharacterSolvedPuzzle.png",
-	runeOne: "runeOne.png",
-	runeTwo: "runeTwo.png",
-	runeThree: "runeThree.png",
-	runeFour: "runeFour.png",
-	winDoor: "winDoor.jpg",
-	loseDoor: "loseDoor.jpg"
+const imageSources = GAME_ASSET_SOURCES.IMAGES
+
+Object.keys(imageSources).forEach((key) => {
+	gameImages[key] = new Image()
+	gameImages[key].decoding = "async"
+})
+
+const loadedImageKeys = new Set()
+const preloadedRawFiles = new Set()
+
+function loadImageByKey(key) {
+	if (loadedImageKeys.has(key) || !gameImages[key] || !imageSources[key]) {
+		return
+	}
+
+	gameImages[key].src = `assets/${imageSources[key]}`
+	loadedImageKeys.add(key)
 }
 
-Object.entries(imageSources).forEach(([key, filename]) => {
-	gameImages[key] = new Image()
-	gameImages[key].src = `assets/${filename}`
-})
+function setImageSourceIfNeeded(key, filename) {
+	const image = gameImages[key]
+	if (!image) {
+		return
+	}
+
+	if (!image.src || !image.src.includes(filename)) {
+		image.src = `assets/${filename}`
+	}
+}
+
+function preloadRawFile(filename) {
+	if (preloadedRawFiles.has(filename)) {
+		return
+	}
+
+	const preloadImage = new Image()
+	preloadImage.decoding = "async"
+	preloadImage.src = `assets/${filename}`
+	preloadedRawFiles.add(filename)
+}
+
+function preloadImageBundle(keys) {
+	keys.forEach(loadImageByKey)
+}
+
+function queueGameplayAssetPreload() {
+	const preloadTask = () => {
+		preloadImageBundle([
+			"main",
+			"exitGate",
+			"candlesDetail",
+			"colorsDetail",
+			"scrollDetail",
+			"chestClosed",
+			"chestOpenRune",
+			"mainCharacterIntro",
+			"mainCharacterSolving",
+			"mainCharacterSolvedPuzzle",
+			"runeOne",
+			"runeTwo",
+			"runeThree",
+			"runeFour",
+			"winDoor",
+			"loseDoor"
+		])
+
+		[
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.CANDLE_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.COLOR_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_CANDLE_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_COLOR_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_ALL_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.EXIT_GATE_COLOR_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.LOSE_DOOR_COLOR_ON
+		].forEach(preloadRawFile)
+	}
+
+	if (typeof window.requestIdleCallback === "function") {
+		window.requestIdleCallback(preloadTask, { timeout: 1200 })
+	} else {
+		setTimeout(preloadTask, 120)
+	}
+}
+
+// Arranque rápido: solo se carga la portada del menú.
+preloadImageBundle(["start"])
 
 runesState.onSolved = () => { gameState.solveRuneChest() }
 runesState.onClose = (closeReason) => {
@@ -268,7 +338,7 @@ canvasElement.addEventListener("mouseup", (event) => {
 })
 
 canvasElement.addEventListener("click", (event) => {
-	if (Date.now() - lastTouchTimestamp < 600) {
+	if (Date.now() - lastTouchTimestamp < GAME_RUNTIME.TOUCH_CLICK_GUARD_MS) {
 		return
 	}
 
@@ -360,27 +430,27 @@ function drawLossSequence(canvasContext, canvasElement, gameImages) {
 			return
 		}
 
-		const maxHeight = 300
+		const maxHeight = GAME_RUNTIME.LOSS_SEQUENCE.INTRO_CHARACTER_MAX_HEIGHT
 		const scale = Math.min(1, maxHeight / introCharacter.naturalHeight)
 		const drawWidth = introCharacter.naturalWidth * scale
 		const drawHeight = introCharacter.naturalHeight * scale
-		const drawX = 10
-		const drawY = canvasElement.height - drawHeight - 96
+		const drawX = GAME_RUNTIME.LOSS_SEQUENCE.INTRO_CHARACTER_X
+		const drawY = canvasElement.height - drawHeight - GAME_RUNTIME.LOSS_SEQUENCE.INTRO_CHARACTER_BOTTOM_OFFSET_Y
 		canvasContext.drawImage(introCharacter, drawX, drawY, drawWidth, drawHeight)
 	}
 
 	const elapsed = Date.now() - lossSequenceState.startedAt
-	const dialogDurationMs = 1000
-	const waitDurationMs = 2000
+	const dialogDurationMs = GAME_RUNTIME.LOSS_SEQUENCE.DIALOG_DURATION_MS
+	const waitDurationMs = GAME_RUNTIME.LOSS_SEQUENCE.WAIT_DURATION_MS
 
 	if (lossSequenceState.phase === "dialog") {
 		drawStandardRoomBackground(canvasContext, canvasElement, gameImages.loseDoor, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
 		drawIntroCharacterOnLoss()
 
-		const panelX = 80
-		const panelY = canvasElement.height - 140
-		const panelWidth = canvasElement.width - 160
-		const panelHeight = 90
+		const panelX = GAME_RUNTIME.LOSS_SEQUENCE.PANEL_MARGIN_X
+		const panelY = canvasElement.height - GAME_RUNTIME.LOSS_SEQUENCE.PANEL_BOTTOM_OFFSET_Y
+		const panelWidth = canvasElement.width - (GAME_RUNTIME.LOSS_SEQUENCE.PANEL_MARGIN_X * 2)
+		const panelHeight = GAME_RUNTIME.LOSS_SEQUENCE.PANEL_HEIGHT
 
 		canvasContext.save()
 		canvasContext.fillStyle = "rgba(0, 0, 0, 0.72)"
@@ -432,44 +502,45 @@ function drawLossSequence(canvasContext, canvasElement, gameImages) {
 export function draw() {
 	// Actualizar imágenes de detalle según el estado de los puzzles
 	try {
-		if (gameState.colorsResultText === "9") {
-			if (gameImages.colorsDetail && !gameImages.colorsDetail.src.includes("colorPanelOn.jpg")) {
-				gameImages.colorsDetail.src = "assets/colorPanelOn.jpg"
-			}
-		} else {
-			if (gameImages.colorsDetail && !gameImages.colorsDetail.src.includes("colorPanelOff.jpg")) {
-				gameImages.colorsDetail.src = "assets/colorPanelOff.jpg"
-			}
-		}
+		const hasGameplayStarted = currentRoom !== ROOM.START || timerActive || gameState.gameWon || lossSequenceState.triggered
 
-		if (gameState.candleResultText === "3") {
-			if (gameImages.candlesDetail && !gameImages.candlesDetail.src.includes("candleOn.jpg")) {
-				gameImages.candlesDetail.src = "assets/candleOn.jpg"
-			}
-		} else {
-			if (gameImages.candlesDetail && !gameImages.candlesDetail.src.includes("candleOff.jpg")) {
-				gameImages.candlesDetail.src = "assets/candleOff.jpg"
-			}
-		}
-
-		// Actualizar la imagen principal de la habitación principal según el estado de los puzzles
-		try {
-			const candleDone = gameState.candleResultText === "3"
-			const colorDone = gameState.colorsResultText === "9"
-			let desiredMain = "assets/roomMain.jpg"
-			if (candleDone && !colorDone) {
-				desiredMain = "assets/roomMainCandleOn.jpg"
-			} else if (colorDone && !candleDone) {
-				desiredMain = "assets/roomMainColorPanelOn.jpg"
-			} else if (candleDone && colorDone) {
-				desiredMain = "assets/roomMainPuzzleOn.jpg"
+		if (hasGameplayStarted) {
+			if (gameState.colorsResultText === "9") {
+				setImageSourceIfNeeded("colorsDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.COLOR_ON)
+			} else {
+				setImageSourceIfNeeded("colorsDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.COLOR_OFF)
 			}
 
-			if (gameImages.main && !gameImages.main.src.includes(desiredMain.split('/').pop())) {
-				gameImages.main.src = desiredMain
+			if (gameState.candleResultText === "3") {
+				setImageSourceIfNeeded("candlesDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.CANDLE_ON)
+			} else {
+				setImageSourceIfNeeded("candlesDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.CANDLE_OFF)
 			}
-		} catch (e) {
-			console.warn("Error actualizando fondo de la habitación principal:", e)
+
+			const colorPuzzleSolved = gameState.colorsResultText === "9"
+			const desiredExitGate = colorPuzzleSolved ? GAME_ASSET_SOURCES.STAGE_VARIANTS.EXIT_GATE_COLOR_ON : GAME_ASSET_SOURCES.STAGE_VARIANTS.EXIT_GATE_DEFAULT
+			setImageSourceIfNeeded("exitGate", desiredExitGate)
+
+			const desiredLoseDoor = colorPuzzleSolved ? GAME_ASSET_SOURCES.STAGE_VARIANTS.LOSE_DOOR_COLOR_ON : GAME_ASSET_SOURCES.STAGE_VARIANTS.LOSE_DOOR_DEFAULT
+			setImageSourceIfNeeded("loseDoor", desiredLoseDoor)
+
+			// Actualizar la imagen principal de la habitación principal según el estado de los puzzles
+			try {
+				const candleDone = gameState.candleResultText === "3"
+				const colorDone = gameState.colorsResultText === "9"
+				let desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_DEFAULT
+				if (candleDone && !colorDone) {
+					desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_CANDLE_ON
+				} else if (colorDone && !candleDone) {
+					desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_COLOR_ON
+				} else if (candleDone && colorDone) {
+					desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_ALL_ON
+				}
+
+				setImageSourceIfNeeded("main", desiredMain)
+			} catch (e) {
+				console.warn("Error actualizando fondo de la habitación principal:", e)
+			}
 		}
 	} catch (e) {
 		// No bloquear el bucle de dibujo por errores menores
@@ -647,6 +718,8 @@ export function draw() {
 	}
 
 	if (gameState.isKeypadOpen) {
+		loadImageByKey("mainCharacterSolving")
+		loadImageByKey("mainCharacterSolvedPuzzle")
 		drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameImages)
 	}
 
@@ -654,6 +727,7 @@ export function draw() {
 	// 🕯️ INTERFAZ DEL POP-UP: PUZZLE DE LAS VELAS (Delegación limpia)
 	// =========================================================================
 	if (gameState.isCandleOpen) {
+		loadImageByKey("candlesDetail")
 		drawCandlePuzzle(canvasContext, canvasElement, gameState, gameImages.candlesDetail, gameImages)
 	}
 
@@ -661,6 +735,7 @@ export function draw() {
 	// 🎨 INTERFAZ DEL POP-UP: PUZZLE DE COLORES (Delegación limpia)
 	// =========================================================================
 	if (gameState.isColorPuzzleOpen) {
+		loadImageByKey("colorsDetail")
 		drawColorPuzzle(canvasContext, canvasElement, gameState, gameImages.colorsDetail, gameImages)
 	}
 
@@ -668,19 +743,26 @@ export function draw() {
 	// 📜 INTERFAZ DEL POP-UP: VISTA DEL PERGAMINO (Delegación limpia)
 	// =========================================================================
 	if (gameState.isScrollOpen) {
+		loadImageByKey("scrollDetail")
 		drawScrollText(canvasContext, canvasElement, gameState, gameImages.scrollDetail, gameImages)
 	}
 
 	// =========================================================================
 	// 🗿 INTERFAZ DEL POP-UP: PUZZLE DE RUNAS (Delegación limpia)
 	// =========================================================================
+	loadImageByKey("runeOne")
+	loadImageByKey("runeTwo")
+	loadImageByKey("runeThree")
+	loadImageByKey("runeFour")
 	drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY)
 	if (gameState.isRuneChestOpen) {
 		drawDialogBox(canvasContext, canvasElement, gameState, "runes", gameImages)
 	}
 
-	// Ejecuta la herramienta que pinta la posición X e Y del ratón
-	drawMouseCoordinates()
+	// Herramienta de depuración opcional
+	if (SHOW_MOUSE_COORDINATES) {
+		drawMouseCoordinates()
+	}
 
 	// Le pide al navegador que vuelva a ejecutar esta función 'draw' en el próximo fotograma
 	requestAnimationFrame(draw)

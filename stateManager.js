@@ -376,6 +376,7 @@ export const gameState = {
 	// 📜 🚀 NUEVO - PERGAMINO DESENROLLADO (Habitación 1)
 	// =========================================================================
 	isScrollOpen: false,             // Estado de apertura de la vista del manuscrito
+	scrollPageIndex: 0,
 	scrollHintVisible: false,
 	scrollHintSeen: false,
 
@@ -383,13 +384,23 @@ export const gameState = {
 	openScroll(isOptionsOpen) {
 		if (!this.isScrollOpen && !isOptionsOpen && !this.isCandleOpen && !this.isColorPuzzleOpen) {
 			this.isScrollOpen = true
+			this.scrollPageIndex = 0
 			this.scrollHintVisible = true
 		}
+	},
+
+	nextScrollPage() {
+		this.scrollPageIndex = Math.min(this.scrollPageIndex + 1, GAME_PUZZLES.SCROLL_PAGES.length - 1)
+	},
+
+	previousScrollPage() {
+		this.scrollPageIndex = Math.max(this.scrollPageIndex - 1, 0)
 	},
 
 	// ❌ Cerrar la vista del manuscrito
 	closeScroll() {
 		this.isScrollOpen = false
+		this.scrollPageIndex = 0
 		this.scrollHintVisible = false
 		this.scrollHintSeen = true
 	},
@@ -417,6 +428,7 @@ export const gameState = {
 		this.colorHintSeen = false
 
 		this.isScrollOpen = false
+		this.scrollPageIndex = 0
 		this.scrollHintVisible = false
 		this.scrollHintSeen = false
 
