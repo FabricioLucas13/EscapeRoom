@@ -73,51 +73,34 @@ export const INTERFACE_COLORS = {
 
 // 📏 MEDIDAS DEL JUEGO (Todo está medido en píxeles)
 export const INTERFACE_DIMENSIONS = {
-<<<<<<< HEAD
-	MENU_BUTTON_WIDTH: 225,          // Ancho de los botones JUGAR y OPCIONES
-	MENU_BUTTON_HEIGHT: 44,          // Alto de los botones JUGAR y OPCIONES
-	OPTIONS_MODAL_WIDTH: 300,        // Ancho de la caja del menú de sonido
-	OPTIONS_MODAL_HEIGHT: 220,       // Alto de la caja del menú de sonido
-	MODAL_BUTTON_WIDTH: 160,         // Ancho de los botones de dentro del menú de sonido (MÚSICA y VOLVER)
-	MODAL_BUTTON_HEIGHT: 38,         // Alto de los botones de dentro del menú de sonido
-	NAVIGATION_ARROW_SIZE: 20,       // Tamaño de las flechas blancas para cambiar de habitación
-	ARROW_Y_ROOM_ONE: 320,       // Altura exacta en la pantalla donde se dibuja la flecha en la Habitación 1
-	KEYPAD_WIDTH: 270,                           // Ancho total del panel del teclado
-	KEYPAD_HEIGHT: 380,                          // Alto total del panel del teclado
-	KEYPAD_GRID_COLS: 3,                         // Columnas de botones
-	KEYPAD_BTN_SIZE: 50,                         // Tamaño cuadrado de cada botón numérico
-	KEYPAD_GAP: 10                               // Separación entre botones
-=======
 	// Menú y Modales Generales
-	MENU_BUTTON_WIDTH: 225,          
-	MENU_BUTTON_HEIGHT: 44,          
-	OPTIONS_MODAL_WIDTH: 300,        
-	OPTIONS_MODAL_HEIGHT: 220,       
-	MODAL_BUTTON_WIDTH: 160,         
-	MODAL_BUTTON_HEIGHT: 38,         
+	MENU_BUTTON_WIDTH: 225,
+	MENU_BUTTON_HEIGHT: 44,
+	OPTIONS_MODAL_WIDTH: 300,
+	OPTIONS_MODAL_HEIGHT: 220,
+	MODAL_BUTTON_WIDTH: 160,
+	MODAL_BUTTON_HEIGHT: 38,
 	NAVIGATION_ARROW_SIZE: 22,
 	ARROW_Y_ROOM_ONE: 324,
 	ARROW_X_ROOM_ONE: 600,
 	ARROW_Y_ROOM_MAIN: 324, // Alias de compatibilidad
 	ARROW_X_ROOM_MAIN: 600, // Alias de compatibilidad
-	
+
 	// Medidas del Teclado (Abreviatura BTN -> BUTTON eliminadas)
-	KEYPAD_WIDTH: 270,                           
-	KEYPAD_HEIGHT: 380,                          
-	KEYPAD_GRID_COLUMNS: 3,                         
-	KEYPAD_BUTTON_SIZE: 50,                         
-	KEYPAD_GAP: 10,                               
+	KEYPAD_WIDTH: 270,
+	KEYPAD_HEIGHT: 380,
+	KEYPAD_GRID_COLUMNS: 3,
+	KEYPAD_BUTTON_SIZE: 50,
+	KEYPAD_GAP: 10,
 
 	// Medidas de las Velas
-	CANDLE_MODAL_WIDTH: 420,          
-	CANDLE_MODAL_HEIGHT: 260,         
-	CANDLE_WIDTH: 70,                 
+	CANDLE_MODAL_WIDTH: 420,
+	CANDLE_MODAL_HEIGHT: 260,
+	CANDLE_WIDTH: 70,
 	CANDLE_HEIGHT: 90,
 	CANDLE_GAP: 10,
-	CANDLE_TITLE_Y: 40,                
-	CANDLE_RESULT_BOTTOM_GAP: 30,      
-
-	// Coordenadas fijas de los objetos interactivos (Hitboxes)
+	CANDLE_TITLE_Y: 40,
+	CANDLE_RESULT_BOTTOM_GAP: 30,
 	ROOM_ONE_CANDLES_X: 130,
 	ROOM_ONE_CANDLES_Y: 230,
 	ROOM_ONE_CANDLES_WIDTH: 105,
@@ -187,16 +170,26 @@ export const INTERFACE_DIMENSIONS = {
 	SCROLL_MODAL_HEIGHT: 320,
 
 	// Puzzle de runas
-	RUNE_MODAL_WIDTH: 650,
-	RUNE_MODAL_HEIGHT: 460,
-	RUNE_BOARD_WIDTH: 560,
-	RUNE_BOARD_HEIGHT: 210,
-	RUNE_SIZE: 100,
-	RUNE_PEDESTAL_SIZE: 80,
-	RUNE_BUTTON_WIDTH: 150,
-	RUNE_BUTTON_HEIGHT: 38,
-	RUNE_BOARD_PADDING: 45,
-	RUNE_BOARD_TOP: 70,
+	RUNE_MODAL_OVERLAY: "rgba(0, 0, 0, 0.65)",
+	RUNE_TITLE_Y: 30,
+	RUNE_START_X: 70,
+	RUNE_START_Y: 72,
+	RUNE_RUNE_SPACING: 92,
+	RUNE_PEDESTAL_START_X: 90,
+	RUNE_PEDESTAL_Y: 215,
+	RUNE_PEDESTAL_SPACING: 92,
+	RUNE_MODAL_WIDTH: 490,
+	RUNE_MODAL_HEIGHT: 345,
+	RUNE_BOARD_WIDTH: 420,
+	RUNE_BOARD_HEIGHT: 155,
+	RUNE_SIZE: 70,
+	RUNE_PEDESTAL_SIZE: 56,
+	RUNE_BUTTON_WIDTH: 120,
+	RUNE_BUTTON_HEIGHT: 32,
+	RUNE_BUTTON_MARGIN_BOTTOM: 48,
+	RUNE_RESULT_MARGIN_BOTTOM: 18,
+	RUNE_BOARD_PADDING: 28,
+	RUNE_BOARD_TOP: 28,
 
 	// 🛠️ NUEVAS MEDIDAS EXTRAÍDAS DE SCROLLTEXT.JS
 	SCROLL_BORDER_LINE_WIDTH: 4,
@@ -239,7 +232,6 @@ export const INTERFACE_DIMENSIONS = {
 	// Keypad specific offsets
 	KEYPAD_TITLE_Y_OFFSET: 40,
 	KEYPAD_SCREEN_Y_OFFSET: 85
->>>>>>> 0a9ac7d1de5b4feff580c822caec11fdc65a22d0
 }
 
 // 🔤 TIPOGRAFÍAS Y FUENTES CENTRALIZADAS (Nombres completamente descriptivos en inglés)
@@ -259,10 +251,23 @@ export const INTERFACE_FONTS = {
 	ACTION_BUTTON: "14px monospace"
 }
 
+// ⚙️ CONFIGURACIÓN GENERAL DEL JUEGO
+export const GAME_SETTINGS = {
+	TIMER_DURATION_MS: 10 * 1000
+}
+
 // 🧩 LOS ENIGMAS Y RESPUESTAS DEL JUEGO
 export const GAME_PUZZLES = {
-	EXIT_SECRET_CODE: "739",                      
+	EXIT_SECRET_CODE: "739",
 	CANDLE_SECRET_ORDER: [2,3,1,4],
+	RUNES_SOLUTION_SEQUENCE: [4, 1, 3],
+	RUNES_SOLVED_CODE: "7",
+	RUNE_IMAGE_KEYS: {
+		1: "runeOne",
+		2: "runeTwo",
+		3: "runeThree",
+		4: "runeFour"
+	},
 
 	// 🛠️ NUEVO ARRAY DE TEXTOS CENTRALIZADOS DEL LORE
 	SCROLL_LORE_LINES: [

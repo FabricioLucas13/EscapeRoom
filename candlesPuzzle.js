@@ -38,7 +38,7 @@ export function drawCandlePuzzle(canvasContext, canvasElement, gameState, backgr
 			return; 
 		}
 
-		if (zone.label === "⚙️ Ejecutar") {
+		if (zone.label === "Activar") {
 			let actionButtonColors = { ...INTERFACE_COLORS }
 			actionButtonColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_NUMBER_BACKGROUND
 			actionButtonColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_SCREEN_TEXT

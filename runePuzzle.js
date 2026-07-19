@@ -1,209 +1,271 @@
 // =========================================================================
 // 🗿 CONFIGURACIÓN INTERNA Y ESTADO DEL PUZZLE DE RUNAS
 // =========================================================================
-import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS } from "./config.js"
+import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS, GAME_PUZZLES } from "./config.js"
+import { drawBeveledButton } from "./helpers.js"
+
+const runeImageKeys = GAME_PUZZLES.RUNE_IMAGE_KEYS
 
 export const runesState = {
 	isOpen: false,
 	resultText: "",
 	draggedIndex: null,
-	
+	onSolved: null,
+	onClose: null,
+	onFailed: null,
+
 	dimensions: {
-		modalW: INTERFACE_DIMENSIONS.RUNE_MODAL_WIDTH,
-		modalH: INTERFACE_DIMENSIONS.RUNE_MODAL_HEIGHT,
-		boardW: INTERFACE_DIMENSIONS.RUNE_BOARD_WIDTH,
-		boardH: INTERFACE_DIMENSIONS.RUNE_BOARD_HEIGHT,
+		modalWidth: INTERFACE_DIMENSIONS.RUNE_MODAL_WIDTH,
+		modalHeight: INTERFACE_DIMENSIONS.RUNE_MODAL_HEIGHT,
+		boardWidth: INTERFACE_DIMENSIONS.RUNE_BOARD_WIDTH,
+		boardHeight: INTERFACE_DIMENSIONS.RUNE_BOARD_HEIGHT,
 		runeSize: INTERFACE_DIMENSIONS.RUNE_SIZE,
 		pedestalSize: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_SIZE,
-		btnW: INTERFACE_DIMENSIONS.RUNE_BUTTON_WIDTH,
-		btnH: INTERFACE_DIMENSIONS.RUNE_BUTTON_HEIGHT,
+		buttonWidth: INTERFACE_DIMENSIONS.RUNE_BUTTON_WIDTH,
+		buttonHeight: INTERFACE_DIMENSIONS.RUNE_BUTTON_HEIGHT,
+		buttonMarginBottom: INTERFACE_DIMENSIONS.RUNE_BUTTON_MARGIN_BOTTOM,
+		resultMarginBottom: INTERFACE_DIMENSIONS.RUNE_RESULT_MARGIN_BOTTOM,
 		boardPadding: INTERFACE_DIMENSIONS.RUNE_BOARD_PADDING,
 		boardTop: INTERFACE_DIMENSIONS.RUNE_BOARD_TOP
 	},
 
 	runes: [
-		{ id: 1, x: 80,  y: 80,  homeX: 80,  homeY: 80,  imageKey: "runeOne" },
-		{ id: 2, x: 200, y: 80,  homeX: 200, homeY: 80,  imageKey: "runeTwo" },
-		{ id: 3, x: 320, y: 80,  homeX: 320, homeY: 80,  imageKey: "runeThree" },
-		{ id: 4, x: 440, y: 80,  homeX: 440, homeY: 80,  imageKey: "runeFour" }
+		{ id: 1, x: INTERFACE_DIMENSIONS.RUNE_START_X, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[1] },
+		{ id: 2, x: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[2] },
+		{ id: 3, x: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 2, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 2, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[3] },
+		{ id: 4, x: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 3, y: INTERFACE_DIMENSIONS.RUNE_START_Y, homeX: INTERFACE_DIMENSIONS.RUNE_START_X + INTERFACE_DIMENSIONS.RUNE_RUNE_SPACING * 3, homeY: INTERFACE_DIMENSIONS.RUNE_START_Y, imageKey: runeImageKeys[4] }
 	],
 
 	pedestals: [
-		{ id: 0, x: 145, y: 260, assignedRuneId: null },
-		{ id: 1, x: 265, y: 260, assignedRuneId: null },
-		{ id: 2, x: 385, y: 260, assignedRuneId: null }
+		{ id: 0, x: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_START_X, y: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_Y, assignedRuneId: null },
+		{ id: 1, x: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_START_X + INTERFACE_DIMENSIONS.RUNE_PEDESTAL_SPACING, y: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_Y, assignedRuneId: null },
+		{ id: 2, x: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_START_X + INTERFACE_DIMENSIONS.RUNE_PEDESTAL_SPACING * 2, y: INTERFACE_DIMENSIONS.RUNE_PEDESTAL_Y, assignedRuneId: null }
 	],
 
 	reset() {
-		this.resultText = "";
-		this.draggedIndex = null;
-		this.runes.forEach(r => { r.x = r.homeX; r.y = r.homeY; });
-		this.pedestals.forEach(p => p.assignedRuneId = null);
+		this.resultText = ""
+		this.draggedIndex = null
+		this.runes.forEach(rune => {
+			rune.x = rune.homeX
+			rune.y = rune.homeY
+		})
+		this.pedestals.forEach(pedestal => {
+			pedestal.assignedRuneId = null
+		})
 	},
 
 	check() {
-		if (this.resultText === "7") return;
-		const currentOrder = this.pedestals.map(p => p.assignedRuneId || 0);
-		if (JSON.stringify(currentOrder) === JSON.stringify([4, 1, 3])) {
-			this.resultText = "7";
+		if (this.resultText === GAME_PUZZLES.RUNES_SOLVED_CODE) return
+
+		const currentOrder = this.pedestals.map(pedestal => pedestal.assignedRuneId || 0)
+		const solution = GAME_PUZZLES.RUNES_SOLUTION_SEQUENCE
+
+		if (solution.length === currentOrder.length && solution.every((value, index) => value === currentOrder[index])) {
+			this.resultText = GAME_PUZZLES.RUNES_SOLVED_CODE
+			if (typeof this.onSolved === "function") {
+				this.onSolved()
+			}
 		} else {
-			this.resultText = "❌ ERROR";
-			setTimeout(() => this.reset(), 1000);
+			this.resultText = "❌ ERROR"
+			if (typeof this.onFailed === "function") {
+				this.onFailed()
+			}
+			setTimeout(() => this.reset(), 1000)
 		}
 	}
-};
+}
 
 // =========================================================================
 // 🖱️ CONTROLADORES DE EVENTOS EN CANVAS (Mousedown, Mouseup)
 // =========================================================================
-export function handleRunesMousedown(mouseX, mouseY, canvasWidth, canvasHeight) {
-	if (!runesState.isOpen) return;
+function getModalPosition(canvasWidth, canvasHeight) {
+	return {
+		modalX: canvasWidth / 2 - runesState.dimensions.modalWidth / 2,
+		modalY: canvasHeight / 2 - runesState.dimensions.modalHeight / 2
+	}
+}
 
-	const modalX = canvasWidth / 2 - runesState.dimensions.modalW / 2;
-	const modalY = canvasHeight / 2 - runesState.dimensions.modalH / 2;
+export function handleRunesMousedown(mouseX, mouseY, canvasWidth, canvasHeight) {
+	if (!runesState.isOpen) return
+
+	const { modalX, modalY } = getModalPosition(canvasWidth, canvasHeight)
+	const runeSize = runesState.dimensions.runeSize
 
 	runesState.runes.forEach((rune, index) => {
-		const absX = modalX + rune.x;
-		const absY = modalY + rune.y;
-		if (mouseX >= absX && mouseX <= absX + runesState.dimensions.runeSize &&
-			mouseY >= absY && mouseY <= absY + runesState.dimensions.runeSize) {
-			runesState.draggedIndex = index;
-			runesState.pedestals.forEach(p => {
-				if (p.assignedRuneId === rune.id) p.assignedRuneId = null;
-			});
+		const absX = modalX + rune.x
+		const absY = modalY + rune.y
+
+		if (mouseX >= absX && mouseX <= absX + runeSize && mouseY >= absY && mouseY <= absY + runeSize) {
+			runesState.draggedIndex = index
+			runesState.pedestals.forEach(pedestal => {
+				if (pedestal.assignedRuneId === rune.id) {
+					pedestal.assignedRuneId = null
+				}
+			})
 		}
-	});
+	})
 }
 
 export function handleRunesMouseup(mouseX, mouseY, canvasWidth, canvasHeight) {
-	if (!runesState.isOpen || runesState.draggedIndex === null) return;
+	if (!runesState.isOpen || runesState.draggedIndex === null) return
 
-	const rune = runesState.runes[runesState.draggedIndex];
-	const modalX = canvasWidth / 2 - runesState.dimensions.modalW / 2;
-	const modalY = canvasHeight / 2 - runesState.dimensions.modalH / 2;
-	let dropped = false;
+	const rune = runesState.runes[runesState.draggedIndex]
+	const { modalX, modalY } = getModalPosition(canvasWidth, canvasHeight)
+	const pedestalSize = runesState.dimensions.pedestalSize
+	let dropped = false
 
-	runesState.pedestals.forEach(p => {
-		const absX = modalX + p.x;
-		const absY = modalY + p.y;
-		const size = runesState.dimensions.pedestalSize;
+	runesState.pedestals.forEach(pedestal => {
+		const absX = modalX + pedestal.x
+		const absY = modalY + pedestal.y
 
-		if (mouseX >= absX && mouseX <= absX + size && mouseY >= absY && mouseY <= absY + size) {
-			if (p.assignedRuneId !== null) {
-				const oldRune = runesState.runes.find(r => r.id === p.assignedRuneId);
-				if (oldRune) { oldRune.x = oldRune.homeX; oldRune.y = oldRune.homeY; }
+		if (mouseX >= absX && mouseX <= absX + pedestalSize && mouseY >= absY && mouseY <= absY + pedestalSize) {
+			if (pedestal.assignedRuneId !== null) {
+				const previousRune = runesState.runes.find(entry => entry.id === pedestal.assignedRuneId)
+				if (previousRune) {
+					previousRune.x = previousRune.homeX
+					previousRune.y = previousRune.homeY
+				}
 			}
-			rune.x = p.x + (size - runesState.dimensions.runeSize) / 2;
-			rune.y = p.y + (size - runesState.dimensions.runeSize) / 2;
-			p.assignedRuneId = rune.id;
-			dropped = true;
+
+			rune.x = pedestal.x + (pedestalSize - runesState.dimensions.runeSize) / 2
+			rune.y = pedestal.y - 6
+			pedestal.assignedRuneId = rune.id
+			dropped = true
 		}
-	});
+	})
 
 	if (!dropped) {
-		rune.x = rune.homeX;
-		rune.y = rune.homeY;
+		rune.x = rune.homeX
+		rune.y = rune.homeY
 	}
-	runesState.draggedIndex = null;
+
+	runesState.draggedIndex = null
 }
 
 export function handleRunesClick(mouseX, mouseY, canvasWidth, canvasHeight) {
-	if (!runesState.isOpen) return;
+	if (!runesState.isOpen) return
 
-	const modalX = canvasWidth / 2 - runesState.dimensions.modalW / 2;
-	const modalY = canvasHeight / 2 - runesState.dimensions.modalH / 2;
+	const { modalX, modalY } = getModalPosition(canvasWidth, canvasHeight)
+	const buttonWidth = runesState.dimensions.buttonWidth
+	const buttonHeight = runesState.dimensions.buttonHeight
+	const buttonY = modalY + runesState.dimensions.modalHeight - runesState.dimensions.buttonMarginBottom
+	const buttonX = modalX + (runesState.dimensions.modalWidth - buttonWidth) / 2
 
-	const btnX = canvasWidth / 2 - runesState.dimensions.btnW / 2;
-	const btnY = modalY + runesState.dimensions.modalH - 75;
-	if (mouseX >= btnX && mouseX <= btnX + runesState.dimensions.btnW && mouseY >= btnY && mouseY <= btnY + runesState.dimensions.btnH) {
-		runesState.check();
-		return;
+	if (mouseX >= buttonX && mouseX <= buttonX + buttonWidth && mouseY >= buttonY && mouseY <= buttonY + buttonHeight) {
+		runesState.check()
+		return
 	}
 
-	const insideModal = mouseX >= modalX && mouseX <= modalX + runesState.dimensions.modalW &&
-		mouseY >= modalY && mouseY <= modalY + runesState.dimensions.modalH;
-	if (!insideModal) {
-		runesState.isOpen = false;
+	const screenInsideModal = mouseX >= modalX && mouseX <= modalX + runesState.dimensions.modalWidth && mouseY >= modalY && mouseY <= modalY + runesState.dimensions.modalHeight
+	if (!screenInsideModal) {
+		if (typeof runesState.onClose === "function") {
+			runesState.onClose()
+		} else {
+			runesState.isOpen = false
+		}
 	}
 }
 
 // =========================================================================
 // 🎨 RENDERIZADO DEL POP-UP EN EL CANVAS
 // =========================================================================
-export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY) {
-	if (!runesState.isOpen) return;
+function drawModalPanel(canvasContext, x, y, width, height) {
+	const cornerInset = 18
+	canvasContext.beginPath()
+	canvasContext.moveTo(x + cornerInset, y)
+	canvasContext.lineTo(x + width - cornerInset, y)
+	canvasContext.lineTo(x + width, y + cornerInset)
+	canvasContext.lineTo(x + width, y + height - cornerInset)
+	canvasContext.lineTo(x + width - cornerInset, y + height)
+	canvasContext.lineTo(x + cornerInset, y + height)
+	canvasContext.lineTo(x, y + height - cornerInset)
+	canvasContext.lineTo(x, y + cornerInset)
+	canvasContext.closePath()
+}
 
-	const modalX = canvasElement.width / 2 - runesState.dimensions.modalW / 2;
-	const modalY = canvasElement.height / 2 - runesState.dimensions.modalH / 2;
+export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY) {
+	if (!runesState.isOpen) return
+
+	const { modalX, modalY } = getModalPosition(canvasElement.width, canvasElement.height)
+	const { modalWidth, modalHeight, runeSize, boardWidth, boardHeight, pedestalSize, buttonWidth, buttonHeight, buttonMarginBottom, resultMarginBottom } = runesState.dimensions
 
 	if (runesState.draggedIndex !== null) {
-		runesState.runes[runesState.draggedIndex].x = mouseX - modalX - runesState.dimensions.runeSize / 2;
-		runesState.runes[runesState.draggedIndex].y = mouseY - modalY - runesState.dimensions.runeSize / 2;
+		runesState.runes[runesState.draggedIndex].x = mouseX - modalX - runeSize / 2
+		runesState.runes[runesState.draggedIndex].y = mouseY - modalY - runeSize / 2
 	}
 
-	canvasContext.fillStyle = "rgba(0, 0, 0, 0.78)";
-	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height);
+	canvasContext.fillStyle = INTERFACE_DIMENSIONS.RUNE_MODAL_OVERLAY
+	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
 
-	let gradient = canvasContext.createLinearGradient(modalX, modalY, modalX, modalY + runesState.dimensions.modalH);
-	gradient.addColorStop(0, "#3b322a");
-	gradient.addColorStop(1, "#1c1713");
-	canvasContext.fillStyle = gradient;
-	canvasContext.fillRect(modalX, modalY, runesState.dimensions.modalW, runesState.dimensions.modalH);
-	canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT;
-	canvasContext.lineWidth = 2;
-	canvasContext.strokeRect(modalX, modalY, runesState.dimensions.modalW, runesState.dimensions.modalH);
+	const gradient = canvasContext.createLinearGradient(modalX, modalY, modalX, modalY + modalHeight)
+	gradient.addColorStop(0, "#3b322a")
+	gradient.addColorStop(1, "#1c1713")
 
-	canvasContext.textAlign = "center";
-	canvasContext.textBaseline = "middle";
-	canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER;
-	canvasContext.font = INTERFACE_FONTS.BUTTON_TITLE;
-	canvasContext.fillText("ALINEACIÓN DE RUNAS ANCESTRALES", canvasElement.width / 2, modalY + 30);
+	drawModalPanel(canvasContext, modalX, modalY, modalWidth, modalHeight)
+	canvasContext.fillStyle = gradient
+	canvasContext.fill()
+	canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT
+	canvasContext.lineWidth = 2
+	canvasContext.stroke()
 
-	canvasContext.fillStyle = "rgba(255,255,255,0.05)";
-	canvasContext.fillRect(modalX + 45, modalY + 50, runesState.dimensions.boardW, runesState.dimensions.boardH);
+	const boardLeftX = modalX + INTERFACE_DIMENSIONS.RUNE_BOARD_PADDING
+	const boardTopY = modalY + INTERFACE_DIMENSIONS.RUNE_BOARD_TOP
+	canvasContext.fillStyle = "rgba(255,255,255,0.04)"
+	canvasContext.fillRect(boardLeftX, boardTopY, boardWidth, boardHeight)
+	canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT
+	canvasContext.lineWidth = 1.2
+	canvasContext.strokeRect(boardLeftX, boardTopY, boardWidth, boardHeight)
 
-	runesState.pedestals.forEach(p => {
-		canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT;
-		canvasContext.lineWidth = 2;
-		canvasContext.setLineDash([6, 4]);
-		canvasContext.strokeRect(modalX + p.x, modalY + p.y, runesState.dimensions.pedestalSize, runesState.dimensions.pedestalSize);
-		canvasContext.setLineDash([]);
-	});
+	runesState.pedestals.forEach(pedestal => {
+		const pedestalX = modalX + pedestal.x
+		const pedestalY = modalY + pedestal.y
 
-	const btnX = canvasElement.width / 2 - runesState.dimensions.btnW / 2;
-	const btnY = modalY + runesState.dimensions.modalH - 65;
-	canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_BACKGROUND_DEFAULT;
-	canvasContext.fillRect(btnX, btnY, runesState.dimensions.btnW, runesState.dimensions.btnH);
-	canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT;
-	canvasContext.strokeRect(btnX, btnY, runesState.dimensions.btnW, runesState.dimensions.btnH);
-	canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER;
-	canvasContext.font = INTERFACE_FONTS.ACTION_BUTTON;
-	canvasContext.fillText("EJECUTAR", canvasElement.width / 2, btnY + 24);
+		canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_BACKGROUND_HOVER
+		canvasContext.fillRect(pedestalX, pedestalY, pedestalSize, pedestalSize)
+
+		canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT
+		canvasContext.lineWidth = 2
+		canvasContext.strokeRect(pedestalX, pedestalY, pedestalSize, pedestalSize)
+	})
+
+	const buttonZone = {
+		x: modalX + (modalWidth - buttonWidth) / 2,
+		y: modalY + modalHeight - buttonMarginBottom,
+		width: buttonWidth,
+		height: buttonHeight
+	}
+
+	const isButtonHovered = mouseX >= buttonZone.x && mouseX <= buttonZone.x + buttonZone.width && mouseY >= buttonZone.y && mouseY <= buttonZone.y + buttonZone.height
+	const buttonColors = { ...INTERFACE_COLORS }
+	buttonColors.BUTTON_BACKGROUND_DEFAULT = INTERFACE_COLORS.KEYPAD_BUTTON_NUMBER_BACKGROUND
+	buttonColors.BUTTON_TEXT_DEFAULT = INTERFACE_COLORS.KEYPAD_SCREEN_TEXT
+	canvasContext.font = INTERFACE_FONTS.ACTION_BUTTON
+	drawBeveledButton(canvasContext, canvasElement, buttonColors, buttonZone, isButtonHovered, "ACTIVAR", 6)
 
 	runesState.runes.forEach(rune => {
-		const img = gameImages[rune.imageKey];
-		const drawX = modalX + rune.x;
-		const drawY = modalY + rune.y;
-		
+		const img = gameImages[rune.imageKey]
+		const drawX = modalX + rune.x
+		const drawY = modalY + rune.y
+
 		if (img && img.complete && img.naturalWidth > 0) {
-			canvasContext.drawImage(img, drawX, drawY, runesState.dimensions.runeSize, runesState.dimensions.runeSize);
+			canvasContext.drawImage(img, drawX, drawY, runeSize, runeSize)
 		} else {
-			canvasContext.fillStyle = "#2f2a1f";
-			canvasContext.fillRect(drawX, drawY, runesState.dimensions.runeSize, runesState.dimensions.runeSize);
-			canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT;
-			canvasContext.lineWidth = 2;
-			canvasContext.strokeRect(drawX, drawY, runesState.dimensions.runeSize, runesState.dimensions.runeSize);
-			canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER;
-			canvasContext.font = INTERFACE_FONTS.BUTTON_TITLE;
-			canvasContext.textAlign = "center";
-			canvasContext.textBaseline = "middle";
-			canvasContext.fillText(String(rune.id), drawX + runesState.dimensions.runeSize / 2, drawY + runesState.dimensions.runeSize / 2 + 1);
+			canvasContext.fillStyle = "#2f2a1f"
+			canvasContext.fillRect(drawX, drawY, runeSize, runeSize)
+			canvasContext.strokeStyle = INTERFACE_COLORS.BUTTON_BORDER_DEFAULT
+			canvasContext.lineWidth = 2
+			canvasContext.strokeRect(drawX, drawY, runeSize, runeSize)
+			canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER
+			canvasContext.font = INTERFACE_FONTS.BUTTON_TITLE
+			canvasContext.textAlign = "center"
+			canvasContext.textBaseline = "middle"
+			canvasContext.fillText(String(rune.id), drawX + runeSize / 2, drawY + runeSize / 2 + 1)
 		}
-	});
+	})
 
 	if (runesState.resultText !== "") {
-		canvasContext.fillStyle = (runesState.resultText === "7") ? "#7cffb2" : "#ff5a5a";
-		canvasContext.font = "bold 24px 'Georgia', serif";
-		canvasContext.fillText(runesState.resultText, canvasElement.width / 2, modalY + runesState.dimensions.modalH - 25);
+		canvasContext.fillStyle = runesState.resultText === GAME_PUZZLES.RUNES_SOLVED_CODE ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
+		canvasContext.font = "bold 24px 'Georgia', serif"
+		canvasContext.fillText(runesState.resultText, modalX + modalWidth / 2, modalY + modalHeight - resultMarginBottom)
 	}
 }

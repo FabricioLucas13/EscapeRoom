@@ -1,4 +1,5 @@
 import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS } from "./config.js"
+import { runesState } from "./runePuzzle.js"
 
 function getDialogText(gameState, dialogType) {
 	const DIALOG_TEXT = {
@@ -23,6 +24,12 @@ function getDialogText(gameState, dialogType) {
 			needsClues: "¿Abrirá pistas de la contraseña?",
 			failed: "No abre.",
 			opened: "Uhh, se ha abierto."
+		},
+		runes: {
+			firstOpen: "Un cofre se ha abierto solo.",
+			opened: "¿Tendrán un orden?",
+			failed: "Hmm, así no es.",
+			solved: "Ha aparecido un 7 en la cerradura."
 		},
 		intro: {
 			whereAmI: "¿Dónde estoy?",
@@ -73,6 +80,18 @@ function getDialogText(gameState, dialogType) {
 			}
 			return isAllPuzzlesSolved(gameState) ? DIALOG_TEXT.keypad.solvedAll : DIALOG_TEXT.keypad.needsClues
 
+		case "runes":
+			if (gameState.runeChestStatus === "solved") {
+				return DIALOG_TEXT.runes.solved
+			}
+			if (gameState.runeChestStatus === "failed") {
+				return DIALOG_TEXT.runes.failed
+			}
+			if (gameState.runeChestStatus === "opened" || gameState.runeChestStatus === "opening") {
+				return DIALOG_TEXT.runes.opened
+			}
+			return DIALOG_TEXT.runes.firstOpen
+
 		default:
 			return ""
 	}
@@ -108,6 +127,7 @@ export function drawDialogBox(canvasContext, canvasElement, gameState, dialogTyp
 		dialogType === "colors" && gameState.colorHintVisible ||
 		dialogType === "scroll" && gameState.scrollHintVisible ||
 		dialogType === "keypad" && gameState.keypadHintVisible ||
+		dialogType === "runes" && gameState.runeChestHintVisible ||
 		dialogType === "intro" && gameState.introVisible
 	)
 

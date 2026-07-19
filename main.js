@@ -1,7 +1,7 @@
 /**
  * 📦 TRAER LAS PIEZAS DE LOS OTROS ARCHIVOS (Imports)
  */
-import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS } from "./config.js"
+import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS, GAME_SETTINGS } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton, drawProportionalBackground, drawStandardRoomBackground, drawNavigationArrow } from "./helpers.js"
 import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions, getColorPuzzleInteractions, getScrollInteractions } from "./interactions.js"
 import { drawKeypadPuzzle } from "./keypadPuzzle.js"
@@ -22,6 +22,13 @@ let mouseX = 0
 let mouseY = 0
 let currentRoom = ROOM.START
 let isOptionsOpen = false
+let timerStartedAt = null
+let timerActive = false
+let lossSequenceState = {
+	triggered: false,
+	phase: "idle",
+	startedAt: null
+}
 
 // --- CONECTAR NUESTRAS VARIABLES CON EL ARCHIVO DE CLICS ---
 initializeInteractions({
@@ -29,6 +36,10 @@ initializeInteractions({
 		currentRoom = targetRoom
 		if (targetRoom === ROOM.ONE) {
 			gameState.startIntroSequence()
+			if (!timerActive) {
+				timerActive = true
+				timerStartedAt = Date.now()
+			}
 		}
 	},
 	openExitKeypad: () => { gameState.openKeypad(isOptionsOpen) },
@@ -58,7 +69,10 @@ initializeInteractions({
 
 	// CABLES DE LA VISTA DEL PERGAMINO CONECTADOS AL GESTOR DE ESTADO
 	openScroll: () => { gameState.openScroll(isOptionsOpen) },
-	closeScroll: () => { gameState.closeScroll() }
+	closeScroll: () => { gameState.closeScroll() },
+
+	// COFRE DE RUNAS
+	openRuneChest: () => { gameState.openRuneChest(isOptionsOpen) }
 })
 
 // --- GENERAR EL MAPA DE BOTONES Y HITBOXES ---
@@ -73,17 +87,24 @@ const imageSources = {
 	candlesDetail: "candleOff.jpg",
 	colorsDetail: "colorPanelOff.jpg",
 	scrollDetail: "tableScroll.jpg",
+	chestClosed: "chestClosed.jpeg",
+	chestOpenRune: "chestOpenRune.jpg",
 	runeOne: "runeOne.png",
 	runeTwo: "runeTwo.png",
 	runeThree: "runeThree.png",
 	runeFour: "runeFour.png",
-	winDoor: "winDoor.jpg"
+	winDoor: "winDoor.jpg",
+	loseDoor: "loseDoor.jpg"
 }
 
 Object.entries(imageSources).forEach(([key, filename]) => {
 	gameImages[key] = new Image()
 	gameImages[key].src = `assets/${filename}`
 })
+
+runesState.onSolved = () => { gameState.solveRuneChest() }
+runesState.onClose = () => { gameState.closeRuneChest() }
+runesState.onFailed = () => { gameState.failRuneChest() }
 
 // =========================================================================
 // 🎯 CONTROLAR EL RATÓN (Eventos de movimiento y clics)
@@ -158,6 +179,83 @@ function drawMouseCoordinates() {
 	canvasContext.fillStyle = "white"
 	canvasContext.font = "14px Arial"
 	canvasContext.fillText(`X: ${mouseX}  Y: ${mouseY}`, 10, 20)
+}
+
+function formatTimerText(remainingMs) {
+	const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000))
+	const minutes = Math.floor(totalSeconds / 60)
+	const seconds = totalSeconds % 60
+	return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+}
+
+function startLossSequence() {
+	if (lossSequenceState.triggered) {
+		return
+	}
+
+	lossSequenceState.triggered = true
+	lossSequenceState.phase = "dialog"
+	lossSequenceState.startedAt = Date.now()
+}
+
+function drawLossSequence(canvasContext, canvasElement, gameImages) {
+	if (!lossSequenceState.triggered) {
+		return false
+	}
+
+	const elapsed = Date.now() - lossSequenceState.startedAt
+	const dialogDurationMs = 1000
+	const waitDurationMs = 2000
+
+	if (lossSequenceState.phase === "dialog") {
+		drawStandardRoomBackground(canvasContext, canvasElement, gameImages.loseDoor, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
+
+		const panelX = 80
+		const panelY = canvasElement.height - 140
+		const panelWidth = canvasElement.width - 160
+		const panelHeight = 90
+
+		canvasContext.save()
+		canvasContext.fillStyle = "rgba(0, 0, 0, 0.72)"
+		canvasContext.fillRect(panelX, panelY, panelWidth, panelHeight)
+		canvasContext.strokeStyle = "#e8d8c3"
+		canvasContext.lineWidth = 2
+		canvasContext.strokeRect(panelX, panelY, panelWidth, panelHeight)
+		canvasContext.fillStyle = "#e8d8c3"
+		canvasContext.font = "bold 24px 'Georgia', serif"
+		canvasContext.textAlign = "center"
+		canvasContext.textBaseline = "middle"
+		canvasContext.fillText("HA VUELTO!", canvasElement.width / 2, panelY + panelHeight / 2)
+		canvasContext.restore()
+
+		if (elapsed >= dialogDurationMs) {
+			lossSequenceState.phase = "wait"
+			lossSequenceState.startedAt = Date.now()
+		}
+
+		return true
+	}
+
+	if (lossSequenceState.phase === "wait") {
+		drawStandardRoomBackground(canvasContext, canvasElement, gameImages.loseDoor, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
+
+		if (elapsed >= waitDurationMs) {
+			lossSequenceState.phase = "death"
+			lossSequenceState.startedAt = Date.now()
+		}
+
+		return true
+	}
+
+	canvasContext.fillStyle = "black"
+	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
+	canvasContext.fillStyle = "#ff0000"
+	canvasContext.font = "bold 48px 'Georgia', serif"
+	canvasContext.textAlign = "center"
+	canvasContext.textBaseline = "middle"
+	canvasContext.fillText("HAS MUERTO", canvasElement.width / 2, canvasElement.height / 2)
+
+	return true
 }
 
 // =========================================================================
@@ -304,15 +402,56 @@ export function draw() {
 			break
 
 		// 🚪 CASO 2: ESTAMOS EN LA HABITACIÓN UNO
-		case ROOM.ONE:
-			drawStandardRoomBackground(canvasContext, canvasElement, gameImages.one, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
+		case ROOM.ONE: {
+			let roomOneBackground = gameImages.one
+			if (gameState.runeChestStatus === "opening") {
+				roomOneBackground = gameImages.chestClosed || gameImages.one
+			} else if (gameState.runeChestStatus === "opened") {
+				roomOneBackground = gameImages.chestOpenRune || gameImages.one
+			} else if (gameState.runeChestStatus === "solved") {
+				roomOneBackground = gameImages.chestClosed || gameImages.one
+			}
+			drawStandardRoomBackground(canvasContext, canvasElement, roomOneBackground, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
 			break
+		}
 
 		// 🗝️ CASO 3: ESTAMOS EN LA HABITACIÓN CUATRO
 		case ROOM.FOUR:
 			drawStandardRoomBackground(canvasContext, canvasElement, gameImages.four, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_FOUR)
 			break
 	}
+
+	let remainingTimeMs = GAME_SETTINGS.TIMER_DURATION_MS
+	if (timerActive && timerStartedAt !== null) {
+		remainingTimeMs = Math.max(0, GAME_SETTINGS.TIMER_DURATION_MS - (Date.now() - timerStartedAt))
+	}
+	if (remainingTimeMs <= 0) {
+		startLossSequence()
+	}
+
+	if (drawLossSequence(canvasContext, canvasElement, gameImages)) {
+		canvasContext.save()
+		canvasContext.textAlign = "right"
+		canvasContext.textBaseline = "middle"
+		canvasContext.font = "bold 18px 'Georgia', serif"
+		canvasContext.fillStyle = "#f4e2b8"
+		if (timerActive) {
+			canvasContext.fillText(formatTimerText(remainingTimeMs), canvasElement.width - 18, 24)
+		}
+		canvasContext.restore()
+		requestAnimationFrame(draw)
+		return
+	}
+
+	canvasContext.save()
+	canvasContext.textAlign = "right"
+	canvasContext.textBaseline = "middle"
+	canvasContext.font = "bold 18px 'Georgia', serif"
+	canvasContext.fillStyle = "#f4e2b8"
+	if (timerActive) {
+		canvasContext.fillText(formatTimerText(remainingTimeMs), canvasElement.width - 18, 24)
+	}
+	canvasContext.restore()
 
 	// --- DIBUJAR LAS FLECHAS PARA MOVERSE ENTRE SALAS ---
 	if (currentRoom === ROOM.ONE) {
@@ -369,6 +508,7 @@ export function draw() {
 	// 🗿 INTERFAZ DEL POP-UP: PUZZLE DE RUNAS (Delegación limpia)
 	// =========================================================================
 	drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY)
+	drawDialogBox(canvasContext, canvasElement, gameState, "runes")
 
 	// Ejecuta la herramienta que pinta la posición X e Y del ratón
 	drawMouseCoordinates()
