@@ -4,23 +4,24 @@
 import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton, drawProportionalBackground, drawStandardRoomBackground, drawNavigationArrow } from "./helpers.js"
 import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions, getColorPuzzleInteractions, getScrollInteractions } from "./interactions.js"
-import { drawKeypadPuzzle } from "./puzzleKeypad.js"
+import { drawKeypadPuzzle } from "./keypadPuzzle.js"
 import { drawCandlePuzzle } from "./candlesPuzzle.js"
-import { drawColorPuzzle } from "./colorsPuzzle.js" 
-import { drawScrollText } from "./scrollText.js" 
+import { drawColorPuzzle } from "./colorsPuzzle.js"
+import { drawScrollText } from "./scrollText.js"
 import { drawDialogBox } from "./dialogBox.js"
 import { playMusic, toggleMusic, getIsMuted } from "./audioEngine.js"
 import { gameState } from "./stateManager.js"
+import { runesState, handleRunesMousedown, handleRunesMouseup, handleRunesClick, drawRunesPuzzle } from "./runePuzzle.js"
 
 // --- CONFIGURAR EL CANVAS (El lienzo de dibujo) ---
 const canvasElement = document.getElementById("game-screen")
 const canvasContext = canvasElement.getContext("2d")
 
 // --- LAS CAJAS DE DATOS DEL JUEGO (Variables de Estado del Motor) ---
-let mouseX = 0                  
-let mouseY = 0                  
-let currentRoom = ROOM.START    
-let isOptionsOpen = false       
+let mouseX = 0
+let mouseY = 0
+let currentRoom = ROOM.START
+let isOptionsOpen = false
 
 // --- CONECTAR NUESTRAS VARIABLES CON EL ARCHIVO DE CLICS ---
 initializeInteractions({
@@ -31,11 +32,11 @@ initializeInteractions({
 		}
 	},
 	openExitKeypad: () => { gameState.openKeypad(isOptionsOpen) },
-	getIsMusicMuted: () => getIsMuted(), 
-	getGameMusic: () => ({ play: () => Promise.resolve(playMusic()) }), 
+	getIsMusicMuted: () => getIsMuted(),
+	getGameMusic: () => ({ play: () => Promise.resolve(playMusic()) }),
 	openOptionsModal: () => { if (!isOptionsOpen && !gameState.isKeypadOpen && !gameState.isCandleOpen && !gameState.isColorPuzzleOpen && !gameState.isScrollOpen) isOptionsOpen = true },
 	closeOptionsModal: () => { isOptionsOpen = false },
-	toggleMusic: () => { toggleMusic() }, 
+	toggleMusic: () => { toggleMusic() },
 
 	// FUNCIONES DEL TECLADO CONECTADAS
 	closeExitKeypad: () => { gameState.closeKeypad() },
@@ -65,13 +66,17 @@ const roomInteractions = getRoomInteractions(canvasElement)
 
 // --- CARGAR LAS IMÁGENES AUTOMÁTIMAMENTE ---
 const gameImages = {}
-const imageSources = { 
-	start: "roomStart.png", 
-	one: "roomOne.jpg", 
-	four: "roomFour.jpg", 
-	candlesDetail: "roomTwo.jpg",
-	colorsDetail: "roomThree.jpg",
-	scrollDetail: "roomFive.jpg",
+const imageSources = {
+	start: "roomStart.jpg",
+	one: "roomMain.jpg",
+	four: "roomExitGate.jpg",
+	candlesDetail: "candleOff.jpg",
+	colorsDetail: "colorPanelOff.jpg",
+	scrollDetail: "tableScroll.jpg",
+	runeOne: "runeOne.png",
+	runeTwo: "runeTwo.png",
+	runeThree: "runeThree.png",
+	runeFour: "runeFour.png",
 	winDoor: "winDoor.jpg"
 }
 
@@ -89,21 +94,46 @@ canvasElement.addEventListener("mousemove", (event) => {
 	mouseY = Math.floor(event.clientY - boundaries.top)
 })
 
+canvasElement.addEventListener("mousedown", (event) => {
+	const boundaries = canvasElement.getBoundingClientRect()
+	const clickX = event.clientX - boundaries.left
+	const clickY = event.clientY - boundaries.top
+
+	if (runesState.isOpen) {
+		handleRunesMousedown(clickX, clickY, canvasElement.width, canvasElement.height)
+	}
+})
+
+canvasElement.addEventListener("mouseup", (event) => {
+	const boundaries = canvasElement.getBoundingClientRect()
+	const clickX = event.clientX - boundaries.left
+	const clickY = event.clientY - boundaries.top
+
+	if (runesState.isOpen) {
+		handleRunesMouseup(clickX, clickY, canvasElement.width, canvasElement.height)
+	}
+})
+
 canvasElement.addEventListener("click", (event) => {
 	const boundaries = canvasElement.getBoundingClientRect()
 	const clickX = event.clientX - boundaries.left
 	const clickY = event.clientY - boundaries.top
 
-	// PRIORIDAD JERÁRQUICA: Teclado > Velas > Colores > Manuscrito > Opciones > Habitación normal
+	// PRIORIDAD JERÁRQUICA: Teclado > Velas > Colores > Manuscrito > Runas > Opciones > Habitación normal
+	if (runesState.isOpen) {
+		handleRunesClick(clickX, clickY, canvasElement.width, canvasElement.height)
+		return
+	}
+
 	let activeButtons = []
 	if (gameState.isKeypadOpen) {
 		activeButtons = getKeypadInteractions(canvasElement)
 	} else if (gameState.isCandleOpen) {
 		activeButtons = getCandleInteractions(canvasElement)
 	} else if (gameState.isColorPuzzleOpen) {
-		activeButtons = getColorPuzzleInteractions(canvasElement) 
+		activeButtons = getColorPuzzleInteractions(canvasElement)
 	} else if (gameState.isScrollOpen) {
-		activeButtons = getScrollInteractions(canvasElement) 
+		activeButtons = getScrollInteractions(canvasElement)
 	} else if (currentRoom === ROOM.START && isOptionsOpen) {
 		activeButtons = getModalInteractions(canvasElement)
 	} else {
@@ -115,7 +145,7 @@ canvasElement.addEventListener("click", (event) => {
 			const button = activeButtons[i]
 			if (isMouseInsideZone(clickX, clickY, button)) {
 				button.action()
-				break 
+				break
 			}
 		}
 	}
@@ -134,6 +164,51 @@ function drawMouseCoordinates() {
 // 🔄 EL MOTOR DE ANIMACIÓN DEL JUEGO (Game Loop)
 // =========================================================================
 export function draw() {
+	// Actualizar imágenes de detalle según el estado de los puzzles
+	try {
+		if (gameState.colorsResultText === "9") {
+			if (gameImages.colorsDetail && !gameImages.colorsDetail.src.includes("colorPanelOn.jpg")) {
+				gameImages.colorsDetail.src = "assets/colorPanelOn.jpg"
+			}
+		} else {
+			if (gameImages.colorsDetail && !gameImages.colorsDetail.src.includes("colorPanelOff.jpg")) {
+				gameImages.colorsDetail.src = "assets/colorPanelOff.jpg"
+			}
+		}
+
+		if (gameState.candleResultText === "3") {
+			if (gameImages.candlesDetail && !gameImages.candlesDetail.src.includes("candleOn.jpg")) {
+				gameImages.candlesDetail.src = "assets/candleOn.jpg"
+			}
+		} else {
+			if (gameImages.candlesDetail && !gameImages.candlesDetail.src.includes("candleOff.jpg")) {
+				gameImages.candlesDetail.src = "assets/candleOff.jpg"
+			}
+		}
+
+		// Actualizar la imagen principal de la habitación 1 según el estado de los puzzles
+		try {
+			const candleDone = gameState.candleResultText === "3"
+			const colorDone = gameState.colorsResultText === "9"
+			let desiredOne = "assets/roomMain.jpg"
+			if (candleDone && !colorDone) {
+				desiredOne = "assets/roomMainCandleOn.jpg"
+			} else if (colorDone && !candleDone) {
+				desiredOne = "assets/roomMainColorPanelOn.jpg"
+			} else if (candleDone && colorDone) {
+				desiredOne = "assets/roomMainPuzzleOn.jpg"
+			}
+
+			if (gameImages.one && !gameImages.one.src.includes(desiredOne.split('/').pop())) {
+				gameImages.one.src = desiredOne
+			}
+		} catch (e) {
+			console.warn("Error actualizando fondo de la habitación 1:", e)
+		}
+	} catch (e) {
+		// No bloquear el bucle de dibujo por errores menores
+		console.warn("Error actualizando imágenes de estado:", e)
+	}
 	if (gameState.gameWon) {
 		const elapsed = Date.now() - gameState.winTriggeredAt
 
@@ -193,7 +268,7 @@ export function draw() {
 					canvasContext.lineTo(modalLeftX + modalWidth, modalTopY + modalBevelSize)
 					canvasContext.lineTo(modalLeftX + modalWidth, modalTopY + modalHeight - modalBevelSize)
 					canvasContext.lineTo(modalLeftX + modalWidth - modalBevelSize, modalTopY + modalHeight)
-					canvasContext.lineTo(modalLeftX + modalBevelSize, modalTopY + modalHeight) 
+					canvasContext.lineTo(modalLeftX + modalBevelSize, modalTopY + modalHeight)
 					canvasContext.lineTo(modalLeftX, modalTopY + modalHeight - modalBevelSize)
 					canvasContext.lineTo(modalLeftX, modalTopY + modalBevelSize)
 					canvasContext.closePath()
@@ -214,7 +289,7 @@ export function draw() {
 					const isMouseOverBack = isMouseInsideZone(mouseX, mouseY, modalButtons[1])
 
 					canvasContext.font = "14px 'Times New Roman', serif"
-					
+
 					const audioStatusText = getIsMuted() ? "MÚSICA: OFF" : "MÚSICA: ON"
 					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, modalButtons[0], isMouseOverAudio, audioStatusText, 6)
 					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, modalButtons[1], isMouseOverBack, "VOLVER", 6)
@@ -243,10 +318,10 @@ export function draw() {
 	if (currentRoom === ROOM.ONE) {
 		drawDialogBox(canvasContext, canvasElement, gameState, "intro")
 		drawNavigationArrow(
-			canvasContext, 
-			canvasElement, 
-			INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, 
-			"UP", 
+			canvasContext,
+			canvasElement,
+			INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
+			"UP",
 			INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE,
 			INTERFACE_DIMENSIONS.ARROW_X_ROOM_ONE
 		)
@@ -280,15 +355,20 @@ export function draw() {
 	// 🎨 INTERFAZ DEL POP-UP: PUZZLE DE COLORES (Delegación limpia)
 	// =========================================================================
 	if (gameState.isColorPuzzleOpen) {
-		drawColorPuzzle(canvasContext, canvasElement, gameState, gameImages.colorsDetail) 
+		drawColorPuzzle(canvasContext, canvasElement, gameState, gameImages.colorsDetail)
 	}
 
 	// =========================================================================
 	// 📜 INTERFAZ DEL POP-UP: VISTA DEL PERGAMINO (Delegación limpia)
 	// =========================================================================
 	if (gameState.isScrollOpen) {
-		drawScrollText(canvasContext, canvasElement, gameState, gameImages.scrollDetail) 
+		drawScrollText(canvasContext, canvasElement, gameState, gameImages.scrollDetail)
 	}
+
+	// =========================================================================
+	// 🗿 INTERFAZ DEL POP-UP: PUZZLE DE RUNAS (Delegación limpia)
+	// =========================================================================
+	drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY)
 
 	// Ejecuta la herramienta que pinta la posición X e Y del ratón
 	drawMouseCoordinates()

@@ -1,4 +1,5 @@
 import { INTERFACE_DIMENSIONS, ROOM } from "./config.js"
+import { runesState } from "./runePuzzle.js"
 
 // =========================================================================
 // 🚀 ¿CÓMO AÑADIR NUEVOS BOTONES O INTERACCIONES? (Guía rápida para el equipo)
@@ -298,7 +299,10 @@ export function getRoomInteractions(canvasElement) {
 				y: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_Y,
 				width: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_WIDTH,
 				height: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_HEIGHT,
-				action: () => console.log("haz hecho click en puzzle runas")
+				action: () => {
+					runesState.reset()
+				runesState.isOpen = true
+			}
 			},
 			{
 				// 🛠️ CONFIGURADO: Ahora abre oficialmente la vista del pergamino

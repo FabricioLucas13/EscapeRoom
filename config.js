@@ -16,9 +16,12 @@
 
 // 🗺️ LISTA DE HABITACIONES Y PANTALLAS (Los números que controlan dónde está el jugador)
 export const ROOM = {
-	START: 0,     // El menú principal donde empiezas
-	ONE: 1,       // La primera habitación (usa la foto roomOne.jpg)
-	FOUR: 4       // La última habitación del puzzle (usa la foto roomFour.jpg)
+	START: 0,      // El menú principal donde empiezas
+	ONE: 1,        // La primera habitación
+	FOUR: 4,       // La última habitación del puzzle
+	MAIN: 1,       // Alias de compatibilidad
+	EXIT_DOOR: 4,  // Alias de compatibilidad
+	EXIT_GATE: 4   // Alias de compatibilidad
 }
 
 // 🎨 LOS COLORES DEL JUEGO (Copia y pega aquí tus códigos de color)
@@ -30,8 +33,10 @@ export const INTERFACE_COLORS = {
 	BUTTON_TEXT_DEFAULT: "#a89276",         // Color de las letras de los botones normales
 	BUTTON_TEXT_HOVER: "#e8d8c3",           // Color de las letras cuando pasas el ratón por encima
 	OPTIONS_MODAL_OVERLAY: "rgba(18, 13, 11, 0.95)", // El color oscuro de fondo que tapa el juego al abrir las opciones
-	FALLBACK_BACKGROUND_ROOM_ONE: "#2d2d2d",  // Color de pantalla si la foto de la habitación 1 no se encuentra
+	FALLBACK_BACKGROUND_ROOM_ONE: "#2d2d2d",   // Color de pantalla si la foto de la habitación 1 no se encuentra
 	FALLBACK_BACKGROUND_ROOM_FOUR: "#245b3b",  // Color de pantalla si la foto de la habitación 4 no se encuentra
+	FALLBACK_BACKGROUND_ROOM_MAIN: "#2d2d2d",  // Alias de compatibilidad
+	FALLBACK_BACKGROUND_ROOM_EXIT_GATE: "#245b3b", // Alias de compatibilidad
 	NAVIGATION_ARROW: "#ffffff",             // Color centralizado de las flechas de navegación
 	
 	// Interfaz del Teclado Numérico (Abreviaturas BTN -> BUTTON eliminadas)
@@ -75,9 +80,11 @@ export const INTERFACE_DIMENSIONS = {
 	OPTIONS_MODAL_HEIGHT: 220,       
 	MODAL_BUTTON_WIDTH: 160,         
 	MODAL_BUTTON_HEIGHT: 38,         
-	NAVIGATION_ARROW_SIZE: 22,       
-	ARROW_Y_ROOM_ONE: 324,           
-	ARROW_X_ROOM_ONE: 600,           
+	NAVIGATION_ARROW_SIZE: 22,
+	ARROW_Y_ROOM_ONE: 324,
+	ARROW_X_ROOM_ONE: 600,
+	ARROW_Y_ROOM_MAIN: 324, // Alias de compatibilidad
+	ARROW_X_ROOM_MAIN: 600, // Alias de compatibilidad
 	
 	// Medidas del Teclado (Abreviatura BTN -> BUTTON eliminadas)
 	KEYPAD_WIDTH: 270,                           
@@ -103,13 +110,13 @@ export const INTERFACE_DIMENSIONS = {
 
 	ROOM_ONE_COLORS_X: 730,
 	ROOM_ONE_COLORS_Y: 165,
-	ROOM_ONE_COLORS_WIDTH: 70,   
-	ROOM_ONE_COLORS_HEIGHT: 80,  
+	ROOM_ONE_COLORS_WIDTH: 70,
+	ROOM_ONE_COLORS_HEIGHT: 80,
 
 	ROOM_ONE_RUNES_X: 860,
 	ROOM_ONE_RUNES_Y: 270,
-	ROOM_ONE_RUNES_WIDTH: 40,    
-	ROOM_ONE_RUNES_HEIGHT: 40,   
+	ROOM_ONE_RUNES_WIDTH: 40,
+	ROOM_ONE_RUNES_HEIGHT: 40,
 
 	// Dimensiones reales del pergamino en la Habitación Uno
 	ROOM_ONE_SCROLL_X: 520,
@@ -120,8 +127,8 @@ export const INTERFACE_DIMENSIONS = {
 	// Hitbox del puzzle de colores visible en la Habitación Cuatro
 	ROOM_FOUR_COLORS_X: 900,
 	ROOM_FOUR_COLORS_Y: 155,
-	ROOM_FOUR_COLORS_WIDTH: 180,   
-	ROOM_FOUR_COLORS_HEIGHT: 120,  
+	ROOM_FOUR_COLORS_WIDTH: 180,
+	ROOM_FOUR_COLORS_HEIGHT: 120,
 
 	// Dimensiones reales del teclado de la Habitación Cuatro
 	ROOM_FOUR_KEYPAD_X: 440,
@@ -129,9 +136,52 @@ export const INTERFACE_DIMENSIONS = {
 	ROOM_FOUR_KEYPAD_WIDTH: 200,
 	ROOM_FOUR_KEYPAD_HEIGHT: 265,
 
+	// Alias de compatibilidad con nombres antiguos
+	ROOM_MAIN_CANDLES_X: 130,
+	ROOM_MAIN_CANDLES_Y: 230,
+	ROOM_MAIN_CANDLES_WIDTH: 105,
+	ROOM_MAIN_CANDLES_HEIGHT: 90,
+
+	ROOM_MAIN_COLORS_X: 730,
+	ROOM_MAIN_COLORS_Y: 165,
+	ROOM_MAIN_COLORS_WIDTH: 70,
+	ROOM_MAIN_COLORS_HEIGHT: 80,
+
+	ROOM_MAIN_RUNES_X: 860,
+	ROOM_MAIN_RUNES_Y: 270,
+	ROOM_MAIN_RUNES_WIDTH: 40,
+	ROOM_MAIN_RUNES_HEIGHT: 40,
+
+	ROOM_MAIN_SCROLL_X: 520,
+	ROOM_MAIN_SCROLL_Y: 390,
+	ROOM_MAIN_SCROLL_WIDTH: 105,
+	ROOM_MAIN_SCROLL_HEIGHT: 35,
+
+	ROOM_EXIT_GATE_COLORS_X: 900,
+	ROOM_EXIT_GATE_COLORS_Y: 155,
+	ROOM_EXIT_GATE_COLORS_WIDTH: 180,
+	ROOM_EXIT_GATE_COLORS_HEIGHT: 120,
+
+	ROOM_EXIT_GATE_KEYPAD_X: 440,
+	ROOM_EXIT_GATE_KEYPAD_Y: 180,
+	ROOM_EXIT_GATE_KEYPAD_WIDTH: 200,
+	ROOM_EXIT_GATE_KEYPAD_HEIGHT: 265,
+
 	// 🚀 NUEVO: Medidas centralizadas de la caja del pergamino blanco
 	SCROLL_MODAL_WIDTH: 460,
 	SCROLL_MODAL_HEIGHT: 320,
+
+	// Puzzle de runas
+	RUNE_MODAL_WIDTH: 650,
+	RUNE_MODAL_HEIGHT: 460,
+	RUNE_BOARD_WIDTH: 560,
+	RUNE_BOARD_HEIGHT: 210,
+	RUNE_SIZE: 100,
+	RUNE_PEDESTAL_SIZE: 80,
+	RUNE_BUTTON_WIDTH: 150,
+	RUNE_BUTTON_HEIGHT: 38,
+	RUNE_BOARD_PADDING: 45,
+	RUNE_BOARD_TOP: 70,
 
 	// 🛠️ NUEVAS MEDIDAS EXTRAÍDAS DE SCROLLTEXT.JS
 	SCROLL_BORDER_LINE_WIDTH: 4,
