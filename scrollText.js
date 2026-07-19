@@ -116,10 +116,10 @@ export function drawScrollText(canvasContext, canvasElement, gameState, backgrou
 	const totalPages = GAME_PUZZLES.SCROLL_PAGES.length
 	const currentPageIndex = Math.max(0, Math.min(gameState.scrollPageIndex || 0, totalPages - 1))
 	const pageLines = GAME_PUZZLES.SCROLL_PAGES[currentPageIndex]
-	const textMarginX = 44
+	const textMarginX = INTERFACE_DIMENSIONS.SCROLL_TEXT_MARGIN_X
 	const textStartX = scrollLeftX + textMarginX
 	const textMaxWidth = scrollWidth - (textMarginX * 2)
-	const lineHeight = INTERFACE_DIMENSIONS.SCROLL_TEXT_LINE_SPACING_Y + 2
+	const lineHeight = INTERFACE_DIMENSIONS.SCROLL_TEXT_LINE_SPACING_Y + INTERFACE_DIMENSIONS.SCROLL_TEXT_EXTRA_LINE_SPACING_Y
 
 	function wrapTextLines(text, maxWidth) {
 		const words = text.split(" ")
@@ -159,7 +159,7 @@ export function drawScrollText(canvasContext, canvasElement, gameState, backgrou
 				const firstCharacter = wrappedLine[0]
 				const remainingText = wrappedLine.slice(1)
 
-				canvasContext.font = "bold italic 27px 'Palatino Linotype', 'Book Antiqua', serif"
+				canvasContext.font = INTERFACE_FONTS.SCROLL_DROP_CAP
 				canvasContext.fillStyle = "#8d1f17"
 				canvasContext.fillText(firstCharacter, textStartX, targetY - 3)
 
@@ -180,11 +180,11 @@ export function drawScrollText(canvasContext, canvasElement, gameState, backgrou
 	canvasContext.shadowColor = "transparent"
 
 	// Botones laterales visuales para cambiar de página
-	const sideButtonWidth = 44
-	const sideButtonHeight = 72
+	const sideButtonWidth = INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_WIDTH
+	const sideButtonHeight = INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_HEIGHT
 	const sideButtonY = scrollTopY + scrollHeight / 2 - sideButtonHeight / 2
-	const leftButtonX = scrollLeftX - sideButtonWidth - 12
-	const rightButtonX = scrollLeftX + scrollWidth + 12
+	const leftButtonX = scrollLeftX - sideButtonWidth - INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_GAP_X
+	const rightButtonX = scrollLeftX + scrollWidth + INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_GAP_X
 	const canGoPrevious = currentPageIndex > 0
 	const canGoNext = currentPageIndex < totalPages - 1
 

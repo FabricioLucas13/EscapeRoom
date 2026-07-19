@@ -143,7 +143,7 @@ function drawCharacterPortrait(canvasContext, canvasElement, characterImage, dia
 	const scale = Math.min(1, maxHeight / characterImage.naturalHeight)
 	const drawWidth = characterImage.naturalWidth * scale
 	const drawHeight = characterImage.naturalHeight * scale
-	const drawX = -90
+	const drawX = INTERFACE_DIMENSIONS.DIALOG_CHARACTER_X
 	const drawY = INTERFACE_DIMENSIONS.DIALOG_BOX_Y - drawHeight - 6
 
 	canvasContext.drawImage(characterImage, drawX, drawY, drawWidth, drawHeight)

@@ -12,6 +12,7 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameIm
 	const keypadHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
 	const keypadLeftX = canvasElement.width / 2 - keypadWidth / 2
 	const keypadTopY = canvasElement.height / 2 - keypadHeight / 2
+	const cornerBevel = INTERFACE_DIMENSIONS.KEYPAD_PANEL_CORNER_BEVEL
 
 	// 1. Fondo oscuro translúcido (El .overlay de CSS)
 	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_OVERLAY
@@ -19,14 +20,14 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameIm
 
 	// 2. El panel con esquinas biseladas (El .panel de CSS)
 	canvasContext.beginPath()
-	canvasContext.moveTo(keypadLeftX + 15, keypadTopY)
-	canvasContext.lineTo(keypadLeftX + keypadWidth - 15, keypadTopY)
-	canvasContext.lineTo(keypadLeftX + keypadWidth, keypadTopY + 15)
-	canvasContext.lineTo(keypadLeftX + keypadWidth, keypadTopY + keypadHeight - 15)
-	canvasContext.lineTo(keypadLeftX + keypadWidth - 15, keypadTopY + keypadHeight)
-	canvasContext.lineTo(keypadLeftX + 15, keypadTopY + keypadHeight)
-	canvasContext.lineTo(keypadLeftX, keypadTopY + keypadHeight - 15)
-	canvasContext.lineTo(keypadLeftX, keypadTopY + 15)
+	canvasContext.moveTo(keypadLeftX + cornerBevel, keypadTopY)
+	canvasContext.lineTo(keypadLeftX + keypadWidth - cornerBevel, keypadTopY)
+	canvasContext.lineTo(keypadLeftX + keypadWidth, keypadTopY + cornerBevel)
+	canvasContext.lineTo(keypadLeftX + keypadWidth, keypadTopY + keypadHeight - cornerBevel)
+	canvasContext.lineTo(keypadLeftX + keypadWidth - cornerBevel, keypadTopY + keypadHeight)
+	canvasContext.lineTo(keypadLeftX + cornerBevel, keypadTopY + keypadHeight)
+	canvasContext.lineTo(keypadLeftX, keypadTopY + keypadHeight - cornerBevel)
+	canvasContext.lineTo(keypadLeftX, keypadTopY + cornerBevel)
 	canvasContext.closePath()
 
 	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_PANEL_BACKGROUND

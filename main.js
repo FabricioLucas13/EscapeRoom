@@ -1,7 +1,7 @@
 /**
  * 📦 TRAER LAS PIEZAS DE LOS OTROS ARCHIVOS (Imports)
  */
-import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS, GAME_SETTINGS } from "./config.js"
+import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS, GAME_SETTINGS, GAME_RUNTIME, GAME_ASSET_SOURCES } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton, drawProportionalBackground, drawStandardRoomBackground, drawNavigationArrow } from "./helpers.js"
 import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions, getColorPuzzleInteractions, getScrollInteractions } from "./interactions.js"
 import { drawKeypadPuzzle } from "./keypadPuzzle.js"
@@ -25,17 +25,17 @@ let isOptionsOpen = false
 let timerStartedAt = null
 let timerActive = false
 let lastTouchTimestamp = 0
-const SHOW_MOUSE_COORDINATES = false
+const SHOW_MOUSE_COORDINATES = GAME_RUNTIME.SHOW_MOUSE_COORDINATES
 
 const replayButton = {
-	width: 225,
-	height: 44
+	width: GAME_RUNTIME.REPLAY_BUTTON.WIDTH,
+	height: GAME_RUNTIME.REPLAY_BUTTON.HEIGHT
 }
 
 function getReplayButtonZone() {
 	return {
 		x: canvasElement.width / 2 - replayButton.width / 2,
-		y: canvasElement.height - 110,
+		y: canvasElement.height - GAME_RUNTIME.REPLAY_BUTTON.BOTTOM_OFFSET_Y,
 		width: replayButton.width,
 		height: replayButton.height
 	}
@@ -222,25 +222,7 @@ const roomInteractions = getRoomInteractions(canvasElement)
 
 // --- CARGAR LAS IMÁGENES AUTOMÁTIMAMENTE ---
 const gameImages = {}
-const imageSources = {
-	start: "roomStart.jpg",
-	main: "roomMain.jpg",
-	exitGate: "roomExitGate.jpg",
-	candlesDetail: "candleOff.jpg",
-	colorsDetail: "colorPanelOff.jpg",
-	scrollDetail: "tableScroll.jpg",
-	chestClosed: "chestClosed.jpeg",
-	chestOpenRune: "chestOpenRune.jpg",
-	mainCharacterIntro: "mainCharacterIntro.png",
-	mainCharacterSolving: "mainCharacterSolving.png",
-	mainCharacterSolvedPuzzle: "mainCharacterSolvedPuzzle.png",
-	runeOne: "runeOne.png",
-	runeTwo: "runeTwo.png",
-	runeThree: "runeThree.png",
-	runeFour: "runeFour.png",
-	winDoor: "winDoor.jpg",
-	loseDoor: "loseDoor.jpg"
-}
+const imageSources = GAME_ASSET_SOURCES.IMAGES
 
 Object.keys(imageSources).forEach((key) => {
 	gameImages[key] = new Image()
@@ -307,13 +289,13 @@ function queueGameplayAssetPreload() {
 		])
 
 		[
-			"candleOn.jpg",
-			"colorPanelOn.jpg",
-			"roomMainCandleOn.jpg",
-			"roomMainColorPanelOn.jpg",
-			"roomMainPuzzleOn.jpg",
-			"roomExitGateColorPanelOn.jpg",
-			"loseDoorColorPanelOn.jpg"
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.CANDLE_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.COLOR_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_CANDLE_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_COLOR_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_ALL_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.EXIT_GATE_COLOR_ON,
+			GAME_ASSET_SOURCES.STAGE_VARIANTS.LOSE_DOOR_COLOR_ON
 		].forEach(preloadRawFile)
 	}
 
@@ -356,7 +338,7 @@ canvasElement.addEventListener("mouseup", (event) => {
 })
 
 canvasElement.addEventListener("click", (event) => {
-	if (Date.now() - lastTouchTimestamp < 600) {
+	if (Date.now() - lastTouchTimestamp < GAME_RUNTIME.TOUCH_CLICK_GUARD_MS) {
 		return
 	}
 
@@ -448,27 +430,27 @@ function drawLossSequence(canvasContext, canvasElement, gameImages) {
 			return
 		}
 
-		const maxHeight = 300
+		const maxHeight = GAME_RUNTIME.LOSS_SEQUENCE.INTRO_CHARACTER_MAX_HEIGHT
 		const scale = Math.min(1, maxHeight / introCharacter.naturalHeight)
 		const drawWidth = introCharacter.naturalWidth * scale
 		const drawHeight = introCharacter.naturalHeight * scale
-		const drawX = 10
-		const drawY = canvasElement.height - drawHeight - 96
+		const drawX = GAME_RUNTIME.LOSS_SEQUENCE.INTRO_CHARACTER_X
+		const drawY = canvasElement.height - drawHeight - GAME_RUNTIME.LOSS_SEQUENCE.INTRO_CHARACTER_BOTTOM_OFFSET_Y
 		canvasContext.drawImage(introCharacter, drawX, drawY, drawWidth, drawHeight)
 	}
 
 	const elapsed = Date.now() - lossSequenceState.startedAt
-	const dialogDurationMs = 1000
-	const waitDurationMs = 2000
+	const dialogDurationMs = GAME_RUNTIME.LOSS_SEQUENCE.DIALOG_DURATION_MS
+	const waitDurationMs = GAME_RUNTIME.LOSS_SEQUENCE.WAIT_DURATION_MS
 
 	if (lossSequenceState.phase === "dialog") {
 		drawStandardRoomBackground(canvasContext, canvasElement, gameImages.loseDoor, INTERFACE_COLORS.FALLBACK_BACKGROUND_ROOM_ONE)
 		drawIntroCharacterOnLoss()
 
-		const panelX = 80
-		const panelY = canvasElement.height - 140
-		const panelWidth = canvasElement.width - 160
-		const panelHeight = 90
+		const panelX = GAME_RUNTIME.LOSS_SEQUENCE.PANEL_MARGIN_X
+		const panelY = canvasElement.height - GAME_RUNTIME.LOSS_SEQUENCE.PANEL_BOTTOM_OFFSET_Y
+		const panelWidth = canvasElement.width - (GAME_RUNTIME.LOSS_SEQUENCE.PANEL_MARGIN_X * 2)
+		const panelHeight = GAME_RUNTIME.LOSS_SEQUENCE.PANEL_HEIGHT
 
 		canvasContext.save()
 		canvasContext.fillStyle = "rgba(0, 0, 0, 0.72)"
@@ -524,35 +506,35 @@ export function draw() {
 
 		if (hasGameplayStarted) {
 			if (gameState.colorsResultText === "9") {
-				setImageSourceIfNeeded("colorsDetail", "colorPanelOn.jpg")
+				setImageSourceIfNeeded("colorsDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.COLOR_ON)
 			} else {
-				setImageSourceIfNeeded("colorsDetail", "colorPanelOff.jpg")
+				setImageSourceIfNeeded("colorsDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.COLOR_OFF)
 			}
 
 			if (gameState.candleResultText === "3") {
-				setImageSourceIfNeeded("candlesDetail", "candleOn.jpg")
+				setImageSourceIfNeeded("candlesDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.CANDLE_ON)
 			} else {
-				setImageSourceIfNeeded("candlesDetail", "candleOff.jpg")
+				setImageSourceIfNeeded("candlesDetail", GAME_ASSET_SOURCES.STAGE_VARIANTS.CANDLE_OFF)
 			}
 
 			const colorPuzzleSolved = gameState.colorsResultText === "9"
-			const desiredExitGate = colorPuzzleSolved ? "roomExitGateColorPanelOn.jpg" : "roomExitGate.jpg"
+			const desiredExitGate = colorPuzzleSolved ? GAME_ASSET_SOURCES.STAGE_VARIANTS.EXIT_GATE_COLOR_ON : GAME_ASSET_SOURCES.STAGE_VARIANTS.EXIT_GATE_DEFAULT
 			setImageSourceIfNeeded("exitGate", desiredExitGate)
 
-			const desiredLoseDoor = colorPuzzleSolved ? "loseDoorColorPanelOn.jpg" : "loseDoor.jpg"
+			const desiredLoseDoor = colorPuzzleSolved ? GAME_ASSET_SOURCES.STAGE_VARIANTS.LOSE_DOOR_COLOR_ON : GAME_ASSET_SOURCES.STAGE_VARIANTS.LOSE_DOOR_DEFAULT
 			setImageSourceIfNeeded("loseDoor", desiredLoseDoor)
 
 			// Actualizar la imagen principal de la habitación principal según el estado de los puzzles
 			try {
 				const candleDone = gameState.candleResultText === "3"
 				const colorDone = gameState.colorsResultText === "9"
-				let desiredMain = "roomMain.jpg"
+				let desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_DEFAULT
 				if (candleDone && !colorDone) {
-					desiredMain = "roomMainCandleOn.jpg"
+					desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_CANDLE_ON
 				} else if (colorDone && !candleDone) {
-					desiredMain = "roomMainColorPanelOn.jpg"
+					desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_COLOR_ON
 				} else if (candleDone && colorDone) {
-					desiredMain = "roomMainPuzzleOn.jpg"
+					desiredMain = GAME_ASSET_SOURCES.STAGE_VARIANTS.MAIN_ALL_ON
 				}
 
 				setImageSourceIfNeeded("main", desiredMain)

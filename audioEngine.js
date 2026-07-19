@@ -1,5 +1,7 @@
+import { GAME_ASSET_SOURCES } from "./config.js"
+
 // --- CONFIGURAR EL REPRODUCTOR DE MÚSICA INTERNO ---
-const backgroundMusic = new Audio("assets/musicEscapeRoom.mp3")
+const backgroundMusic = new Audio(`assets/${GAME_ASSET_SOURCES.AUDIO.BACKGROUND_MUSIC}`)
 backgroundMusic.loop = true
 backgroundMusic.preload = "none"
 

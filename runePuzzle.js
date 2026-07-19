@@ -1,15 +1,15 @@
 // =========================================================================
 // 🗿 CONFIGURACIÓN INTERNA Y ESTADO DEL PUZZLE DE RUNAS
 // =========================================================================
-import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS, GAME_PUZZLES } from "./config.js"
+import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS, GAME_PUZZLES, GAME_RUNTIME } from "./config.js"
 import { drawBeveledButton } from "./helpers.js"
 
 const runeImageKeys = GAME_PUZZLES.RUNE_IMAGE_KEYS
-const RUNE_CLOSE_GUARD_AFTER_SOLVE_MS = 200
-const RUNE_SLOT_ROW_Y = 88
-const RUNE_ROW_Y = 178
-const RUNE_ROW_GAP = 18
-const RUNE_SLOT_GAP = 44
+const RUNE_CLOSE_GUARD_AFTER_SOLVE_MS = GAME_RUNTIME.RUNES.CLOSE_GUARD_AFTER_SOLVE_MS
+const RUNE_SLOT_ROW_Y = INTERFACE_DIMENSIONS.RUNE_SLOT_ROW_Y
+const RUNE_ROW_Y = INTERFACE_DIMENSIONS.RUNE_ROW_Y
+const RUNE_ROW_GAP = INTERFACE_DIMENSIONS.RUNE_ROW_GAP
+const RUNE_SLOT_GAP = INTERFACE_DIMENSIONS.RUNE_SLOT_GAP
 
 function createRuneLayout() {
 	const runeSize = INTERFACE_DIMENSIONS.RUNE_SIZE
@@ -97,7 +97,7 @@ export const runesState = {
 			if (typeof this.onFailed === "function") {
 				this.onFailed()
 			}
-			setTimeout(() => this.reset(), 1000)
+			setTimeout(() => this.reset(), GAME_RUNTIME.RUNES.RESET_AFTER_FAIL_MS)
 		}
 	}
 }
@@ -207,7 +207,7 @@ export function handleRunesClick(mouseX, mouseY, canvasWidth, canvasHeight) {
 // 🎨 RENDERIZADO DEL POP-UP EN EL CANVAS
 // =========================================================================
 function drawModalPanel(canvasContext, x, y, width, height) {
-	const cornerInset = 18
+	const cornerInset = INTERFACE_DIMENSIONS.RUNE_MODAL_CORNER_INSET
 	canvasContext.beginPath()
 	canvasContext.moveTo(x + cornerInset, y)
 	canvasContext.lineTo(x + width - cornerInset, y)
@@ -255,8 +255,8 @@ export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX
 
 	canvasContext.strokeStyle = "rgba(232, 216, 195, 0.12)"
 	canvasContext.beginPath()
-	canvasContext.moveTo(boardLeftX + 20, modalY + 150)
-	canvasContext.lineTo(boardLeftX + boardWidth - 20, modalY + 150)
+	canvasContext.moveTo(boardLeftX + INTERFACE_DIMENSIONS.RUNE_BOARD_RULE_MARGIN_X, modalY + INTERFACE_DIMENSIONS.RUNE_BOARD_RULE_Y)
+	canvasContext.lineTo(boardLeftX + boardWidth - INTERFACE_DIMENSIONS.RUNE_BOARD_RULE_MARGIN_X, modalY + INTERFACE_DIMENSIONS.RUNE_BOARD_RULE_Y)
 	canvasContext.stroke()
 
 	runesState.pedestals.forEach(pedestal => {
