@@ -68,9 +68,11 @@ function drawReplayButton() {
 
 function getCanvasPointFromMouseEvent(event) {
 	const boundaries = canvasElement.getBoundingClientRect()
+	const scaleX = canvasElement.width / boundaries.width
+	const scaleY = canvasElement.height / boundaries.height
 	return {
-		x: event.clientX - boundaries.left,
-		y: event.clientY - boundaries.top
+		x: (event.clientX - boundaries.left) * scaleX,
+		y: (event.clientY - boundaries.top) * scaleY
 	}
 }
 
@@ -81,9 +83,11 @@ function getCanvasPointFromTouchEvent(event) {
 	}
 
 	const boundaries = canvasElement.getBoundingClientRect()
+	const scaleX = canvasElement.width / boundaries.width
+	const scaleY = canvasElement.height / boundaries.height
 	return {
-		x: touch.clientX - boundaries.left,
-		y: touch.clientY - boundaries.top
+		x: (touch.clientX - boundaries.left) * scaleX,
+		y: (touch.clientY - boundaries.top) * scaleY
 	}
 }
 
