@@ -5,7 +5,7 @@ import { drawDialogBox } from "./dialogBox.js"
  * 📜 DRAW UNROLLED SCROLL (Text Detail View Component)
  * SCENARIO EFFECT: Renders the background texture with an ancient interactive pop-up document layered over it.
  */
-export function drawScrollText(canvasContext, canvasElement, gameState, backgroundImage) {
+export function drawScrollText(canvasContext, canvasElement, gameState, backgroundImage, gameImages) {
 	// 1. Solid black fallback canvas backdrop while loading textures
 	canvasContext.fillStyle = "black"
 	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
@@ -59,7 +59,7 @@ export function drawScrollText(canvasContext, canvasElement, gameState, backgrou
 		scrollTopY + scrollHeight - INTERFACE_DIMENSIONS.SCROLL_FOOTER_PADDING_BOTTOM
 	)
 
-	drawDialogBox(canvasContext, canvasElement, gameState, "scroll")
+	drawDialogBox(canvasContext, canvasElement, gameState, "scroll", gameImages)
 
 	// Revert canvas graphics engine base configurations
 	canvasContext.textAlign = "left"

@@ -1,5 +1,4 @@
 import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS } from "./config.js"
-import { runesState } from "./runePuzzle.js"
 
 function getDialogText(gameState, dialogType) {
 	const DIALOG_TEXT = {
@@ -81,13 +80,13 @@ function getDialogText(gameState, dialogType) {
 			return isAllPuzzlesSolved(gameState) ? DIALOG_TEXT.keypad.solvedAll : DIALOG_TEXT.keypad.needsClues
 
 		case "runes":
-			if (gameState.runeChestStatus === "solved") {
+			if (gameState.isRuneChestSolved) {
 				return DIALOG_TEXT.runes.solved
 			}
 			if (gameState.runeChestStatus === "failed") {
 				return DIALOG_TEXT.runes.failed
 			}
-			if (gameState.runeChestStatus === "opened" || gameState.runeChestStatus === "opening") {
+			if (gameState.runeChestStatus === "intro_open" || gameState.runeChestStatus === "modal") {
 				return DIALOG_TEXT.runes.opened
 			}
 			return DIALOG_TEXT.runes.firstOpen
@@ -99,6 +98,50 @@ function getDialogText(gameState, dialogType) {
 
 function isAllPuzzlesSolved(gameState) {
 	return gameState.candleResultText === "3" && gameState.colorsResultText === "9" && gameState.thirdPuzzleResolved
+}
+
+function getCharacterImageKey(gameState, dialogType) {
+	if (dialogType === "intro") {
+		return "mainCharacterIntro"
+	}
+
+	if (dialogType === "scroll") {
+		return "mainCharacterSolving"
+	}
+
+	if (dialogType === "candles") {
+		return gameState.candleResultText === "3" ? "mainCharacterSolvedPuzzle" : "mainCharacterSolving"
+	}
+
+	if (dialogType === "colors") {
+		return gameState.colorsResultText === "9" ? "mainCharacterSolvedPuzzle" : "mainCharacterSolving"
+	}
+
+	if (dialogType === "runes") {
+		return gameState.isRuneChestSolved ? "mainCharacterSolvedPuzzle" : "mainCharacterSolving"
+	}
+
+	if (dialogType === "keypad") {
+		return gameState.keypadResultStatus === "success" ? "mainCharacterSolvedPuzzle" : "mainCharacterSolving"
+	}
+
+	return null
+}
+
+function drawCharacterPortrait(canvasContext, canvasElement, characterImage, dialogType) {
+	if (!characterImage || !characterImage.complete || characterImage.naturalWidth <= 0) {
+		return
+	}
+
+	const isIntro = dialogType === "intro"
+	const maxHeight = isIntro ? 420 : 300
+	const scale = Math.min(1, maxHeight / characterImage.naturalHeight)
+	const drawWidth = characterImage.naturalWidth * scale
+	const drawHeight = characterImage.naturalHeight * scale
+	const drawX = 8
+	const drawY = INTERFACE_DIMENSIONS.DIALOG_BOX_Y - drawHeight - 6
+
+	canvasContext.drawImage(characterImage, drawX, drawY, drawWidth, drawHeight)
 }
 
 function wrapText(canvasContext, text, x, y, maxWidth, lineHeight) {
@@ -120,7 +163,7 @@ function wrapText(canvasContext, text, x, y, maxWidth, lineHeight) {
 	})
 }
 
-export function drawDialogBox(canvasContext, canvasElement, gameState, dialogType) {
+export function drawDialogBox(canvasContext, canvasElement, gameState, dialogType, gameImages = null) {
 	const dialogText = getDialogText(gameState, dialogType)
 	const visible = (
 		dialogType === "candles" && gameState.candleHintVisible ||
@@ -134,6 +177,13 @@ export function drawDialogBox(canvasContext, canvasElement, gameState, dialogTyp
 	if (!visible || !dialogText) {
 		return
 	}
+
+	const characterImageKey = getCharacterImageKey(gameState, dialogType)
+	const characterImage = characterImageKey && gameImages ? gameImages[characterImageKey] : null
+
+	canvasContext.save()
+	drawCharacterPortrait(canvasContext, canvasElement, characterImage, dialogType)
+	canvasContext.restore()
 
 	const panelX = INTERFACE_DIMENSIONS.DIALOG_BOX_MARGIN
 	const panelY = INTERFACE_DIMENSIONS.DIALOG_BOX_Y

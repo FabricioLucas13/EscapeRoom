@@ -7,7 +7,7 @@ import { drawDialogBox } from "./dialogBox.js"
  * 🎨 DIBUJAR EL PUZZLE DE COLORES (Vista de Detalle Autónoma)
  * EFECTO SCENARIO: Dibuja la foto roomThree.jpg a pantalla completa.
  */
-export function drawColorPuzzle(canvasContext, canvasElement, gameState, backgroundImage) {
+export function drawColorPuzzle(canvasContext, canvasElement, gameState, backgroundImage, gameImages) {
 	// 1. Pintamos el fondo negro por si la imagen tarda unos milisegundos en cargar
 	canvasContext.fillStyle = "black"
 	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
@@ -101,13 +101,7 @@ export function drawColorPuzzle(canvasContext, canvasElement, gameState, backgro
 	})
 
 	// 5. Mensaje de resultado o número "9" final de recompensa
-	if (gameState.colorsResultText !== "") {
-		canvasContext.fillStyle = (gameState.colorsResultText === "9") ? INTERFACE_COLORS.KEYPAD_TEXT_SUCCESS : INTERFACE_COLORS.KEYPAD_TEXT_ERROR
-		canvasContext.font = "bold 16px 'Georgia', serif"
-		canvasContext.fillText(gameState.colorsResultText, canvasElement.width / 2, canvasElement.height - INTERFACE_DIMENSIONS.CANDLE_RESULT_BOTTOM_GAP)
-	}
-
-	drawDialogBox(canvasContext, canvasElement, gameState, "colors")
+	drawDialogBox(canvasContext, canvasElement, gameState, "colors", gameImages)
 
 	// Restauramos fuentes por defecto del motor gráfico
 	canvasContext.textAlign = "left"

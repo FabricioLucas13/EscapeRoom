@@ -261,7 +261,7 @@ export function getRoomInteractions(canvasElement) {
 				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH,
 				height: INTERFACE_DIMENSIONS.MENU_BUTTON_HEIGHT,
 				action: () => {
-					gameEngineBridge.changeRoom(ROOM.ONE)
+					gameEngineBridge.changeRoom(ROOM.MAIN)
 					if (!gameEngineBridge.getIsMusicMuted()) {
 						gameEngineBridge.getGameMusic().play().catch(() => { })
 					}
@@ -275,13 +275,13 @@ export function getRoomInteractions(canvasElement) {
 				action: () => gameEngineBridge.openOptionsModal()
 			}
 		],
-		[ROOM.ONE]: [
+		[ROOM.MAIN]: [
 			{
 				x: INTERFACE_DIMENSIONS.ARROW_X_ROOM_ONE - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
 				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE,
 				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
 				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
-				action: () => gameEngineBridge.changeRoom(ROOM.FOUR)
+				action: () => gameEngineBridge.changeRoom(ROOM.EXIT_GATE)
 			},
 			{
 				x: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_X,
@@ -313,7 +313,7 @@ export function getRoomInteractions(canvasElement) {
 				action: () => gameEngineBridge.openScroll()
 			}
 		],
-		[ROOM.FOUR]: [
+		[ROOM.EXIT_GATE]: [
 			{
 				x: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_X,
 				y: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_Y,
@@ -326,7 +326,7 @@ export function getRoomInteractions(canvasElement) {
 				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10,
 				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
 				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
-				action: () => gameEngineBridge.changeRoom(ROOM.ONE)
+				action: () => gameEngineBridge.changeRoom(ROOM.MAIN)
 			},
 			{
 				x: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_X,
