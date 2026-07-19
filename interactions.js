@@ -1,189 +1,339 @@
 import { INTERFACE_DIMENSIONS, ROOM } from "./config.js"
+import { runesState } from "./runePuzzle.js"
 
 // =========================================================================
 // 🚀 ¿CÓMO AÑADIR NUEVOS BOTONES O INTERACCIONES? (Guía rápida para el equipo)
 // =========================================================================
-//
-// ➡️ SI QUIERES PONER ZONAS DE CLIC EN UNA HABITACIÓN NUEVA:
-//    - Añade una lista nueva abajo del todo dentro de "getRoomInteractions".
-//    - Ejemplo para la Habitación Dos: 
-//      [ROOM.TWO]: [ { x: 100, y: 150, width: 50, height: 50, action: () => { ... } } ]
-//
-// ➡️ SI QUIERES HACER ALGO COMPLEJO (como guardar datos o cambiar un estado de main.js):
-//    - Primero escribe la función en "main.js" y pásala dentro de "initializeInteractions".
-//    - Añade su nombre en la lista "gameEngineBridge" de aquí abajo y úsala en tu botón.
-//
-// =========================================================================
-
-// 🔗 ENLACES HACIA EL ARCHIVO PRINCIPAL (main.js)
 const gameEngineBridge = {
-	changeRoomRef: null,          // Guarda la función para cambiar de habitación
-	openExitKeypadRef: null,      // Guarda la función para abrir el teclado numérico
-	getIsMusicMuted: () => false, // Mira si la música está silenciada en el menú principal
-	toggleMusicCallback: null,    // Función para silenciar o activar la música
-	closeOptionsModal: null,      // Función para cerrar el cuadro de opciones
-	openOptionsModal: null,       // Función para abrir el cuadro de opciones
-	getGameMusic: null,            // Accede al reproductor de música del juego
-	
-	// Enlaces nuevos para el teclado numérico:
-	closeExitKeypadRef: null,     // Función para cerrar el teclado numérico
-	keypadPressRef: null,         // Función para registrar un número pulsado
-	keypadResetRef: null,         // Función para borrar (botón flecha)
-	keypadCheckRef: null          // Función para comprobar la contraseña (botón check)
+	changeRoom: null,
+	openExitKeypad: null,
+	getIsMusicMuted: () => false,
+	toggleMusic: null,
+	closeOptionsModal: null,
+	openOptionsModal: null,
+	getGameMusic: null,
+
+	// Teclado numérico
+	closeExitKeypad: null,
+	keypadPress: null,
+	keypadReset: null,
+	keypadCheck: null,
+
+	// Puzzle de las velas
+	openCandles: null,
+	closeCandles: null,
+	toggleCandle: null,
+	checkCandles: null,
+
+	// Puzzle de Colores
+	openColorPuzzle: null,
+	closeColorPuzzle: null,
+	addColorToSequence: null,
+	checkColorSequence: null,
+
+	// Pasarela de datos para la vista del pergamino desenrollado
+	openScroll: null,
+	closeScroll: null
 }
 
-// 🟢 CONECTAR LOS ARCHIVOS (Se ejecuta una sola vez al arrancar el juego)
 export function initializeInteractions(engineActions) {
-	gameEngineBridge.changeRoomRef = engineActions.changeRoom
-	gameEngineBridge.openExitKeypadRef = engineActions.openExitKeypad
+	gameEngineBridge.changeRoom = engineActions.changeRoom
+	gameEngineBridge.openExitKeypad = engineActions.openExitKeypad
 	gameEngineBridge.getIsMusicMuted = engineActions.getIsMusicMuted
-	gameEngineBridge.toggleMusicCallback = engineActions.toggleMusic
+	gameEngineBridge.toggleMusic = engineActions.toggleMusic
 	gameEngineBridge.closeOptionsModal = engineActions.closeOptionsModal
 	gameEngineBridge.openOptionsModal = engineActions.openOptionsModal
 	gameEngineBridge.getGameMusic = engineActions.getGameMusic
-	
-	// Conexión de las nuevas funciones del teclado:
-	gameEngineBridge.closeExitKeypadRef = engineActions.closeExitKeypad
-	gameEngineBridge.keypadPressRef = engineActions.keypadPress
-	gameEngineBridge.keypadResetRef = engineActions.keypadReset
-	gameEngineBridge.keypadCheckRef = engineActions.keypadCheck
+
+	gameEngineBridge.closeExitKeypad = engineActions.closeExitKeypad
+	gameEngineBridge.keypadPress = engineActions.keypadPress
+	gameEngineBridge.keypadReset = engineActions.keypadReset
+	gameEngineBridge.keypadCheck = engineActions.keypadCheck
+
+	gameEngineBridge.openCandles = engineActions.openCandles
+	gameEngineBridge.closeCandles = engineActions.closeCandles
+	gameEngineBridge.toggleCandle = engineActions.toggleCandle
+	gameEngineBridge.checkCandles = engineActions.checkCandles
+
+	gameEngineBridge.openColorPuzzle = engineActions.openColorPuzzle
+	gameEngineBridge.closeColorPuzzle = engineActions.closeColorPuzzle
+	gameEngineBridge.addColorToSequence = engineActions.addColorToSequence
+	gameEngineBridge.checkColorSequence = engineActions.checkColorSequence
+
+	// Conectamos los cables del pergamino
+	gameEngineBridge.openScroll = engineActions.openScroll
+	gameEngineBridge.closeScroll = engineActions.closeScroll
 }
 
-// 🎵 SILENCIAR O ACTIVAR LA MÚSICA
 export function toggleMusic() {
-	gameEngineBridge.toggleMusicCallback()
+	gameEngineBridge.toggleMusic()
 }
 
-// 🔳 ZONAS DE CLIC PARA EL MENÚ DE OPCIONES (El cuadro de sonido)
 export function getModalInteractions(canvasElement) {
 	const modalTopY = canvasElement.height / 2 - INTERFACE_DIMENSIONS.OPTIONS_MODAL_HEIGHT / 2
 	const modalButtonLeftX = canvasElement.width / 2 - INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH / 2
 
 	return [
-		{ 
-			x: modalButtonLeftX, 
-			y: modalTopY + 70, 
-			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH, 
-			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT, 
-			action: toggleMusic 
+		{
+			x: modalButtonLeftX,
+			y: modalTopY + 70,
+			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH,
+			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT,
+			action: toggleMusic
 		},
-		{ 
-			x: modalButtonLeftX, 
-			y: modalTopY + 140, 
-			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH, 
-			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT, 
-			action: () => gameEngineBridge.closeOptionsModal() 
+		{
+			x: modalButtonLeftX,
+			y: modalTopY + 140,
+			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH,
+			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT,
+			action: () => gameEngineBridge.closeOptionsModal()
 		}
 	]
 }
 
-// 🔢 ZONAS DE CLIC DINÁMICAS PARA EL TECLADO NUMÉRICO (Grid 3x4 + Cruz de cerrar)
 export function getKeypadInteractions(canvasElement) {
-	const padWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
-	const padHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
-	const btnSize = INTERFACE_DIMENSIONS.KEYPAD_BTN_SIZE || 50
+	const keypadWidth = INTERFACE_DIMENSIONS.KEYPAD_WIDTH || 270
+	const keypadHeight = INTERFACE_DIMENSIONS.KEYPAD_HEIGHT || 380
+	const buttonSize = INTERFACE_DIMENSIONS.KEYPAD_BUTTON_SIZE || 50
 	const gap = INTERFACE_DIMENSIONS.KEYPAD_GAP || 10
 
-	const panelX = canvasElement.width / 2 - padWidth / 2
-	const panelY = canvasElement.height / 2 - padHeight / 2
-	
-	// El teclado empieza a calcular sus botones abajo del título y la pantalla (Y: +130)
-	const startGridX = panelX + (padWidth - (btnSize * 3 + gap * 2)) / 2
+	const panelX = canvasElement.width / 2 - keypadWidth / 2
+	const panelY = canvasElement.height / 2 - keypadHeight / 2
+
+	const startGridX = panelX + (keypadWidth - (buttonSize * 3 + gap * 2)) / 2
 	const startGridY = panelY + 130
 
-	// Orden exacto de los botones tal y como lo diseñó el equipo en el HTML
 	const layout = [
-		{ label: "1", action: () => gameEngineBridge.keypadPressRef("1") },
-		{ label: "2", action: () => gameEngineBridge.keypadPressRef("2") },
-		{ label: "3", action: () => gameEngineBridge.keypadPressRef("3") },
-		{ label: "4", action: () => gameEngineBridge.keypadPressRef("4") },
-		{ label: "5", action: () => gameEngineBridge.keypadPressRef("5") },
-		{ label: "6", action: () => gameEngineBridge.keypadPressRef("6") },
-		{ label: "7", action: () => gameEngineBridge.keypadPressRef("7") },
-		{ label: "8", action: () => gameEngineBridge.keypadPressRef("8") },
-		{ label: "9", action: () => gameEngineBridge.keypadPressRef("9") },
-		{ label: "←", action: () => gameEngineBridge.keypadResetRef() },
-		{ label: "0", action: () => gameEngineBridge.keypadPressRef("0") },
-		{ label: "✓", action: () => gameEngineBridge.keypadCheckRef() }
+		{ label: "1", action: () => gameEngineBridge.keypadPress("1") },
+		{ label: "2", action: () => gameEngineBridge.keypadPress("2") },
+		{ label: "3", action: () => gameEngineBridge.keypadPress("3") },
+		{ label: "4", action: () => gameEngineBridge.keypadPress("4") },
+		{ label: "5", action: () => gameEngineBridge.keypadPress("5") },
+		{ label: "6", action: () => gameEngineBridge.keypadPress("6") },
+		{ label: "7", action: () => gameEngineBridge.keypadPress("7") },
+		{ label: "8", action: () => gameEngineBridge.keypadPress("8") },
+		{ label: "9", action: () => gameEngineBridge.keypadPress("9") },
+		{ label: "←", action: () => gameEngineBridge.closeExitKeypad() },
+		{ label: "0", action: () => gameEngineBridge.keypadPress("0") },
+		{ label: "✓", action: () => gameEngineBridge.keypadCheck() }
 	]
 
-	const zones = []
+	const interactiveButtons = []
 
-	// Generamos matemáticamente las cajas de colisión para los 12 botones
-	layout.forEach((btn, index) => {
-		const col = index % 3
+	layout.forEach((button, index) => {
+		const column = index % 3
 		const row = Math.floor(index / 3)
 
-		zones.push({
-			x: startGridX + col * (btnSize + gap),
-			y: startGridY + row * (btnSize + gap),
-			width: btnSize,
-			height: btnSize,
-			action: btn.action,
-			label: btn.label // Pasamos la etiqueta para que main.js la dibuje
+		interactiveButtons.push({
+			x: startGridX + column * (buttonSize + gap),
+			y: startGridY + row * (buttonSize + gap),
+			width: buttonSize,
+			height: buttonSize,
+			action: button.action,
+			label: button.label
 		})
 	})
 
-	// Añadimos la cruz (✕) para poder cerrar el pop-up arriba a la derecha
-	zones.push({
-		x: panelX + padWidth - 30,
-		y: panelY + 10,
-		width: 20,
-		height: 20,
-		action: () => gameEngineBridge.closeExitKeypadRef(),
-		label: "✕"
-	})
-
-	return zones
+	return interactiveButtons
 }
 
-// 🗺️ MAPA DE CLICS DE TODO EL JUEGO (Zonas interactivas)
+export function getCandleInteractions(canvasElement) {
+	const candlePanelWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
+	const candlePanelHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
+	const candleWidth = INTERFACE_DIMENSIONS.CANDLE_WIDTH || 70
+	const candleHeight = INTERFACE_DIMENSIONS.CANDLE_HEIGHT || 90
+	const gap = INTERFACE_DIMENSIONS.CANDLE_GAP || 10
+
+	const panelX = canvasElement.width / 2 - candlePanelWidth / 2
+	const panelY = canvasElement.height / 2 - candlePanelHeight / 2
+
+	const totalGridWidth = (candleWidth * 4) + (gap * 3)
+	const startGridX = panelX + (candlePanelWidth - totalGridWidth) / 2
+	const startGridY = panelY + 70
+
+	const interactiveCandles = []
+
+	const candleLabels = ["1", "2", "3", "4"]
+	candleLabels.forEach((label, index) => {
+		interactiveCandles.push({
+			x: startGridX + index * (candleWidth + gap),
+			y: startGridY,
+			width: candleWidth,
+			height: candleHeight,
+			action: () => gameEngineBridge.toggleCandle(index + 1),
+			label: `candle_${index + 1}`
+		})
+	})
+
+	interactiveCandles.push({
+		x: canvasElement.width / 2 - 120 / 2,
+		y: panelY + candlePanelHeight - 55,
+		width: 120,
+		height: 35,
+		action: () => gameEngineBridge.checkCandles(),
+		label: "⚙️ Ejecutar"
+	})
+
+	interactiveCandles.push({
+		x: 0,
+		y: 0,
+		width: canvasElement.width,
+		height: canvasElement.height,
+		action: () => gameEngineBridge.closeCandles(),
+		label: "BACKGROUND_CLOSE_ZONE"
+	})
+
+	return interactiveCandles
+}
+
+export function getColorPuzzleInteractions(canvasElement) {
+	const modalWidth = INTERFACE_DIMENSIONS.CANDLE_MODAL_WIDTH || 420
+	const modalHeight = INTERFACE_DIMENSIONS.CANDLE_MODAL_HEIGHT || 260
+	const slotWidth = INTERFACE_DIMENSIONS.CANDLE_WIDTH || 70
+	const slotHeight = INTERFACE_DIMENSIONS.CANDLE_HEIGHT || 90
+	const gap = INTERFACE_DIMENSIONS.CANDLE_GAP || 10
+
+	const panelX = canvasElement.width / 2 - modalWidth / 2
+	const panelY = canvasElement.height / 2 - modalHeight / 2
+
+	const totalGridWidth = (slotWidth * 4) + (gap * 3)
+	const startGridX = panelX + (modalWidth - totalGridWidth) / 2
+	const startGridY = panelY + 70
+
+	const interactiveButtons = []
+
+	const colorsList = ["morado", "azul", "amarillo", "verde"]
+	colorsList.forEach((colorName, index) => {
+		interactiveButtons.push({
+			x: startGridX + index * (slotWidth + gap),
+			y: startGridY,
+			width: slotWidth,
+			height: slotHeight,
+			action: () => gameEngineBridge.addColorToSequence(colorName),
+			label: `color_${colorName}`
+		})
+	})
+
+	interactiveButtons.push({
+		x: canvasElement.width / 2 - 120 / 2,
+		y: panelY + modalHeight - 55,
+		width: 120,
+		height: 35,
+		action: () => gameEngineBridge.checkColorSequence(),
+		label: "⚙️ Ejecutar"
+	})
+
+	interactiveButtons.push({
+		x: 0,
+		y: 0,
+		width: canvasElement.width,
+		height: canvasElement.height,
+		action: () => gameEngineBridge.closeColorPuzzle(),
+		label: "BACKGROUND_CLOSE_ZONE"
+	})
+
+	return interactiveButtons
+}
+
+// Zona invisible para cerrar el pergamino blanco al hacer clic fuera
+export function getScrollInteractions(canvasElement) {
+	return [
+		{
+			x: 0,
+			y: 0,
+			width: canvasElement.width,
+			height: canvasElement.height,
+			action: () => gameEngineBridge.closeScroll(),
+			label: "BACKGROUND_CLOSE_ZONE"
+		}
+	]
+}
+
 export function getRoomInteractions(canvasElement) {
 	return {
 		[ROOM.START]: [
 			{
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH / 2,
 				y: canvasElement.height / 2 - 35,
-				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH, 
+				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH,
 				height: INTERFACE_DIMENSIONS.MENU_BUTTON_HEIGHT,
-				action: () => { 
-					gameEngineBridge.changeRoomRef(ROOM.ONE) 
+				action: () => {
+					gameEngineBridge.changeRoom(ROOM.ONE)
 					if (!gameEngineBridge.getIsMusicMuted()) {
-						gameEngineBridge.getGameMusic().play().catch(() => {})
+						gameEngineBridge.getGameMusic().play().catch(() => { })
 					}
 				}
 			},
 			{
 				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH / 2,
 				y: canvasElement.height / 2 + 25,
-				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH, 
+				width: INTERFACE_DIMENSIONS.MENU_BUTTON_WIDTH,
 				height: INTERFACE_DIMENSIONS.MENU_BUTTON_HEIGHT,
 				action: () => gameEngineBridge.openOptionsModal()
 			}
 		],
 		[ROOM.ONE]: [
-			{ 
-				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, 
-				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE, 
-				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2, 
-				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10, 
-				action: () => gameEngineBridge.changeRoomRef(ROOM.FOUR) 
+			{
+				x: INTERFACE_DIMENSIONS.ARROW_X_ROOM_ONE - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
+				y: INTERFACE_DIMENSIONS.ARROW_Y_ROOM_ONE,
+				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
+				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
+				action: () => gameEngineBridge.changeRoom(ROOM.FOUR)
+			},
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_CANDLES_HEIGHT,
+				action: () => gameEngineBridge.openCandles()
+			},
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_COLORS_HEIGHT,
+				action: () => gameEngineBridge.openColorPuzzle()
+			},
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_RUNES_HEIGHT,
+				action: () => {
+					runesState.reset()
+				runesState.isOpen = true
+			}
+			},
+			{
+				// 🛠️ CONFIGURADO: Ahora abre oficialmente la vista del pergamino
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_HEIGHT,
+				action: () => gameEngineBridge.openScroll()
 			}
 		],
 		[ROOM.FOUR]: [
-			{ 
-				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE, 
-				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10, 
-				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2, 
-				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10, 
-				action: () => gameEngineBridge.changeRoomRef(ROOM.ONE) 
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_X,
+				y: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_FOUR_COLORS_HEIGHT,
+				action: () => gameEngineBridge.openColorPuzzle()
 			},
-			{ 
-				x: 490, 
-				y: 235, 
-				width: 140, 
-				height: 185, 
-				action: () => gameEngineBridge.openExitKeypadRef() 
+			{
+				x: canvasElement.width / 2 - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE,
+				y: canvasElement.height - INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE - 10,
+				width: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE * 2,
+				height: INTERFACE_DIMENSIONS.NAVIGATION_ARROW_SIZE + 10,
+				action: () => gameEngineBridge.changeRoom(ROOM.ONE)
+			},
+			{
+				x: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_X,
+				y: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_FOUR_KEYPAD_HEIGHT,
+				action: () => gameEngineBridge.openExitKeypad()
 			}
 		]
 	}
