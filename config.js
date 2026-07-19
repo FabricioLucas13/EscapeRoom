@@ -60,8 +60,8 @@ export const INTERFACE_DIMENSIONS = {
 	OPTIONS_MODAL_HEIGHT: 220,       // Alto de la caja del menú de sonido
 	MODAL_BUTTON_WIDTH: 160,         // Ancho de los botones de dentro del menú de sonido (MÚSICA y VOLVER)
 	MODAL_BUTTON_HEIGHT: 38,         // Alto de los botones de dentro del menú de sonido
-	NAVIGATION_ARROW_SIZE: 30,       // Tamaño de las flechas blancas para cambiar de habitación
-	ARROW_Y_ROOM_ONE: 360,       // Altura exacta en la pantalla donde se dibuja la flecha en la Habitación 1
+	NAVIGATION_ARROW_SIZE: 20,       // Tamaño de las flechas blancas para cambiar de habitación
+	ARROW_Y_ROOM_ONE: 320,       // Altura exacta en la pantalla donde se dibuja la flecha en la Habitación 1
 	KEYPAD_WIDTH: 270,                           // Ancho total del panel del teclado
 	KEYPAD_HEIGHT: 380,                          // Alto total del panel del teclado
 	KEYPAD_GRID_COLS: 3,                         // Columnas de botones

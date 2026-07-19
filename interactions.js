@@ -188,3 +188,86 @@ export function getRoomInteractions(canvasElement) {
 		]
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// añadi esto fabri 
+
+import { gameState } from "./stateManager.js" // Asegúrate de que tienes este import arriba si no existía
+
+// =========================================================================
+// 🎯 INTERACCIONES DEL PUZZLE DE SÍMBOLOS (Añadir al final de interactions.js)
+// =========================================================================
+
+export function getSymbolsInteractions(canvasElement) {
+    const padWidth = 420;
+    const padHeight = 280;
+    const padLeftX = canvasElement.width / 2 - padWidth / 2;
+    const padTopY = canvasElement.height / 2 - padHeight / 2;
+
+    const zones = [];
+
+    // 1. Botón Cerrar (✕) - Arriba a la derecha
+    zones.push({
+        label: "✕",
+        x: padLeftX + padWidth - 35,
+        y: padTopY + 15,
+        width: 25,
+        height: 25,
+        action: () => { gameState.closeSymbols(); }
+    });
+
+    // 2. Botones de los 4 símbolos: ☀️(1), 🔺(2), ✦(3), 🌙(4)
+    const btnSize = 60;
+    const gap = 15;
+    const totalButtonsWidth = (btnSize * 4) + (gap * 3);
+    const startX = canvasElement.width / 2 - totalButtonsWidth / 2;
+    const buttonsY = padTopY + 100;
+
+    const symbols = [
+        { label: "☀️", id: 1 },
+        { label: "🔺", id: 2 },
+        { label: "✦", id: 3 },
+        { label: "🌙", id: 4 }
+    ];
+
+    symbols.forEach((symbol, index) => {
+        zones.push({
+            label: symbol.label,
+            symbolId: symbol.id,
+            x: startX + index * (btnSize + gap),
+            y: buttonsY,
+            width: btnSize,
+            height: btnSize,
+            action: () => { gameState.pressSymbol(symbol.id); }
+        });
+    });
+
+    // 3. Botón Ejecutar (⚙️ Ejecutar) - Abajo en el centro
+    const devBtnWidth = 140;
+    const devBtnHeight = 36;
+    zones.push({
+        label: "⚙️ Ejecutar",
+        x: canvasElement.width / 2 - devBtnWidth / 2,
+        y: padTopY + padHeight - 65,
+        width: devBtnWidth,
+        height: devBtnHeight,
+        action: () => { gameState.checkSymbols(); }
+    });
+
+    return zones;
+}

@@ -10,6 +10,99 @@ export const gameState = {
 	keypadResultStatus: "",
 	secretCode: "739", // La contraseña se queda protegida dentro de su lógica
 
+
+
+
+
+
+
+
+
+
+
+
+// esto tambien lo añadi
+// =========================================================================
+    // 🧩 NUEVAS PROPIEDADES PARA EL PUZZLE DE SÍMBOLOS (Añadir dentro de gameState)
+    // =========================================================================
+    isSymbolsOpen: false,
+    symbolsInput: [],          
+    symbolsResultText: "",     
+    symbolsResultStatus: "",   
+    symbolsShakeTimer: 0,      
+
+    openSymbols(isOptionsOpen) {
+        if (!this.isSymbolsOpen && !isOptionsOpen) {
+            this.isSymbolsOpen = true;
+            this.symbolsInput = [];
+            this.symbolsResultText = "";
+            this.symbolsResultStatus = "";
+            this.symbolsShakeTimer = 0;
+        }
+    },
+
+    closeSymbols() {
+        this.isSymbolsOpen = false;
+        this.symbolsInput = [];
+        this.symbolsResultText = "";
+        this.symbolsResultStatus = "";
+        this.symbolsShakeTimer = 0;
+    },
+
+    pressSymbol(symbolId) {
+        if (this.symbolsResultStatus === "success") return;
+        this.symbolsInput.push(symbolId);
+        this.symbolsResultText = ""; 
+    },
+
+    checkSymbols() {
+        const correctSequence = [4, 1, 2, 3]; // Luna, Sol, Triángulo, Estrella
+        
+        if (JSON.stringify(this.symbolsInput) === JSON.stringify(correctSequence)) {
+            this.symbolsResultText = "CÓDIGO OBTENIDO: 7";
+            this.symbolsResultStatus = "success";
+        } else {
+            this.symbolsInput = [];
+            this.symbolsResultText = "ERROR: INTÉNTALO DE NUEVO";
+            this.symbolsResultStatus = "error";
+            this.symbolsShakeTimer = 24; // Activa el efecto visual de vibración
+        }
+    },
+
+    updateShake() {
+        if (this.symbolsShakeTimer > 0) {
+            this.symbolsShakeTimer--;
+        }
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	// 🚪 Abrir el teclado de forma segura
 	openKeypad(isOptionsOpen) {
 		if (!this.isKeypadOpen && !isOptionsOpen) {
