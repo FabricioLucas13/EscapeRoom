@@ -178,6 +178,16 @@ export function drawDialogBox(canvasContext, canvasElement, gameState, dialogTyp
 		return
 	}
 
+	// Blindamos el estado global del canvas para evitar herencias visuales entre puzzles.
+	canvasContext.save()
+	canvasContext.globalAlpha = 1
+	canvasContext.shadowColor = "transparent"
+	canvasContext.shadowBlur = 0
+	canvasContext.shadowOffsetX = 0
+	canvasContext.shadowOffsetY = 0
+	canvasContext.filter = "none"
+	canvasContext.setLineDash([])
+
 	const characterImageKey = getCharacterImageKey(gameState, dialogType)
 	const characterImage = characterImageKey && gameImages ? gameImages[characterImageKey] : null
 
@@ -240,5 +250,6 @@ export function drawDialogBox(canvasContext, canvasElement, gameState, dialogTyp
 	})
 
 	canvasContext.shadowColor = "transparent"
+	canvasContext.restore()
 	canvasContext.restore()
 }

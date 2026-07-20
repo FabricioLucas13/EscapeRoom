@@ -223,6 +223,16 @@ function drawModalPanel(canvasContext, x, y, width, height) {
 export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX, mouseY) {
 	if (!runesState.isOpen) return
 
+	canvasContext.save()
+	canvasContext.globalAlpha = 1
+	canvasContext.globalCompositeOperation = "source-over"
+	canvasContext.shadowColor = "transparent"
+	canvasContext.shadowBlur = 0
+	canvasContext.shadowOffsetX = 0
+	canvasContext.shadowOffsetY = 0
+	canvasContext.filter = "none"
+	canvasContext.setLineDash([])
+
 	const { modalX, modalY } = getModalPosition(canvasElement.width, canvasElement.height)
 	const { modalWidth, modalHeight, runeSize, boardWidth, boardHeight, pedestalSize, buttonWidth, buttonHeight, buttonMarginBottom } = runesState.dimensions
 
@@ -311,5 +321,7 @@ export function drawRunesPuzzle(canvasContext, canvasElement, gameImages, mouseX
 			canvasContext.fillText(String(rune.id), drawX + runeSize / 2, drawY + runeSize / 2 + 1)
 		}
 	})
+
+	canvasContext.restore()
 
 }
