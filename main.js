@@ -72,11 +72,23 @@ async function toggleFullscreenMode() {
 }
 
 function drawFullscreenButton() {
+	canvasContext.save()
+	canvasContext.globalAlpha = 1
+	canvasContext.globalCompositeOperation = "source-over"
+	canvasContext.shadowColor = "transparent"
+	canvasContext.shadowBlur = 0
+	canvasContext.shadowOffsetX = 0
+	canvasContext.shadowOffsetY = 0
+	canvasContext.filter = "none"
+	canvasContext.setLineDash([])
+
 	const buttonZone = getFullscreenButtonZone()
 	const isHovered = isMouseInsideZone(mouseX, mouseY, buttonZone)
 	const buttonLabel = isFullscreenActive() ? "SALIR" : "FULL"
 	canvasContext.font = "12px 'Times New Roman', serif"
 	drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, buttonZone, isHovered, buttonLabel, 6)
+
+	canvasContext.restore()
 }
 
 function getReplayButtonZone() {

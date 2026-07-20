@@ -14,6 +14,16 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameIm
 	const keypadTopY = canvasElement.height / 2 - keypadHeight / 2
 	const cornerBevel = INTERFACE_DIMENSIONS.KEYPAD_PANEL_CORNER_BEVEL
 
+	canvasContext.save()
+	canvasContext.globalAlpha = 1
+	canvasContext.globalCompositeOperation = "source-over"
+	canvasContext.shadowColor = "transparent"
+	canvasContext.shadowBlur = 0
+	canvasContext.shadowOffsetX = 0
+	canvasContext.shadowOffsetY = 0
+	canvasContext.filter = "none"
+	canvasContext.setLineDash([])
+
 	// 1. Fondo oscuro translúcido (El .overlay de CSS)
 	canvasContext.fillStyle = INTERFACE_COLORS.KEYPAD_OVERLAY
 	canvasContext.fillRect(0, 0, canvasElement.width, canvasElement.height)
@@ -84,4 +94,5 @@ export function drawKeypadPuzzle(canvasContext, canvasElement, gameState, gameIm
 	// Restauramos fuentes por defecto del motor
 	canvasContext.textAlign = "left"
 	canvasContext.textBaseline = "alphabetic"
+	canvasContext.restore()
 }
