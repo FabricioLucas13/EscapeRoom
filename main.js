@@ -26,6 +26,7 @@ let timerStartedAt = null
 let timerActive = false
 let lastTouchTimestamp = 0
 const SHOW_MOUSE_COORDINATES = GAME_RUNTIME.SHOW_MOUSE_COORDINATES
+const SHOW_INTERACTION_HITBOXES = GAME_RUNTIME.SHOW_INTERACTION_HITBOXES
 
 const replayButton = {
 	width: GAME_RUNTIME.REPLAY_BUTTON.WIDTH,
@@ -402,6 +403,32 @@ function drawMouseCoordinates() {
 	canvasContext.fillText(`X: ${mouseX}  Y: ${mouseY}`, 10, 20)
 }
 
+function drawDebugRoomHitboxes() {
+	if (gameState.isKeypadOpen || gameState.isCandleOpen || gameState.isColorPuzzleOpen || gameState.isScrollOpen || gameState.isRuneChestOpen || runesState.isOpen || isOptionsOpen) {
+		return
+	}
+
+	const activeRoomHitboxes = roomInteractions[currentRoom] || []
+	activeRoomHitboxes.forEach((zone, index) => {
+		const isBookHitbox = currentRoom === ROOM.MAIN && index === activeRoomHitboxes.length - 1
+
+		canvasContext.save()
+		canvasContext.fillStyle = isBookHitbox ? "rgba(255, 196, 77, 0.22)" : "rgba(80, 200, 255, 0.12)"
+		canvasContext.strokeStyle = isBookHitbox ? "#ffc44d" : "#50c8ff"
+		canvasContext.lineWidth = isBookHitbox ? 3 : 2
+		canvasContext.setLineDash(isBookHitbox ? [] : [8, 6])
+		canvasContext.fillRect(zone.x, zone.y, zone.width, zone.height)
+		canvasContext.strokeRect(zone.x, zone.y, zone.width, zone.height)
+		canvasContext.font = "12px Arial"
+		canvasContext.fillStyle = isBookHitbox ? "#ffe2a3" : "#d9f6ff"
+		const label = isBookHitbox
+			? `LIBRO ${zone.width}x${zone.height}`
+			: `${Math.round(zone.width)}x${Math.round(zone.height)}`
+		canvasContext.fillText(label, zone.x + 4, Math.max(14, zone.y - 6))
+		canvasContext.restore()
+	})
+}
+
 function formatTimerText(remainingMs) {
 	const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000))
 	const minutes = Math.floor(totalSeconds / 60)
@@ -760,6 +787,10 @@ export function draw() {
 	}
 
 	// Herramienta de depuración opcional
+	if (SHOW_INTERACTION_HITBOXES) {
+		drawDebugRoomHitboxes()
+	}
+
 	if (SHOW_MOUSE_COORDINATES) {
 		drawMouseCoordinates()
 	}
