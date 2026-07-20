@@ -56,11 +56,11 @@ export const INTERFACE_COLORS = {
 	CANDLE_FLAME_GREEN: "#66bb6a",
 	CANDLE_FLAME_PURPLE: "#ab47bc",
 
-	// 🚀 NUEVO: Estilos centralizados del pergamino blanco
-	SCROLL_PAPER_BACKGROUND: "#fcf9e8",     // Color blanco hueso / pergamino antiguo
-	SCROLL_PAPER_TEXT: "#1a1310",           // Color de texto oscuro para alta legibilidad
-	SCROLL_PAPER_SECONDARY_TEXT: "#2b221e", // Color secundario para los párrafos de lore
-	SCROLL_PAPER_BORDER: "#8c6f4f",         // Color del borde del manuscrito
+	// 🚀 NUEVO: Estilos centralizados del libro
+	BOOK_PAPER_BACKGROUND: "#fcf9e8",     // Color blanco hueso / pergamino antiguo
+	BOOK_PAPER_TEXT: "#1a1310",           // Color de texto oscuro para alta legibilidad
+	BOOK_PAPER_SECONDARY_TEXT: "#2b221e", // Color secundario para los párrafos de lore
+	BOOK_PAPER_BORDER: "#8c6f4f",         // Color del borde del manuscrito
 
 	// Caja de diálogo inferior
 	DIALOG_BOX_BACKGROUND: "rgba(0, 0, 0, 0.72)",
@@ -130,11 +130,11 @@ export const INTERFACE_DIMENSIONS = {
 	ROOM_ONE_RUNES_WIDTH: 40,
 	ROOM_ONE_RUNES_HEIGHT: 40,
 
-	// Dimensiones reales del pergamino en la Habitación Uno
-	ROOM_ONE_SCROLL_X: 500,
-	ROOM_ONE_SCROLL_Y: 390,
-	ROOM_ONE_SCROLL_WIDTH: 125,
-	ROOM_ONE_SCROLL_HEIGHT: 35,
+	// Dimensiones reales del libro en la Habitación Uno
+	ROOM_ONE_BOOK_X: 500,
+	ROOM_ONE_BOOK_Y: 390,
+	ROOM_ONE_BOOK_WIDTH: 125,
+	ROOM_ONE_BOOK_HEIGHT: 35,
 
 	// Hitbox del puzzle de colores visible en la Habitación Cuatro
 	ROOM_FOUR_COLORS_X: 900,
@@ -164,10 +164,10 @@ export const INTERFACE_DIMENSIONS = {
 	ROOM_MAIN_RUNES_WIDTH: 40,
 	ROOM_MAIN_RUNES_HEIGHT: 40,
 
-	ROOM_MAIN_SCROLL_X: 500,
-	ROOM_MAIN_SCROLL_Y: 390,
-	ROOM_MAIN_SCROLL_WIDTH: 125,
-	ROOM_MAIN_SCROLL_HEIGHT: 35,
+	ROOM_MAIN_BOOK_X: 500,
+	ROOM_MAIN_BOOK_Y: 390,
+	ROOM_MAIN_BOOK_WIDTH: 125,
+	ROOM_MAIN_BOOK_HEIGHT: 35,
 
 	ROOM_EXIT_GATE_COLORS_X: 900,
 	ROOM_EXIT_GATE_COLORS_Y: 155,
@@ -179,9 +179,9 @@ export const INTERFACE_DIMENSIONS = {
 	ROOM_EXIT_GATE_KEYPAD_WIDTH: 200,
 	ROOM_EXIT_GATE_KEYPAD_HEIGHT: 265,
 
-	// 🚀 NUEVO: Medidas centralizadas de la caja del pergamino blanco
-	SCROLL_MODAL_WIDTH: 460,
-	SCROLL_MODAL_HEIGHT: 320,
+	// 🚀 NUEVO: Medidas centralizadas de la caja del libro
+	BOOK_MODAL_WIDTH: 460,
+	BOOK_MODAL_HEIGHT: 320,
 
 	// Puzzle de runas
 	RUNE_MODAL_OVERLAY: "rgba(0, 0, 0, 0.65)",
@@ -212,17 +212,17 @@ export const INTERFACE_DIMENSIONS = {
 	RUNE_BOARD_RULE_MARGIN_X: 20,
 	RUNE_BOARD_RULE_Y: 150,
 
-	// 🛠️ NUEVAS MEDIDAS EXTRAÍDAS DE SCROLLTEXT.JS
-	SCROLL_BORDER_LINE_WIDTH: 4,
-	SCROLL_TITLE_PADDING_Y: 30,
-	SCROLL_TEXT_START_PADDING_Y: 85,
-	SCROLL_TEXT_LINE_SPACING_Y: 20,
-	SCROLL_TEXT_MARGIN_X: 44,
-	SCROLL_TEXT_EXTRA_LINE_SPACING_Y: 2,
-	SCROLL_SIDE_BUTTON_WIDTH: 44,
-	SCROLL_SIDE_BUTTON_HEIGHT: 72,
-	SCROLL_SIDE_BUTTON_GAP_X: 12,
-	SCROLL_FOOTER_PADDING_BOTTOM: 25,
+	// 🛠️ NUEVAS MEDIDAS EXTRAÍDAS DE BOOKTEXT.JS
+	BOOK_BORDER_LINE_WIDTH: 4,
+	BOOK_TITLE_PADDING_Y: 30,
+	BOOK_TEXT_START_PADDING_Y: 85,
+	BOOK_TEXT_LINE_SPACING_Y: 20,
+	BOOK_TEXT_MARGIN_X: 44,
+	BOOK_TEXT_EXTRA_LINE_SPACING_Y: 2,
+	BOOK_SIDE_BUTTON_WIDTH: 44,
+	BOOK_SIDE_BUTTON_HEIGHT: 72,
+	BOOK_SIDE_BUTTON_GAP_X: 12,
+	BOOK_FOOTER_PADDING_BOTTOM: 25,
 
 	// Caja de diálogo inferior
 	DIALOG_BOX_Y: 500,
@@ -263,10 +263,10 @@ export const INTERFACE_DIMENSIONS = {
 
 // 🔤 TIPOGRAFÍAS Y FUENTES CENTRALIZADAS (Nombres completamente descriptivos en inglés)
 export const INTERFACE_FONTS = {
-	SCROLL_TITLE: "bold 20px 'Georgia', serif",
-	SCROLL_BODY: "italic 17px 'Palatino Linotype', 'Book Antiqua', serif",
-	SCROLL_DROP_CAP: "bold italic 27px 'Palatino Linotype', 'Book Antiqua', serif",
-	SCROLL_FOOTER: "italic 11px Arial",
+	BOOK_TITLE: "bold 20px 'Georgia', serif",
+	BOOK_BODY: "italic 17px 'Palatino Linotype', 'Book Antiqua', serif",
+	BOOK_DROP_CAP: "bold italic 27px 'Palatino Linotype', 'Book Antiqua', serif",
+	BOOK_FOOTER: "italic 11px Arial",
 	DIALOG_BOX_BODY: "16px 'Georgia', serif",
 
 	// Keypad and common UI fonts
@@ -339,7 +339,7 @@ export const GAME_ASSET_SOURCES = {
 		exitGate: "roomExitGate.jpg",
 		candlesDetail: "candleOff.jpg",
 		colorsDetail: "colorPanelOff.jpg",
-		scrollDetail: "tableScroll.jpg",
+		bookDetail: "tableBook.jpg",
 		chestClosed: "chestClosed.jpeg",
 		chestOpenRune: "chestOpenRune.jpg",
 		mainCharacterIntro: "mainCharacterIntro.png",
@@ -383,7 +383,7 @@ export const GAME_PUZZLES = {
 	},
 
 	// Textos del manuscrito paginados en 3 páginas
-	SCROLL_PAGES: [
+	BOOK_PAGES: [
 		[
 			"En la danza callada del cirio y la cera,",
 			"no despierta primero quien nació más cercano.",

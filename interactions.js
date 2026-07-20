@@ -35,11 +35,11 @@ const gameEngineBridge = {
 	// Cofre de runas
 	openRuneChest: null,
 
-	// Pasarela de datos para la vista del pergamino desenrollado
-	openScroll: null,
-	closeScroll: null,
-	nextScrollPage: null,
-	previousScrollPage: null
+	// Pasarela de datos para la vista del libro
+	openBook: null,
+	closeBook: null,
+	nextBookPage: null,
+	previousBookPage: null
 }
 
 export function initializeInteractions(engineActions) {
@@ -69,11 +69,11 @@ export function initializeInteractions(engineActions) {
 	gameEngineBridge.checkColorSequence = engineActions.checkColorSequence
 	gameEngineBridge.openRuneChest = engineActions.openRuneChest
 
-	// Conectamos los cables del pergamino
-	gameEngineBridge.openScroll = engineActions.openScroll
-	gameEngineBridge.closeScroll = engineActions.closeScroll
-	gameEngineBridge.nextScrollPage = engineActions.nextScrollPage
-	gameEngineBridge.previousScrollPage = engineActions.previousScrollPage
+	// Conectamos los cables del libro
+	gameEngineBridge.openBook = engineActions.openBook
+	gameEngineBridge.closeBook = engineActions.closeBook
+	gameEngineBridge.nextBookPage = engineActions.nextBookPage
+	gameEngineBridge.previousBookPage = engineActions.previousBookPage
 }
 
 export function toggleMusic() {
@@ -265,63 +265,63 @@ export function getColorPuzzleInteractions(canvasElement) {
 	return interactiveButtons
 }
 
-// Zona invisible para cerrar el pergamino blanco al hacer clic fuera
-export function getScrollInteractions(canvasElement) {
-	const scrollWidth = INTERFACE_DIMENSIONS.SCROLL_MODAL_WIDTH
-	const scrollHeight = INTERFACE_DIMENSIONS.SCROLL_MODAL_HEIGHT
-	const scrollLeftX = canvasElement.width / 2 - scrollWidth / 2
-	const scrollTopY = canvasElement.height / 2 - scrollHeight / 2
-	const sideButtonWidth = INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_WIDTH
-	const sideButtonHeight = INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_HEIGHT
-	const sideButtonY = scrollTopY + scrollHeight / 2 - sideButtonHeight / 2
+// Zona invisible para cerrar el libro al hacer clic fuera
+export function getBookInteractions(canvasElement) {
+	const bookWidth = INTERFACE_DIMENSIONS.BOOK_MODAL_WIDTH
+	const bookHeight = INTERFACE_DIMENSIONS.BOOK_MODAL_HEIGHT
+	const bookLeftX = canvasElement.width / 2 - bookWidth / 2
+	const bookTopY = canvasElement.height / 2 - bookHeight / 2
+	const sideButtonWidth = INTERFACE_DIMENSIONS.BOOK_SIDE_BUTTON_WIDTH
+	const sideButtonHeight = INTERFACE_DIMENSIONS.BOOK_SIDE_BUTTON_HEIGHT
+	const sideButtonY = bookTopY + bookHeight / 2 - sideButtonHeight / 2
 
 	return [
 		{
-			x: scrollLeftX - sideButtonWidth - INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_GAP_X,
+			x: bookLeftX - sideButtonWidth - INTERFACE_DIMENSIONS.BOOK_SIDE_BUTTON_GAP_X,
 			y: sideButtonY,
 			width: sideButtonWidth,
 			height: sideButtonHeight,
-			action: () => gameEngineBridge.previousScrollPage(),
-			label: "SCROLL_PREV_PAGE"
+			action: () => gameEngineBridge.previousBookPage(),
+			label: "BOOK_PREV_PAGE"
 		},
 		{
-			x: scrollLeftX + scrollWidth + INTERFACE_DIMENSIONS.SCROLL_SIDE_BUTTON_GAP_X,
+			x: bookLeftX + bookWidth + INTERFACE_DIMENSIONS.BOOK_SIDE_BUTTON_GAP_X,
 			y: sideButtonY,
 			width: sideButtonWidth,
 			height: sideButtonHeight,
-			action: () => gameEngineBridge.nextScrollPage(),
-			label: "SCROLL_NEXT_PAGE"
+			action: () => gameEngineBridge.nextBookPage(),
+			label: "BOOK_NEXT_PAGE"
 		},
 		{
 			x: 0,
 			y: 0,
 			width: canvasElement.width,
-			height: scrollTopY,
-			action: () => gameEngineBridge.closeScroll(),
+			height: bookTopY,
+			action: () => gameEngineBridge.closeBook(),
 			label: "BACKGROUND_CLOSE_TOP"
 		},
 		{
 			x: 0,
-			y: scrollTopY + scrollHeight,
+			y: bookTopY + bookHeight,
 			width: canvasElement.width,
-			height: canvasElement.height - (scrollTopY + scrollHeight),
-			action: () => gameEngineBridge.closeScroll(),
+			height: canvasElement.height - (bookTopY + bookHeight),
+			action: () => gameEngineBridge.closeBook(),
 			label: "BACKGROUND_CLOSE_BOTTOM"
 		},
 		{
 			x: 0,
-			y: scrollTopY,
-			width: scrollLeftX,
-			height: scrollHeight,
-			action: () => gameEngineBridge.closeScroll(),
+			y: bookTopY,
+			width: bookLeftX,
+			height: bookHeight,
+			action: () => gameEngineBridge.closeBook(),
 			label: "BACKGROUND_CLOSE_LEFT"
 		},
 		{
-			x: scrollLeftX + scrollWidth,
-			y: scrollTopY,
-			width: canvasElement.width - (scrollLeftX + scrollWidth),
-			height: scrollHeight,
-			action: () => gameEngineBridge.closeScroll(),
+			x: bookLeftX + bookWidth,
+			y: bookTopY,
+			width: canvasElement.width - (bookLeftX + bookWidth),
+			height: bookHeight,
+			action: () => gameEngineBridge.closeBook(),
 			label: "BACKGROUND_CLOSE_RIGHT"
 		}
 	]
@@ -380,12 +380,12 @@ export function getRoomInteractions(canvasElement) {
 				action: () => gameEngineBridge.openRuneChest()
 			},
 			{
-				// 🛠️ CONFIGURADO: Ahora abre oficialmente la vista del pergamino
-				x: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_X,
-				y: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_Y,
-				width: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_WIDTH,
-				height: INTERFACE_DIMENSIONS.ROOM_ONE_SCROLL_HEIGHT,
-				action: () => gameEngineBridge.openScroll()
+				// 🛠️ CONFIGURADO: Ahora abre oficialmente la vista del libro
+				x: INTERFACE_DIMENSIONS.ROOM_ONE_BOOK_X,
+				y: INTERFACE_DIMENSIONS.ROOM_ONE_BOOK_Y,
+				width: INTERFACE_DIMENSIONS.ROOM_ONE_BOOK_WIDTH,
+				height: INTERFACE_DIMENSIONS.ROOM_ONE_BOOK_HEIGHT,
+				action: () => gameEngineBridge.openBook()
 			}
 		],
 		[ROOM.EXIT_GATE]: [

@@ -3,11 +3,11 @@
  */
 import { ROOM, INTERFACE_COLORS, INTERFACE_DIMENSIONS, GAME_SETTINGS, GAME_RUNTIME, GAME_ASSET_SOURCES } from "./config.js"
 import { isMouseInsideZone, drawBeveledButton, drawProportionalBackground, drawStandardRoomBackground, drawNavigationArrow } from "./helpers.js"
-import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions, getColorPuzzleInteractions, getScrollInteractions } from "./interactions.js"
+import { initializeInteractions, getModalInteractions, getRoomInteractions, getKeypadInteractions, getCandleInteractions, getColorPuzzleInteractions, getBookInteractions } from "./interactions.js"
 import { drawKeypadPuzzle } from "./keypadPuzzle.js"
 import { drawCandlePuzzle } from "./candlesPuzzle.js"
 import { drawColorPuzzle } from "./colorsPuzzle.js"
-import { drawScrollText } from "./scrollText.js"
+import { drawBookText } from "./bookText.js"
 import { drawDialogBox } from "./dialogBox.js"
 import { playMusic, toggleMusic, getIsMuted } from "./audioEngine.js"
 import { gameState } from "./stateManager.js"
@@ -223,8 +223,8 @@ function processPrimaryAction(clickX, clickY) {
 		activeButtons = getCandleInteractions(canvasElement)
 	} else if (gameState.isColorPuzzleOpen) {
 		activeButtons = getColorPuzzleInteractions(canvasElement)
-	} else if (gameState.isScrollOpen) {
-		activeButtons = getScrollInteractions(canvasElement)
+	} else if (gameState.isBookOpen) {
+		activeButtons = getBookInteractions(canvasElement)
 	} else if (currentRoom === ROOM.START && isOptionsOpen) {
 		activeButtons = getModalInteractions(canvasElement)
 	} else {
@@ -269,7 +269,7 @@ initializeInteractions({
 	getGameMusic: () => ({ play: () => Promise.resolve(playMusic()) }),
 	previousTimerDifficulty: () => { cycleTimerDifficulty(-1) },
 	nextTimerDifficulty: () => { cycleTimerDifficulty(1) },
-	openOptionsModal: () => { if (!isOptionsOpen && !gameState.isKeypadOpen && !gameState.isCandleOpen && !gameState.isColorPuzzleOpen && !gameState.isScrollOpen) isOptionsOpen = true },
+	openOptionsModal: () => { if (!isOptionsOpen && !gameState.isKeypadOpen && !gameState.isCandleOpen && !gameState.isColorPuzzleOpen && !gameState.isBookOpen) isOptionsOpen = true },
 	closeOptionsModal: () => { isOptionsOpen = false },
 	toggleMusic: () => { toggleMusic() },
 
@@ -291,11 +291,11 @@ initializeInteractions({
 	addColorToSequence: (colorName) => { gameState.addColorToSequence(colorName) },
 	checkColorSequence: () => { gameState.checkColorSequence() },
 
-	// CABLES DE LA VISTA DEL PERGAMINO CONECTADOS AL GESTOR DE ESTADO
-	openScroll: () => { gameState.openScroll(isOptionsOpen) },
-	closeScroll: () => { gameState.closeScroll() },
-	nextScrollPage: () => { gameState.nextScrollPage() },
-	previousScrollPage: () => { gameState.previousScrollPage() },
+	// CABLES DE LA VISTA DEL LIBRO CONECTADOS AL GESTOR DE ESTADO
+	openBook: () => { gameState.openBook(isOptionsOpen) },
+	closeBook: () => { gameState.closeBook() },
+	nextBookPage: () => { gameState.nextBookPage() },
+	previousBookPage: () => { gameState.previousBookPage() },
 
 	// COFRE DE RUNAS
 	openRuneChest: () => { gameState.openRuneChest(isOptionsOpen) }
@@ -358,7 +358,7 @@ function queueGameplayAssetPreload() {
 			"exitGate",
 			"candlesDetail",
 			"colorsDetail",
-			"scrollDetail",
+			"bookDetail",
 			"chestClosed",
 			"chestOpenRune",
 			"mainCharacterIntro",
@@ -487,7 +487,7 @@ function drawMouseCoordinates() {
 }
 
 function drawDebugRoomHitboxes() {
-	if (gameState.isKeypadOpen || gameState.isCandleOpen || gameState.isColorPuzzleOpen || gameState.isScrollOpen || gameState.isRuneChestOpen || runesState.isOpen || isOptionsOpen) {
+	if (gameState.isKeypadOpen || gameState.isCandleOpen || gameState.isColorPuzzleOpen || gameState.isBookOpen || gameState.isRuneChestOpen || runesState.isOpen || isOptionsOpen) {
 		return
 	}
 
@@ -865,11 +865,11 @@ export function draw() {
 	}
 
 	// =========================================================================
-	// 📜 INTERFAZ DEL POP-UP: VISTA DEL PERGAMINO (Delegación limpia)
+	// 📖 INTERFAZ DEL POP-UP: VISTA DEL LIBRO (Delegación limpia)
 	// =========================================================================
-	if (gameState.isScrollOpen) {
-		loadImageByKey("scrollDetail")
-		drawScrollText(canvasContext, canvasElement, gameState, gameImages.scrollDetail, gameImages)
+	if (gameState.isBookOpen) {
+		loadImageByKey("bookDetail")
+		drawBookText(canvasContext, canvasElement, gameState, gameImages.bookDetail, gameImages)
 	}
 
 	// =========================================================================

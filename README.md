@@ -59,7 +59,7 @@ Luego abre `http://localhost:8000`.
 - [stateManager.js](stateManager.js): estado global, secuencias y resolución de puzles.
 - [interactions.js](interactions.js): hitboxes y acciones por pantalla/modal.
 - [dialogBox.js](dialogBox.js): caja de diálogo narrativa.
-- [scrollText.js](scrollText.js): vista del manuscrito/libro.
+- [bookText.js](bookText.js): vista del manuscrito/libro.
 - [candlesPuzzle.js](candlesPuzzle.js): puzle de velas.
 - [colorsPuzzle.js](colorsPuzzle.js): puzle de colores.
 - [keypadPuzzle.js](keypadPuzzle.js): teclado de salida.
