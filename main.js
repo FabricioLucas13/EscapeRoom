@@ -680,8 +680,10 @@ export function draw() {
 
 					canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER
 					canvasContext.font = "bold 18px 'Times New Roman', serif"
-					canvasContext.fillText("SONIDO", canvasElement.width / 2, modalTopY + 30)
-					canvasContext.fillText("DIFICULTAD", canvasElement.width / 2, modalTopY + INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_TITLE_Y_OFFSET)
+					canvasContext.textAlign = "center"
+					canvasContext.textBaseline = "middle"
+					canvasContext.fillText("SONIDO", canvasElement.width / 2, modalTopY + 34)
+					canvasContext.fillText("DIFICULTAD", canvasElement.width / 2, modalTopY + INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_TITLE_Y_OFFSET + 4)
 
 					const modalButtons = getModalInteractions(canvasElement)
 					const isMouseOverAudio = isMouseInsideZone(mouseX, mouseY, modalButtons[0])
