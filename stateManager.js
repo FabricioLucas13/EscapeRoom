@@ -20,7 +20,7 @@ export const gameState = {
 
 	// 🚪 Abrir el panel de forma segura
 	openCandles(isOptionsOpen) {
-		if (!this.isCandleOpen && !isOptionsOpen && !this.isColorPuzzleOpen && !this.isScrollOpen) {
+		if (!this.isCandleOpen && !isOptionsOpen && !this.isColorPuzzleOpen && !this.isBookOpen) {
 			this.isCandleOpen = true
 			this.candleHintVisible = true
 		}
@@ -115,7 +115,7 @@ export const gameState = {
 	},
 
 	openRuneChest(isOptionsOpen) {
-		if (this.isRuneChestOpen || isOptionsOpen || this.isKeypadOpen || this.isCandleOpen || this.isColorPuzzleOpen || this.isScrollOpen) {
+		if (this.isRuneChestOpen || isOptionsOpen || this.isKeypadOpen || this.isCandleOpen || this.isColorPuzzleOpen || this.isBookOpen) {
 			return
 		}
 
@@ -303,7 +303,7 @@ export const gameState = {
 			this.isKeypadOpen = false
 			this.isCandleOpen = false
 			this.isColorPuzzleOpen = false
-			this.isScrollOpen = false
+			this.isBookOpen = false
 			this.gameWon = true
 			this.winTriggeredAt = Date.now()
 		} else {
@@ -325,7 +325,7 @@ export const gameState = {
 
 	// 🚪 Abrir el panel de forma segura controlando que no haya otros puzles abiertos
 	openColorPuzzle(isOptionsOpen) {
-		if (!this.isColorPuzzleOpen && !isOptionsOpen && !this.isCandleOpen && !this.isScrollOpen) {
+		if (!this.isColorPuzzleOpen && !isOptionsOpen && !this.isCandleOpen && !this.isBookOpen) {
 			this.isColorPuzzleOpen = true
 			this.colorHintVisible = true
 		}
@@ -375,36 +375,36 @@ export const gameState = {
 	},
 
 	// =========================================================================
-	// 📜 🚀 NUEVO - PERGAMINO DESENROLLADO (Habitación 1)
+	// 📖 🚀 NUEVO - LIBRO (Habitación 1)
 	// =========================================================================
-	isScrollOpen: false,             // Estado de apertura de la vista del manuscrito
-	scrollPageIndex: 0,
-	scrollHintVisible: false,
-	scrollHintSeen: false,
+	isBookOpen: false,             // Estado de apertura de la vista del manuscrito
+	bookPageIndex: 0,
+	bookHintVisible: false,
+	bookHintSeen: false,
 
 	// 🚪 Abrir el manuscrito de forma segura controlando la jerarquía de interfaces
-	openScroll(isOptionsOpen) {
-		if (!this.isScrollOpen && !isOptionsOpen && !this.isCandleOpen && !this.isColorPuzzleOpen) {
-			this.isScrollOpen = true
-			this.scrollPageIndex = 0
-			this.scrollHintVisible = true
+	openBook(isOptionsOpen) {
+		if (!this.isBookOpen && !isOptionsOpen && !this.isCandleOpen && !this.isColorPuzzleOpen) {
+			this.isBookOpen = true
+			this.bookPageIndex = 0
+			this.bookHintVisible = true
 		}
 	},
 
-	nextScrollPage() {
-		this.scrollPageIndex = Math.min(this.scrollPageIndex + 1, GAME_PUZZLES.SCROLL_PAGES.length - 1)
+	nextBookPage() {
+		this.bookPageIndex = Math.min(this.bookPageIndex + 1, GAME_PUZZLES.BOOK_PAGES.length - 1)
 	},
 
-	previousScrollPage() {
-		this.scrollPageIndex = Math.max(this.scrollPageIndex - 1, 0)
+	previousBookPage() {
+		this.bookPageIndex = Math.max(this.bookPageIndex - 1, 0)
 	},
 
 	// ❌ Cerrar la vista del manuscrito
-	closeScroll() {
-		this.isScrollOpen = false
-		this.scrollPageIndex = 0
-		this.scrollHintVisible = false
-		this.scrollHintSeen = true
+	closeBook() {
+		this.isBookOpen = false
+		this.bookPageIndex = 0
+		this.bookHintVisible = false
+		this.bookHintSeen = true
 	},
 
 	resetForNewGame() {
@@ -429,10 +429,10 @@ export const gameState = {
 		this.colorHintVisible = false
 		this.colorHintSeen = false
 
-		this.isScrollOpen = false
-		this.scrollPageIndex = 0
-		this.scrollHintVisible = false
-		this.scrollHintSeen = false
+		this.isBookOpen = false
+		this.bookPageIndex = 0
+		this.bookHintVisible = false
+		this.bookHintSeen = false
 
 		this.clearRuneChestTimers()
 		this.isRuneChestOpen = false

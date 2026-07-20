@@ -3,7 +3,7 @@ import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS } from "./confi
 function getDialogText(gameState, dialogType) {
 	const DIALOG_TEXT = {
 	candles: {
-		notStarted: "Las velas parecen esperar un antiguo ritual. Tal vez el manuscrito sepa cómo despertarlas.",
+		notStarted: "Las velas parecen esperar un antiguo ritual. Tal vez el libro sepa cómo despertarlas.",
 		startedAgain: "La llama recuerda... pero el orden aún no es el correcto.",
 		solved: "Una llama cambia de color. Entre las cenizas aparece grabado un 3.",
 		error: "Las llamas se apagan de golpe. El ritual debe seguir otro orden."
@@ -16,8 +16,8 @@ function getDialogText(gameState, dialogType) {
 		solved: "Los cristales vibran un instante. Entre ellos aparece marcado un 9."
 	},
 
-	scroll: {
-		firstOpen: "El pergamino está cubierto de versos. Tal vez oculten algo más que palabras.",
+	book: {
+		firstOpen: "El libro está cubierto de versos. Tal vez oculten algo más que palabras.",
 		again: "Cada estrofa parece guardar un secreto distinto."
 	},
 
@@ -63,8 +63,8 @@ function getDialogText(gameState, dialogType) {
 			}
 			return DIALOG_TEXT.colors.notStarted
 
-		case "scroll":
-			return gameState.scrollHintSeen ? DIALOG_TEXT.scroll.again : DIALOG_TEXT.scroll.firstOpen
+		case "book":
+			return gameState.bookHintSeen ? DIALOG_TEXT.book.again : DIALOG_TEXT.book.firstOpen
 
 		case "intro":
 			if (gameState.introStage === 1) {
@@ -110,7 +110,7 @@ function getCharacterImageKey(gameState, dialogType) {
 		return "mainCharacterIntro"
 	}
 
-	if (dialogType === "scroll") {
+	if (dialogType === "book") {
 		return "mainCharacterSolving"
 	}
 
@@ -168,7 +168,7 @@ export function drawDialogBox(canvasContext, canvasElement, gameState, dialogTyp
 	const visible = (
 		dialogType === "candles" && gameState.candleHintVisible ||
 		dialogType === "colors" && gameState.colorHintVisible ||
-		dialogType === "scroll" && gameState.scrollHintVisible ||
+		dialogType === "book" && gameState.bookHintVisible ||
 		dialogType === "keypad" && gameState.keypadHintVisible ||
 		dialogType === "runes" && gameState.runeChestHintVisible ||
 		dialogType === "intro" && gameState.introVisible
