@@ -324,7 +324,7 @@ export const GAME_ASSET_SOURCES = {
 		winDoor: "winDoor.jpg",
 		loseDoor: "loseDoor.jpg"
 	},
-	STATE_VARIANTS: {
+	STAGE_VARIANTS: {
 		CANDLE_ON: "candleOn.jpg",
 		CANDLE_OFF: "candleOff.jpg",
 		COLOR_ON: "colorPanelOn.jpg",
