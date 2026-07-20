@@ -11,6 +11,8 @@ const gameEngineBridge = {
 	closeOptionsModal: null,
 	openOptionsModal: null,
 	getGameMusic: null,
+	previousTimerDifficulty: null,
+	nextTimerDifficulty: null,
 
 	// Teclado numérico
 	closeExitKeypad: null,
@@ -48,6 +50,8 @@ export function initializeInteractions(engineActions) {
 	gameEngineBridge.closeOptionsModal = engineActions.closeOptionsModal
 	gameEngineBridge.openOptionsModal = engineActions.openOptionsModal
 	gameEngineBridge.getGameMusic = engineActions.getGameMusic
+	gameEngineBridge.previousTimerDifficulty = engineActions.previousTimerDifficulty
+	gameEngineBridge.nextTimerDifficulty = engineActions.nextTimerDifficulty
 
 	gameEngineBridge.closeExitKeypad = engineActions.closeExitKeypad
 	gameEngineBridge.keypadPress = engineActions.keypadPress
@@ -79,6 +83,11 @@ export function toggleMusic() {
 export function getModalInteractions(canvasElement) {
 	const modalTopY = canvasElement.height / 2 - INTERFACE_DIMENSIONS.OPTIONS_MODAL_HEIGHT / 2
 	const modalButtonLeftX = canvasElement.width / 2 - INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH / 2
+	const selectorCenterX = canvasElement.width / 2
+	const selectorTopY = modalTopY + INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_SELECTOR_Y_OFFSET
+	const arrowSize = INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_ARROW_SIZE
+	const arrowGap = INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_ARROW_GAP
+	const labelWidth = INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_LABEL_WIDTH
 
 	return [
 		{
@@ -87,6 +96,20 @@ export function getModalInteractions(canvasElement) {
 			width: INTERFACE_DIMENSIONS.MODAL_BUTTON_WIDTH,
 			height: INTERFACE_DIMENSIONS.MODAL_BUTTON_HEIGHT,
 			action: toggleMusic
+		},
+		{
+			x: selectorCenterX - (labelWidth / 2) - arrowGap - arrowSize,
+			y: selectorTopY,
+			width: arrowSize,
+			height: arrowSize,
+			action: () => gameEngineBridge.previousTimerDifficulty()
+		},
+		{
+			x: selectorCenterX + (labelWidth / 2) + arrowGap,
+			y: selectorTopY,
+			width: arrowSize,
+			height: arrowSize,
+			action: () => gameEngineBridge.nextTimerDifficulty()
 		},
 		{
 			x: modalButtonLeftX,
