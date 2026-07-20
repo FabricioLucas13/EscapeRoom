@@ -3,7 +3,7 @@ import { INTERFACE_COLORS, INTERFACE_DIMENSIONS, INTERFACE_FONTS } from "./confi
 function getDialogText(gameState, dialogType) {
 	const DIALOG_TEXT = {
 	candles: {
-		notStarted: "Las velas parecen esperar un antiguo ritual. Tal vez el manuscrito sepa cómo despertarlas.",
+		notStarted: "Las velas parecen esperar un antiguo ritual. Tal vez el libro sepa cómo despertarlas.",
 		startedAgain: "La llama recuerda... pero el orden aún no es el correcto.",
 		solved: "Una llama cambia de color. Entre las cenizas aparece grabado un 3.",
 		error: "Las llamas se apagan de golpe. El ritual debe seguir otro orden."
