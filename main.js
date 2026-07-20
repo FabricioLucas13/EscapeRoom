@@ -35,6 +35,50 @@ const replayButton = {
 	height: GAME_RUNTIME.REPLAY_BUTTON.HEIGHT
 }
 
+function getFullscreenButtonZone() {
+	return {
+		x: canvasElement.width - INTERFACE_DIMENSIONS.FULLSCREEN_BUTTON_WIDTH - INTERFACE_DIMENSIONS.FULLSCREEN_BUTTON_RIGHT_OFFSET,
+		y: canvasElement.height - INTERFACE_DIMENSIONS.FULLSCREEN_BUTTON_HEIGHT - INTERFACE_DIMENSIONS.FULLSCREEN_BUTTON_BOTTOM_OFFSET,
+		width: INTERFACE_DIMENSIONS.FULLSCREEN_BUTTON_WIDTH,
+		height: INTERFACE_DIMENSIONS.FULLSCREEN_BUTTON_HEIGHT
+	}
+}
+
+function isFullscreenActive() {
+	return Boolean(document.fullscreenElement || document.webkitFullscreenElement)
+}
+
+async function toggleFullscreenMode() {
+	if (!isFullscreenActive()) {
+		if (canvasElement.requestFullscreen) {
+			await canvasElement.requestFullscreen()
+			return
+		}
+
+		if (canvasElement.webkitRequestFullscreen) {
+			canvasElement.webkitRequestFullscreen()
+		}
+		return
+	}
+
+	if (document.exitFullscreen) {
+		await document.exitFullscreen()
+		return
+	}
+
+	if (document.webkitExitFullscreen) {
+		document.webkitExitFullscreen()
+	}
+}
+
+function drawFullscreenButton() {
+	const buttonZone = getFullscreenButtonZone()
+	const isHovered = isMouseInsideZone(mouseX, mouseY, buttonZone)
+	const buttonLabel = isFullscreenActive() ? "SALIR" : "FULL"
+	canvasContext.font = "12px 'Times New Roman', serif"
+	drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, buttonZone, isHovered, buttonLabel, 6)
+}
+
 function getReplayButtonZone() {
 	return {
 		x: canvasElement.width / 2 - replayButton.width / 2,
@@ -150,6 +194,11 @@ function processPrimaryAction(clickX, clickY) {
 		if (isMouseInsideZone(clickX, clickY, getReplayButtonZone())) {
 			resetToStartMenu()
 		}
+		return
+	}
+
+	if (isMouseInsideZone(clickX, clickY, getFullscreenButtonZone())) {
+		toggleFullscreenMode().catch(() => { })
 		return
 	}
 
@@ -843,6 +892,8 @@ export function draw() {
 	if (SHOW_MOUSE_COORDINATES) {
 		drawMouseCoordinates()
 	}
+
+	drawFullscreenButton()
 
 	// Le pide al navegador que vuelva a ejecutar esta función 'draw' en el próximo fotograma
 	requestAnimationFrame(draw)
