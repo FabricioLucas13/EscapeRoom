@@ -25,6 +25,8 @@ let isOptionsOpen = false
 let timerStartedAt = null
 let timerActive = false
 let lastTouchTimestamp = 0
+let selectedTimerDifficultyKey = GAME_SETTINGS.DEFAULT_TIMER_DIFFICULTY
+const TIMER_DIFFICULTY_ORDER = ["easy", "standard", "hard"]
 const SHOW_MOUSE_COORDINATES = GAME_RUNTIME.SHOW_MOUSE_COORDINATES
 const SHOW_INTERACTION_HITBOXES = GAME_RUNTIME.SHOW_INTERACTION_HITBOXES
 
@@ -59,6 +61,36 @@ function resetToStartMenu() {
 	timerActive = false
 	isOptionsOpen = false
 	currentRoom = ROOM.START
+}
+
+function getSelectedTimerDifficulty() {
+	return GAME_SETTINGS.TIMER_DIFFICULTIES[selectedTimerDifficultyKey] || GAME_SETTINGS.TIMER_DIFFICULTIES[GAME_SETTINGS.DEFAULT_TIMER_DIFFICULTY]
+}
+
+function getSelectedTimerDurationMs() {
+	return getSelectedTimerDifficulty().durationMs
+}
+
+function cycleTimerDifficulty(direction) {
+	const currentIndex = TIMER_DIFFICULTY_ORDER.indexOf(selectedTimerDifficultyKey)
+	const safeCurrentIndex = currentIndex >= 0 ? currentIndex : 0
+	const nextIndex = (safeCurrentIndex + direction + TIMER_DIFFICULTY_ORDER.length) % TIMER_DIFFICULTY_ORDER.length
+	const nextDifficultyKey = TIMER_DIFFICULTY_ORDER[nextIndex]
+
+	if (!GAME_SETTINGS.TIMER_DIFFICULTIES[nextDifficultyKey]) {
+		return
+	}
+
+	selectedTimerDifficultyKey = nextDifficultyKey
+	if (!timerActive) {
+		timerStartedAt = null
+	}
+}
+
+function getSelectedTimerDifficultyLabel() {
+	const selectedDifficulty = getSelectedTimerDifficulty()
+	const totalMinutes = Math.floor(selectedDifficulty.durationMs / 60000)
+	return `${selectedDifficulty.label} · ${totalMinutes} MIN`
 }
 
 function drawReplayButton() {
@@ -186,6 +218,8 @@ initializeInteractions({
 	openExitKeypad: () => { gameState.openKeypad(isOptionsOpen) },
 	getIsMusicMuted: () => getIsMuted(),
 	getGameMusic: () => ({ play: () => Promise.resolve(playMusic()) }),
+	previousTimerDifficulty: () => { cycleTimerDifficulty(-1) },
+	nextTimerDifficulty: () => { cycleTimerDifficulty(1) },
 	openOptionsModal: () => { if (!isOptionsOpen && !gameState.isKeypadOpen && !gameState.isCandleOpen && !gameState.isColorPuzzleOpen && !gameState.isScrollOpen) isOptionsOpen = true },
 	closeOptionsModal: () => { isOptionsOpen = false },
 	toggleMusic: () => { toggleMusic() },
@@ -647,17 +681,30 @@ export function draw() {
 					canvasContext.fillStyle = INTERFACE_COLORS.BUTTON_TEXT_HOVER
 					canvasContext.font = "bold 18px 'Times New Roman', serif"
 					canvasContext.fillText("SONIDO", canvasElement.width / 2, modalTopY + 30)
+					canvasContext.fillText("DIFICULTAD", canvasElement.width / 2, modalTopY + INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_TITLE_Y_OFFSET)
 
 					const modalButtons = getModalInteractions(canvasElement)
-					// 🛠️ REPARADO: Índices fijos individuales colocados para el panel de ajustes
 					const isMouseOverAudio = isMouseInsideZone(mouseX, mouseY, modalButtons[0])
-					const isMouseOverBack = isMouseInsideZone(mouseX, mouseY, modalButtons[1])
+					const isMouseOverDifficultyLeft = isMouseInsideZone(mouseX, mouseY, modalButtons[1])
+					const isMouseOverDifficultyRight = isMouseInsideZone(mouseX, mouseY, modalButtons[2])
+					const isMouseOverBack = isMouseInsideZone(mouseX, mouseY, modalButtons[3])
 
 					canvasContext.font = "14px 'Times New Roman', serif"
 
 					const audioStatusText = getIsMuted() ? "MÚSICA: OFF" : "MÚSICA: ON"
 					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, modalButtons[0], isMouseOverAudio, audioStatusText, 6)
-					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, modalButtons[1], isMouseOverBack, "VOLVER", 6)
+					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, modalButtons[1], isMouseOverDifficultyLeft, "<", 6)
+					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, modalButtons[2], isMouseOverDifficultyRight, ">", 6)
+
+					const difficultyDisplayWidth = INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_LABEL_WIDTH
+					const difficultyDisplayZone = {
+						x: canvasElement.width / 2 - difficultyDisplayWidth / 2,
+						y: modalButtons[1].y,
+						width: difficultyDisplayWidth,
+						height: INTERFACE_DIMENSIONS.OPTIONS_DIFFICULTY_ARROW_SIZE
+					}
+					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, difficultyDisplayZone, false, getSelectedTimerDifficultyLabel(), 6)
+					drawBeveledButton(canvasContext, canvasElement, INTERFACE_COLORS, modalButtons[3], isMouseOverBack, "VOLVER", 6)
 				}
 
 				canvasContext.textAlign = "left"
@@ -686,9 +733,9 @@ export function draw() {
 			break
 	}
 
-	let remainingTimeMs = GAME_SETTINGS.TIMER_DURATION_MS
+	let remainingTimeMs = getSelectedTimerDurationMs()
 	if (timerActive && timerStartedAt !== null) {
-		remainingTimeMs = Math.max(0, GAME_SETTINGS.TIMER_DURATION_MS - (Date.now() - timerStartedAt))
+		remainingTimeMs = Math.max(0, getSelectedTimerDurationMs() - (Date.now() - timerStartedAt))
 	}
 	if (remainingTimeMs <= 0) {
 		startLossSequence()
