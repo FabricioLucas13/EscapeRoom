@@ -1,129 +1,117 @@
-# 🎮 Manual Git: Escape Room (Edición para Principiantes)
+# Escape Room
 
-Este manual te guiará para descargar el juego, trabajar de forma segura en tu propio espacio y subir tus cambios a internet sin romper el trabajo de tus compañeros.
+Juego web de escape room en 2D desarrollado con HTML, CSS y JavaScript sobre `canvas`. El jugador debe explorar la sala, resolver varios puzles y obtener el código final antes de que se agote el tiempo.
 
----
+## Descripción
 
-## 🛑 Reglas de Oro Obligatorias
-*   **La rama `main` es sagrada**: Es el juego que funciona. Nunca escribas código directamente en ella.
-*   **Tu propia rama**: Trabajarás siempre dentro de tu rama personal (`nombre-apellido`).
-*   **Actualizar antes de programar**: Trae siempre lo que tus compañeros hayan subido antes de tocar tu código.
-*   **Revisión en equipo**: Nada entra a `main` sin que otra persona lo revise mediante una *Pull Request*.
+El proyecto plantea una experiencia breve de misterio con estética narrativa y puzles encadenados. La partida transcurre entre una sala principal y una zona de salida, donde cada interacción activa paneles, pistas visuales o secuencias que desbloquean el avance.
 
----
+Incluye soporte para ratón y pantallas táctiles, por lo que funciona tanto en escritorio como en móvil.
 
-## 📥 PASO 1: Tu primer día en el proyecto (Solo se hace una vez)
+## Mecánicas principales
 
-Abre tu terminal, sitúate en la carpeta de tu ordenador donde guardas tus proyectos y escribe estos comandos en orden:
+- Exploración por habitaciones con navegación lateral.
+- Cuenta atrás de 10 minutos por partida.
+- Puzle de velas con orden secreto.
+- Puzle de colores con secuencia correcta.
+- Libro o pergamino interactivo con texto dividido en páginas.
+- Cofre de runas con lógica propia de apertura y resolución.
+- Teclado numérico final para escapar.
+- Estados visuales que cambian según los puzles resueltos.
 
-### 1. Clonar el repositorio
-Descarga una copia exacta del proyecto usando este enlace directo:
+## Controles
+
+- `Clic` o `toque` para interactuar con objetos y botones.
+- `Flechas de navegación` dentro de la escena para cambiar de zona.
+- `Botones laterales` en el manuscrito para pasar páginas.
+- `Paneles emergentes` que se cierran tocando fuera cuando corresponde.
+
+## Tecnologías
+
+- HTML5
+- CSS3
+- JavaScript ES Modules
+- Renderizado con `canvas`
+
+No requiere frameworks ni dependencias externas.
+
+## Cómo ejecutarlo
+
+### Opción rápida
+
+Abre [index.html](index.html) en el navegador.
+
+### Opción recomendada
+
+Ejecuta el proyecto con un servidor local para evitar problemas de carga de assets en algunos navegadores.
+
+Ejemplo con VS Code y Live Server:
+
 ```bash
-git clone https://github.com/FabricioLucas13/EscapeRoom.git
+Abrir index.html con Live Server
 ```
 
-### 2. Entrar en la carpeta del proyecto
-Muévete dentro de la carpeta que se acaba de crear.
+Si prefieres Python:
+
 ```bash
-cd EscapeRoom
+python -m http.server 8000
 ```
 
-### 3. Comprobar tu rama inicial
-Asegúrate de saber en qué lugar estás parado.
-```bash
-git branch
-```
-*💡 Deberías ver la palabra `* main` en color verde.*
+Y después abre `http://localhost:8000`.
 
-### 4. Crear tu rama personal
-Crea tu propio espacio de trabajo con tu nombre y apellido. Esto te moverá automáticamente allí.
-```bash
-git checkout -b nombre-apellido
-```
-*📌 Ejemplo real: `git checkout -b pepe-perez`*
+## Estructura del proyecto
 
-### 5. Verificar el cambio
-Confirma que ya no estás en `main`.
-```bash
-git branch
-```
-*💡 El asterisco `*` debe aparecer ahora al lado de tu nombre (`* nombre-apellido`).*
+- [index.html](index.html): punto de entrada del juego.
+- [main.js](main.js): bucle principal, carga de assets y renderizado general.
+- [config.js](config.js): constantes, medidas, puzzles, textos y catálogo de assets.
+- [stateManager.js](stateManager.js): estado global del juego y lógica de progreso.
+- [interactions.js](interactions.js): hitboxes e interacciones por pantalla.
+- [style.css](style.css): estilos base de la página.
+- [audioEngine.js](audioEngine.js): música y control de sonido.
+- [dialogBox.js](dialogBox.js): caja de diálogo narrativa.
+- [scrollText.js](scrollText.js): visor del manuscrito o libro.
+- [candlesPuzzle.js](candlesPuzzle.js): puzle de velas.
+- [colorsPuzzle.js](colorsPuzzle.js): puzle de colores.
+- [keypadPuzzle.js](keypadPuzzle.js): teclado final.
+- [runePuzzle.js](runePuzzle.js): lógica y render del puzle de runas.
+- [helpers.js](helpers.js): utilidades de dibujo y colisión.
+- [assets/](assets/): imágenes, fondos, personajes y audio.
 
----
+## Configuración del juego
 
-## 🔄 PASO 2: Tu rutina diaria (Antes de empezar a programar)
+La mayor parte del ajuste del proyecto está centralizada en [config.js](config.js).
 
-Cada día, antes de abrir tu editor de código, debes sincronizarte con lo que hayan hecho tus compañeros para evitar conflictos:
+Desde ahí puedes modificar:
 
-### 1. Salta momentáneamente a la rama principal
-```bash
-git checkout main
-```
+- Tiempo total de la partida.
+- Colores de interfaz.
+- Posición y tamaño de hitboxes.
+- Orden y solución de los puzles.
+- Textos del manuscrito.
+- Rutas de imágenes y música.
 
-### 2. Descarga lo nuevo que haya en internet
-```bash
-git pull origin main
-```
+## Objetivo del jugador
 
-### 3. Regresa a tu rama personal
-```bash
-git checkout nombre-apellido
-```
+Resolver las pistas repartidas por la escena, descubrir los dígitos ocultos y usarlos en el teclado final para escapar antes de que termine la cuenta atrás.
 
-### 4. Absorbe los cambios de `main` dentro de tu rama
-```bash
-git pull origin main
-```
-*¡Listo! Tu rama personal ya tiene tu código antiguo combinado con lo último que subieron los demás.*
+## Estado actual
 
----
+El proyecto ya incluye:
 
-## 🛠️ PASO 3: ¡A programar!
-Abre tus archivos (`main.html`, `script.js`, `style.css`), modifica el Escape Room y **guarda los cambios** en tu editor de texto.
+- Navegación entre pantallas.
+- Lógica de victoria y derrota.
+- Compatibilidad táctil.
+- Ajustes de hitbox afinados para escritorio y móvil.
+- Organización modular del código para seguir ampliándolo.
 
----
+## Posibles mejoras futuras
 
-## 📤 PASO 4: Guardar y subir tus cambios a GitHub (Al terminar)
+- Añadir una pantalla inicial con instrucciones narrativas.
+- Incorporar más habitaciones o variantes de puzles.
+- Guardado de progreso o reinicio parcial.
+- Efectos de sonido por interacción.
+- Pantalla final con estadísticas de tiempo.
 
-Cuando verifiques que tus pantallas o puzles funcionan bien, es hora de enviarlos a internet:
+## Autoría
 
-### 1. Ver qué has tocado
-Mira la lista de archivos que modificaste (aparecerán resaltados en color rojo).
-```bash
-git status
-```
-
-### 2. Preparar los archivos
-Mete todos los cambios dentro de la "caja de envío" (el punto `.` significa meter todo).
-```bash
-git add .
-```
-
-### 3. Crear el Commit (Ponerle una etiqueta al paquete)
-Guarda tu progreso con una nota breve de lo que hiciste. Usa los prefijos `feat:` para cosas nuevas o `fix:` si arreglaste un fallo.
-```bash
-git commit -m "feat: añadido el rompecabezas del candado"
-```
-
-### 4. Subir la rama a GitHub
-*   **Si es la PRIMERA VEZ que subes esta rama a internet:**
-    ```bash
-    git push -u origin nombre-apellido
-    ```
-*   **Para todas las SIGUIENTES VECES que subes cambios:**
-    ```bash
-    git push
-    ```
-
----
-
-## 🤝 PASO 5: Combinar tu trabajo con el grupo (En la web de GitHub)
-
-Una vez ejecutado el comando `git push`, tu código está en la nube pero separado del juego principal. Para unirlo:
-
-1.  Entra directamente a la página web del repositorio: [FabricioLucas13/EscapeRoom](https://github.com/FabricioLucas13/EscapeRoom).
-2.  Verás un botón amarillo que dice **"Compare & pull request"**. Haz clic en él.
-3.  **Configura las ramas**: Asegúrate de que la rama origen (*source*) sea tu rama personal y la rama destino (*base*) sea `main`.
-4.  Escribe un título claro y explica brevemente qué has diseñado.
-5.  Avisa a un compañero del equipo para que revise tu código.
-6.  Si tu compañero te da el visto bueno, se pulsa el botón **Merge** y tus cambios formarán parte oficial del Escape Room.
+Proyecto desarrollado como Escape Room web interactivo y preparado para seguir iterándose desde una estructura modular y fácil de mantener.
