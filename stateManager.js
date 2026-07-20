@@ -1,7 +1,7 @@
-import { GAME_PUZZLES } from "./config.js"
+import { GAME_PUZZLES, GAME_RUNTIME } from "./config.js"
 import { runesState } from "./runePuzzle.js"
 
-const RUNE_CHEST_CLOSED_STEP_MS = 1500
+const RUNE_CHEST_CLOSED_STEP_MS = 2200
 const RUNE_CHEST_OPEN_STEP_MS = 1000
 
 /**
@@ -257,15 +257,17 @@ export const gameState = {
 		}
 
 		const elapsed = Date.now() - this.introStartedAt
+		const firstLineDurationMs = GAME_RUNTIME.INTRO_SEQUENCE.FIRST_LINE_DURATION_MS
+		const totalDurationMs = GAME_RUNTIME.INTRO_SEQUENCE.TOTAL_DURATION_MS
 
-		if (elapsed >= 2000) {
+		if (elapsed >= totalDurationMs) {
 			this.introVisible = false
 			this.introSeen = true
 			this.introStage = 0
 			return
 		}
 
-		if (elapsed >= 1000) {
+		if (elapsed >= firstLineDurationMs) {
 			this.introStage = 2
 		}
 	},
